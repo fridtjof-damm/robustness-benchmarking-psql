@@ -2,8 +2,6 @@ import time
 import duckdb
 import pandas as pd
 import matplotlib.pyplot as plt
-import numpy as np
-import statistics as st
 
 cursor = duckdb.connect('tpch.duckdb')
 tpch_query_results = []
