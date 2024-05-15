@@ -1,1 +1,5 @@
 /tpch-kit
+/queryresults
+*.tbl
+*.duckdb
+.python-version
