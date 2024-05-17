@@ -4,3 +4,6 @@
 *.duckdb
 .python-version
 .DS_Store
+/build
+*.synctex.gz
+*.aux
