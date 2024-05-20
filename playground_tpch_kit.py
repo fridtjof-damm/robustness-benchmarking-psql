@@ -2,9 +2,7 @@ import datetime
 import itertools as it
 import duckdb
 
-
 cursor = duckdb.connect(".open tpch-kit-v.duckdb")
-
 
 def generate_query(template: str, query_id: int) -> list[str]:
     queries: list[str] = []
@@ -25,7 +23,8 @@ def generate_query(template: str, query_id: int) -> list[str]:
             for d4 in dates_04:
                 queries.append(template.format(DATE = d4))
         case 5:
-            print(query_id)         
+            for param5 in it.product(regions, dates_05):
+                queries.append(template.format(REGION = param5[0][1],DATE = param5[1]))        
         case 6:
             for var6 in it.product(dates_05, discount, quantity):
                 queries.append(template.format(DATE = var6[0], DISCOUNT = var6[1], QUANTITY = var6[2]))
@@ -70,8 +69,7 @@ def run_query(query_id: int):
         template = statement_file.read()
         queries = generate_query(template, query_id)
         for query in queries:
-            cursor.execute(query).df()
-            # print()
+            cursor.execute(query).fetchall()
             # print("---------------------------------------")
 
 type_syllables_3 = ['TIN', 'NICKEL', 'BRASS', 'STEEL', 'COPPER']
