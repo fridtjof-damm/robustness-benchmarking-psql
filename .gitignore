@@ -1,5 +1,7 @@
 /tpch-kit
 /queryresults
+/tpch-tables
+/thesis
 *.tbl
 *.duckdb
 .python-version
@@ -7,3 +9,4 @@
 /build
 *.synctex.gz
 *.aux
+test.py
