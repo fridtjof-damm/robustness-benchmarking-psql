@@ -3,7 +3,6 @@ import itertools as it
 import time
 import duckdb
 
-
 cursor = duckdb.connect(".open tpch-kit-v.duckdb")
 SCALE_FACTOR = 1
 
@@ -85,19 +84,21 @@ def generate_query(template: str, query_id: int) -> list[str]:
     print(query_id)
     return queries  
       
-def run_query(query_id: int, duration_file):
+def run_query(query_id: int, execution_file):
     
     with open(f'queries/{query_id}.sql', encoding="UTF8") as statement_file:
         template = statement_file.read()
-        start = time.time()
+        # start = time.time()
         queries = generate_query(template, query_id)
-        end = time.time() - start
-        print(end)
-        duration_file.write(str(end))
-        duration_file.write('\n')
+        # end = time.time() - start
+        #duration_file.write(str(end))
+        #duration_file.write('\n')
         for query in queries:
-            pass
-            # cursor.execute(query).fetchall()
+            start = time.time()
+            cursor.execute(query).fetchall()
+            end = time.time() - start
+            execution_file.write(str(query_id)+';'+str(end))
+            execution_file.write('\n')
             # print("---------------------------------------")
 
 type_syllables_1 = ['STANDARD', 'SMALL', 'MEDIUM', 'LARGE', 'ECONOMY', 'PROMO']
@@ -137,9 +138,12 @@ container_syllables_1 = ['SM', 'LG', 'MED', 'JUMBO', 'WRAP']
 container_syllables_2 = ['CASE', 'BOX', 'BAG', 'JAR', 'PKG', 'PACK', 'CAN', 'DRUM']
 brand = ['BRAND#' + str(i[0]) + str(i[1]) for i in it.permutations(range(1, 6), 2)]
 
-with open('duration.csv', encoding='UTF8', mode='a') as duration:
-    for pquery in range(1,23):
-        run_query(pquery, duration)
+#with open('duration.csv', encoding='UTF8', mode='a') as duration:
+#    for pquery in range(1,23):
+#        run_query(pquery, duration)
 
+with open('query_execution.csv', encoding='UTF8', mode='a') as execution:
+    for pquery in range(1,23):
+        run_query(pquery, execution)
 
 # Bandbreite der Möglichen Variationen der Queries sehr grpß => systematischer Ansatz zum Auswählen Parameter der Query Variation 
