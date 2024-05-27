@@ -54,16 +54,16 @@ def generate_query(template: str, query_id: int) -> list[str]:
                 queries.append(template.format(DATE = param14))
         case 15:
             for i, param15 in enumerate(dates_04):
-                queries.append(template.format(DATE = param15, STREAM_ID = i + 1)) # welchen wert für stream ID benutzen?
+                queries.append(template.format(DATE = param15, STREAM_ID = i + 1)) 
         case 16:
-            for param16 in it.product(brand, it.product(type_syllables_1, type_syllables_2), it.permutations(range(1, 51, 7), 8)):
-                queries.append(template.format(BRAND = param16[0], TYPE = f'{param16[1][0]} {param16[1][1]}', SIZE1 = param16[2], SIZE2 = param16[2][0], SIZE3 = param16[2][1], SIZE4 = param16[2][2], SIZE5 = param16[2][3], SIZE6 = param16[2][4], SIZE7 = param16[2][5], SIZE8 =  param16[2][6]))
+            for param16 in it.product(brand, it.product(type_syllables_1, type_syllables_2), range(8, 51)):
+                queries.append(template.format(BRAND = param16[0], TYPE = f'{param16[1][0]} {param16[1][1]}', SIZE1 = 1, SIZE2 = 2, SIZE3 = 3, SIZE4 = 4, SIZE5 = 5, SIZE6 = 6, SIZE7 = 7, SIZE8 =  param16[2]))
         case 17:
             for param17 in it.product(brand, it.product(container_syllables_1, container_syllables_2)):
                 queries.append(template.format(BRAND = param17[0], CONTAINER = f'{param17[1][0]} {param17[1][1]}'))
         case 18:
             for param18 in range(312,316):
-                queries.append(template.format(QUANTITY = param18)) # warum in der Doku 300 als Wert zum checken ?
+                queries.append(template.format(QUANTITY = param18)) 
         case 19:
             for param19 in it.product(range(1, 11), range(10, 21), range(20, 31), it.permutations(brand, 3)):
                 queries.append(template.format(QUANTITY1 = param19[0], QUANTITY2 = param19[1], QUANTITY3 = param19[2], BRAND1 = param19[3][0], BRAND2 = param19[3][1], BRAND3 = param19[3][2])) # Können die brands die gleichen sein?
@@ -74,12 +74,12 @@ def generate_query(template: str, query_id: int) -> list[str]:
             for param21 in nations:
                 queries.append(template.format(NATION = param21[1]))
         case 22:
-            #for param22 in it.product(nations, repeat=7):
-            #    queries.append(template.format(I1 = param22[0][0], I2 = param22[1][0], I3 = param22[2][0], I4 = param22[3][0], I5 = param22[4][0], I6 = param22[5][0], I7 = param22[6][0]))
-            pass    
-    
+            phone_num_offset = 10
+            for i in range(6,len(nations)):
+               queries.append(template.format(I1 = (nations[0][0] + phone_num_offset) , I2 = (nations[1][0] + phone_num_offset), I3 = (nations[2][0] + phone_num_offset), I4 = (nations[3][0] + phone_num_offset), I5 = (nations[4][0] + phone_num_offset), I6 = (nations[2][0] + phone_num_offset), I7 = (nations[i][0]+ phone_num_offset)))
+                
     print(query_id)
-    return queries  
+    return queries
 
 type_syllables_1 = ['STANDARD', 'SMALL', 'MEDIUM', 'LARGE', 'ECONOMY', 'PROMO']
 type_syllables_2 = ['ANODIZED', 'BURNISHED', 'PLATED', 'POLISHED', 'BRUSHED']
