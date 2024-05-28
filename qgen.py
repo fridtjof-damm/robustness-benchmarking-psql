@@ -56,6 +56,7 @@ def generate_query(template: str, query_id: int) -> list[str]:
             for i, param15 in enumerate(dates_04):
                 queries.append(template.format(DATE = param15, STREAM_ID = i + 1)) 
         case 16:
+            pass
             for param16 in it.product(brand, it.product(type_syllables_1, type_syllables_2), range(8, 51)):
                 queries.append(template.format(BRAND = param16[0], TYPE = f'{param16[1][0]} {param16[1][1]}', SIZE1 = 1, SIZE2 = 2, SIZE3 = 3, SIZE4 = 4, SIZE5 = 5, SIZE6 = 6, SIZE7 = 7, SIZE8 =  param16[2]))
         case 17:
@@ -65,15 +66,19 @@ def generate_query(template: str, query_id: int) -> list[str]:
             for param18 in range(312,316):
                 queries.append(template.format(QUANTITY = param18)) 
         case 19:
+            pass
             for param19 in it.product(range(1, 11), range(10, 21), range(20, 31), it.permutations(brand, 3)):
                 queries.append(template.format(QUANTITY1 = param19[0], QUANTITY2 = param19[1], QUANTITY3 = param19[2], BRAND1 = param19[3][0], BRAND2 = param19[3][1], BRAND3 = param19[3][2])) # Können die brands die gleichen sein?
         case 20:
+            pass
             for param20 in it.product(colors, dates_05, nations):
                 queries.append(template.format(COLOR = param20[0], DATE = param20[1], NATION = param20[2][1]))
         case 21:
+            pass
             for param21 in nations:
                 queries.append(template.format(NATION = param21[1]))
         case 22:
+            pass
             phone_num_offset = 10
             for i in range(6,len(nations)):
                queries.append(template.format(I1 = (nations[0][0] + phone_num_offset) , I2 = (nations[1][0] + phone_num_offset), I3 = (nations[2][0] + phone_num_offset), I4 = (nations[3][0] + phone_num_offset), I5 = (nations[4][0] + phone_num_offset), I6 = (nations[2][0] + phone_num_offset), I7 = (nations[i][0]+ phone_num_offset)))

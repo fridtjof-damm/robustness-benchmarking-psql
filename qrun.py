@@ -1,6 +1,6 @@
 import time 
 import duckdb
-from querygen import generate_query
+from qgen import generate_query
 
 cursor = duckdb.connect("tpch.duckdb")
 
