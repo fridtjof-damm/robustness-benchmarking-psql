@@ -3,21 +3,24 @@ import itertools as it
 
 SCALE_FACTOR = 10
 
-def generate_query(template: str, query_id: int) -> list[str]:
+def generate_query(template: str, query_id: int) -> tuple[list[str],list[tuple]]:
     queries: list[str] = []
+    parameters: list[tuple] = []
     match query_id:
         case 1:
-            for param1 in range(60, 125):
+            for param1 in range(60, 121):
                 queries.append(template.format(DELTA = param1))
+                parameters.append((param1,))
         case 2:
             for s in range(1,51):
                 for t in type_syllables_3:
                     for region in regions:
                         queries.append(template.format(SIZE = s, TYPE = t, REGION = region[1]))
+                        parameters.append((s,t,region[1]))
         case 3:
-            for s in segments:
+            for seg in segments:
                 for d3 in dates_03:
-                    queries.append(template.format(SEGMENT = s, DATE = d3))
+                    queries.append(template.format(SEGMENT = seg, DATE = d3))
         case 4:
             for param4 in dates_04:
                 queries.append(template.format(DATE = param4))
@@ -81,10 +84,10 @@ def generate_query(template: str, query_id: int) -> list[str]:
             pass
             phone_num_offset = 10
             for i in range(6,len(nations)):
-               queries.append(template.format(I1 = (nations[0][0] + phone_num_offset) , I2 = (nations[1][0] + phone_num_offset), I3 = (nations[2][0] + phone_num_offset), I4 = (nations[3][0] + phone_num_offset), I5 = (nations[4][0] + phone_num_offset), I6 = (nations[2][0] + phone_num_offset), I7 = (nations[i][0]+ phone_num_offset)))
-                
-    print(query_id)
-    return queries
+               queries.append(template.format(I1 = (nations[0][0] + phone_num_offset) , I2 = (nations[1][0] + phone_num_offset), I3 = (nations[2][0] + phone_num_offset), I4 = (nations[3][0] + phone_num_offset), I5 = (nations[4][0] + phone_num_offset), I6 = (nations[2][0] + phone_num_offset), I7 = (nations[i][0]+ phone_num_offset)))          
+    # print(query_id)
+    #print(parameters)
+    return queries,parameters
 
 type_syllables_1 = ['STANDARD', 'SMALL', 'MEDIUM', 'LARGE', 'ECONOMY', 'PROMO']
 type_syllables_2 = ['ANODIZED', 'BURNISHED', 'PLATED', 'POLISHED', 'BRUSHED']

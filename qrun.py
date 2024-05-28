@@ -1,22 +1,21 @@
-import time 
+import time
 import duckdb
 from qgen import generate_query
+from utils import format_tuple
 
 cursor = duckdb.connect("tpch.duckdb")
 
 def run_query(query_id: int, execution_file):   
     with open(f'queries/{query_id}.sql', encoding="UTF8") as statement_file:
         template = statement_file.read()
-        queries = generate_query(template, query_id)
-
-        for query in queries:
+        queries, parameters = generate_query(template, query_id)
+        assert len(queries) == len(parameters)
+        for q,p in zip(queries,parameters):
             start = time.time()
-            cursor.execute(query).fetchall()
+            cursor.execute(q).fetchall()
             end = time.time() - start
-            execution_file.write(str(query_id)+';'+str(end))
-            execution_file.write('\n')
+            execution_file.write(str(end)+';'+format_tuple(p)+'\n')
 
-
-with open('query_execution.csv', encoding='UTF8', mode='a') as execution:
-    for pquery in range(1,23):
-        run_query(pquery, execution)
+for qid in range(1,23):
+    with open(f'results/{qid}.csv', encoding='UTF8', mode='a') as execution:
+        run_query(qid, execution)
