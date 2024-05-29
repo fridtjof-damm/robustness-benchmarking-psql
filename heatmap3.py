@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
-from utils import csv_to_data_list
+from utils import csv_to_data_list, csv_to_values_list
 # source file
 FILE = 'results/3.csv'
 
@@ -34,16 +34,17 @@ plt.ylim(0,axis_len)
 plt.xlim(0,axis_len)
 
 
-# define explicit labels for the x axis
-#values = ['1992-04-01', '1992-07-01', '1992-10-01', '1993-01-01', '1993-04-01', '1993-07-01', '1993-10-01', '1994-01-01', '1994-04-01', '1994-07-01', '1994-10-01', '1995-01-01', '1995-04-01', '1995-07-01', '1995-10-01', '1996-01-01', '1996-04-01', '1996-07-01', '1996-10-01', '1997-01-01', '1997-04-01', '1997-07-01', '1997-10-01', '1998-01-01', '1998-04-01', '1998-07-01', '1998-10-01', '1999-01-01']
+# define explicit labels for the x and y axis
+values_x = csv_to_values_list(FILE)[0]
+values_y = csv_to_values_list(FILE)[1]
 
 ax.set_xticks(list(range(0, axis_len, 4)))
-#ax.set_xticklabels(values[0:axis_len:4])
+ax.set_xticklabels(values_x[0:axis_len:4])
 ax.set_xlabel('order_date')
 plt.xticks(rotation=45, ha='right')
 
 ax.set_yticks(list(range(0, axis_len, 4)))
-#ax.set_yticklabels(values[0:axis_len:4])
+ax.set_yticklabels(values_y[0:axis_len:4])
 ax.set_ylabel('mktsegment')
 
 plt.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)
