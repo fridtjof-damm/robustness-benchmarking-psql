@@ -38,13 +38,13 @@ plt.xlim(0,axis_len)
 values_x = csv_to_values_list(FILE)[0]
 values_y = csv_to_values_list(FILE)[1]
 
-ax.set_xticks(list(range(0, axis_len, 4)))
-ax.set_xticklabels(values_x[0:axis_len:4])
+ax.set_xticks(list(range(0, axis_len, 3)))
+ax.set_xticklabels(values_x[0:axis_len:3])
 ax.set_xlabel('order_date')
 plt.xticks(rotation=45, ha='right')
 
-ax.set_yticks(list(range(0, axis_len, 4)))
-ax.set_yticklabels(values_y[0:axis_len:4])
+ax.set_yticks(list(range(0, axis_len, 3)))
+ax.set_yticklabels(values_y[0:axis_len:3])
 ax.set_ylabel('mktsegment')
 
 plt.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)
