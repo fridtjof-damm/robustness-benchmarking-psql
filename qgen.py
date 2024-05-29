@@ -21,6 +21,7 @@ def generate_query(template: str, query_id: int) -> tuple[list[str],list[tuple]]
             for seg in segments:
                 for d3 in dates_03:
                     queries.append(template.format(SEGMENT = seg, DATE = d3))
+                    parameters.append((seg,str(d3)))
         case 4:
             for param4 in dates_04:
                 queries.append(template.format(DATE = param4))
