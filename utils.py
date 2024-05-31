@@ -15,9 +15,11 @@ def csv_to_data_list(file) -> tuple[list[list],int]:
         sqr_len = round(math.sqrt(len(csv_data)))
         axis_len = sqr_len
     
+    k = 0
     for i in range(sqr_len):
         for j in range(sqr_len):
-            data.append([i,j,float(csv_data[i][0])])
+                data.append([i,j,csv_data[k][0]])
+                k += 1
     
     return data,axis_len
 
