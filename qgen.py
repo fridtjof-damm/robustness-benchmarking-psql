@@ -25,68 +25,82 @@ def generate_query(template: str, query_id: int) -> tuple[list[str],list[tuple]]
         case 4:
             for param4 in dates_04:
                 queries.append(template.format(DATE = param4))
+                parameters.append((param4))
         case 5:
             for param5 in it.product(regions, dates_05):
                 queries.append(template.format(REGION = param5[0][1],DATE = param5[1]))
+                parameters.append((param5))
         case 6:
             for param6 in it.product(dates_05, discount, quantity):
                 queries.append(template.format(DATE = param6[0], DISCOUNT = param6[1], QUANTITY = param6[2]))
+                parameters.append((param6))
         case 7:
             for nation_pair in it.permutations(nations, 2):
                 queries.append(template.format(NATION1 = nation_pair[0][1], NATION2 = nation_pair[1][1]))
+                parameters.append((nation_pair))
         case 8:
             for param8 in it.product(nations,regions,type_syllables_3):
                 if param8[0][2] == param8[1][0]:
                     queries.append(template.format(NATION = param8[0][1], REGION = param8[1][1], TYPE = param8[2]))
+                    parameters.append((param8))
         case 9:
             for param9 in colors:
                 queries.append(template.format(COLOR = param9))
+                parameters.append((param9))
         case 10:
             for param10 in dates_10:
                 queries.append(template.format(DATE = param10))
+                parameters.append((param10))
         case 11:
             for param11 in nations:
                 queries.append(template.format(NATION = param11[1], FRACTION = 0.0001 / SCALE_FACTOR))
+                parameters.append((param11))
         case 12:
             for param12 in it.product(it.permutations(modes, 2), dates_05):
                 queries.append(template.format(SHIPMODE1 = param12[0][0], SHIPMODE2 = param12[0][1], DATE = param12[1]))
+                parameters.append((param12))
         case 13:
             for param13 in it.product(word1, word2):
                 queries.append(template.format(WORD1 = param13[0], WORD2 = param13[1]))
+                parameters.append((param13))
         case 14:
             for param14 in dates_05:
                 queries.append(template.format(DATE = param14))
+                parameters.append((param14))
         case 15:
             for i, param15 in enumerate(dates_04):
-                queries.append(template.format(DATE = param15, STREAM_ID = i + 1)) 
+                queries.append(template.format(DATE = param15, STREAM_ID = i + 1))
+                parameters.append((param15,i+1))
         case 16:
-            pass
             for param16 in it.product(brand, it.product(type_syllables_1, type_syllables_2), range(8, 51)):
                 queries.append(template.format(BRAND = param16[0], TYPE = f'{param16[1][0]} {param16[1][1]}', SIZE1 = 1, SIZE2 = 2, SIZE3 = 3, SIZE4 = 4, SIZE5 = 5, SIZE6 = 6, SIZE7 = 7, SIZE8 =  param16[2]))
+                parameters.append((param16))
         case 17:
             for param17 in it.product(brand, it.product(container_syllables_1, container_syllables_2)):
                 queries.append(template.format(BRAND = param17[0], CONTAINER = f'{param17[1][0]} {param17[1][1]}'))
+                parameters.append((param17))
         case 18:
             for param18 in range(312,316):
                 queries.append(template.format(QUANTITY = param18)) 
+                parameters.append((param18))
         case 19:
-            pass
             for param19 in it.product(range(1, 11), range(10, 21), range(20, 31), it.permutations(brand, 3)):
                 queries.append(template.format(QUANTITY1 = param19[0], QUANTITY2 = param19[1], QUANTITY3 = param19[2], BRAND1 = param19[3][0], BRAND2 = param19[3][1], BRAND3 = param19[3][2])) # Können die brands die gleichen sein?
+                parameters.append((param19))
         case 20:
-            pass
             for param20 in it.product(colors, dates_05, nations):
                 queries.append(template.format(COLOR = param20[0], DATE = param20[1], NATION = param20[2][1]))
+                parameters.append((param20))
         case 21:
-            pass
             for param21 in nations:
                 queries.append(template.format(NATION = param21[1]))
+                parameters.append((param21))
         case 22:
-            pass
             phone_num_offset = 10
             for i in range(6,len(nations)):
                queries.append(template.format(I1 = (nations[0][0] + phone_num_offset) , I2 = (nations[1][0] + phone_num_offset), I3 = (nations[2][0] + phone_num_offset), I4 = (nations[3][0] + phone_num_offset), I5 = (nations[4][0] + phone_num_offset), I6 = (nations[2][0] + phone_num_offset), I7 = (nations[i][0]+ phone_num_offset)))          
-    # print(query_id)
+               #parameters.append(())
+    # print(query_id)   
     #print(parameters)
     return queries,parameters
 
