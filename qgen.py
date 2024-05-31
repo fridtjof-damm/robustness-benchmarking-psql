@@ -99,7 +99,7 @@ def generate_query(template: str, query_id: int) -> tuple[list[str],list[tuple]]
             phone_num_offset = 10
             for i in range(6,len(nations)):
                queries.append(template.format(I1 = (nations[0][0] + phone_num_offset) , I2 = (nations[1][0] + phone_num_offset), I3 = (nations[2][0] + phone_num_offset), I4 = (nations[3][0] + phone_num_offset), I5 = (nations[4][0] + phone_num_offset), I6 = (nations[2][0] + phone_num_offset), I7 = (nations[i][0]+ phone_num_offset)))          
-               #parameters.append(())
+               parameters.append(((nations[0][0] + phone_num_offset) , (nations[1][0] + phone_num_offset), (nations[2][0] + phone_num_offset), (nations[3][0] + phone_num_offset), (nations[4][0] + phone_num_offset), (nations[2][0] + phone_num_offset), (nations[i][0]+ phone_num_offset)))
     # print(query_id)   
     #print(parameters)
     return queries,parameters
