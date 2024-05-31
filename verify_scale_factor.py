@@ -1,9 +1,9 @@
 import duckdb
 # duckdb connection
 # sf 10 
-#cursor = duckdb.connect('tpch.duckdb')
+cursor = duckdb.connect('tpch.duckdb')
 # sf 100
-cursor = duckdb.connect('tpch_sf_100.duckdb')
+#cursor = duckdb.connect('tpch_sf_100.duckdb')
 # cnt tables on db instance
 tables = cursor.execute('SELECT * FROM (SHOW TABLES);').fetchall()
 # table cardinalities for SF = 1 from https://www.tpc.org/TPC_Documents_Current_Versions/pdf/TPC-H_v3.0.1.pdf#page=13 

@@ -4,7 +4,7 @@ from qgen import generate_query
 from utils import format_tuple
 
 cursor = duckdb.connect("tpch.duckdb")
-
+#cursor = duckdb.connect("tpch_sf_100.duckdb")
 def run_query(query_id: int, execution_file):   
     with open(f'queries/{query_id}.sql', encoding="UTF8") as statement_file:
         template = statement_file.read()
