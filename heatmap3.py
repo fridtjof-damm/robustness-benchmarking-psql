@@ -3,7 +3,8 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
-from utils import csv_to_data_list, csv_to_values_list
+from qgen import segments, dates_03
+from utils import csv_to_data_list
 # source file
 FILE = 'results/3.csv'
 
@@ -35,16 +36,17 @@ plt.xlim(0,axis_len)
 
 
 # define explicit labels for the x and y axis
-values_x = csv_to_values_list(FILE)[0]
-values_y = csv_to_values_list(FILE)[1]
-
-ax.set_xticks(list(range(0, axis_len, 3)))
+values_x = dates_03
+values_y = segments
+step_y = round(axis_len / len(values_y))
+print(values_y)
+ax.set_xticks(list(range(1, axis_len, 3)))
 ax.set_xticklabels(values_x[0:axis_len:3])
 ax.set_xlabel('order_date')
 plt.xticks(rotation=45, ha='right')
 
-ax.set_yticks(list(range(0, axis_len, 3)))
-ax.set_yticklabels(values_y[0:axis_len:3])
+ax.set_yticks(list(range(2,axis_len,2)))
+ax.set_yticklabels(values_y)
 ax.set_ylabel('mktsegment')
 
 plt.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)
