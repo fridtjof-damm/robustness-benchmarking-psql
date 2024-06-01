@@ -1,6 +1,6 @@
 import datetime
 import itertools as it
-from verify_scale_factor import sf
+from verifySF import sf
 
 SCALE_FACTOR = sf
 
@@ -26,7 +26,7 @@ def generate_query(template: str, query_id: int) -> tuple[list[str],list[tuple]]
         case 4:
             for param4 in dates_04:
                 queries.append(template.format(DATE = param4))
-                parameters.append((param4))
+                parameters.append((str(param4),))
         case 5:
             for param5 in it.product(regions, dates_05):
                 queries.append(template.format(REGION = param5[0][1],DATE = param5[1]))
@@ -47,11 +47,11 @@ def generate_query(template: str, query_id: int) -> tuple[list[str],list[tuple]]
         case 9:
             for param9 in colors:
                 queries.append(template.format(COLOR = param9))
-                parameters.append((param9))
+                parameters.append((param9,))
         case 10:
             for param10 in dates_10:
                 queries.append(template.format(DATE = param10))
-                parameters.append((param10))
+                parameters.append(((param10),))
         case 11:
             for param11 in nations:
                 queries.append(template.format(NATION = param11[1], FRACTION = 0.0001 / SCALE_FACTOR))
@@ -59,7 +59,7 @@ def generate_query(template: str, query_id: int) -> tuple[list[str],list[tuple]]
         case 12:
             for param12 in it.product(it.permutations(modes, 2), dates_05):
                 queries.append(template.format(SHIPMODE1 = param12[0][0], SHIPMODE2 = param12[0][1], DATE = param12[1]))
-                parameters.append((param12))
+                parameters.append((param12,))
         case 13:
             for param13 in it.product(word1, word2):
                 queries.append(template.format(WORD1 = param13[0], WORD2 = param13[1]))
@@ -67,7 +67,7 @@ def generate_query(template: str, query_id: int) -> tuple[list[str],list[tuple]]
         case 14:
             for param14 in dates_05:
                 queries.append(template.format(DATE = param14))
-                parameters.append((param14))
+                parameters.append((param14,))
         case 15:
             for i, param15 in enumerate(dates_04):
                 queries.append(template.format(DATE = param15, STREAM_ID = i + 1))
@@ -75,11 +75,11 @@ def generate_query(template: str, query_id: int) -> tuple[list[str],list[tuple]]
         case 16:
             for param16 in it.product(brand, it.product(type_syllables_1, type_syllables_2), range(8, 51)):
                 queries.append(template.format(BRAND = param16[0], TYPE = f'{param16[1][0]} {param16[1][1]}', SIZE1 = 1, SIZE2 = 2, SIZE3 = 3, SIZE4 = 4, SIZE5 = 5, SIZE6 = 6, SIZE7 = 7, SIZE8 =  param16[2]))
-                parameters.append((param16))
+                parameters.append((param16,))
         case 17:
             for param17 in it.product(brand, it.product(container_syllables_1, container_syllables_2)):
                 queries.append(template.format(BRAND = param17[0], CONTAINER = f'{param17[1][0]} {param17[1][1]}'))
-                parameters.append((param17))
+                parameters.append((param17,))
         case 18:
             for param18 in range(312,316):
                 queries.append(template.format(QUANTITY = param18)) 
@@ -91,11 +91,11 @@ def generate_query(template: str, query_id: int) -> tuple[list[str],list[tuple]]
         case 20:
             for param20 in it.product(colors, dates_05, nations):
                 queries.append(template.format(COLOR = param20[0], DATE = param20[1], NATION = param20[2][1]))
-                parameters.append((param20))
+                parameters.append((param20,))
         case 21:
             for param21 in nations:
                 queries.append(template.format(NATION = param21[1]))
-                parameters.append((param21))
+                parameters.append((param21,))
         case 22:
             phone_num_offset = 10
             for i in range(6,len(nations)):
@@ -140,4 +140,4 @@ word1 = ['special', 'pending', 'unusual', 'express']
 word2 = ['packages', 'requests', 'accounts', 'deposits']
 container_syllables_1 = ['SM', 'LG', 'MED', 'JUMBO', 'WRAP']
 container_syllables_2 = ['CASE', 'BOX', 'BAG', 'JAR', 'PKG', 'PACK', 'CAN', 'DRUM']
-brand = ['BRAND#' + str(i[0]) + str(i[1]) for i in it.permutations(range(1, 6), 2)]
+brand = ['BRAND#11','BRAND#22','BRAND#33']

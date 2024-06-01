@@ -16,6 +16,6 @@ def run_query(query_id: int, execution_file):
             end = time.time() - start
             execution_file.write(str(end)+';'+format_tuple(p)+'\n')
 
-for qid in range(1,23):
+for qid in range(21,23):
     with open(f'results/{qid}.csv', encoding='UTF8', mode='a') as execution:
         run_query(qid, execution)
