@@ -15,9 +15,11 @@ for table in tpch_tables_rows:
     table_rows_n = cursor.execute('SELECT COUNT(*) FROM '+table[0]+';').fetchall()
     # if 'nation' and 'region' not in table:  
     sfs.append(table_rows_n[0][0] // table[1])
+
+sf = max(sfs)
 print('############################################################') 
 print('############################################################')    
-print('######### THIS DB INSTANCE HAS A SCALEFACCTOR OF: '+str(max(sfs))+' #######')
+print('######### THIS DB INSTANCE HAS A SCALEFACCTOR OF: '+str(sf)+' #######')
 print('############################################################')
 print('############################################################')   
 

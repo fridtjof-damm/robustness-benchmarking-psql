@@ -1,7 +1,8 @@
 import datetime
 import itertools as it
+from verify_scale_factor import sf
 
-SCALE_FACTOR = 10
+SCALE_FACTOR = sf
 
 def generate_query(template: str, query_id: int) -> tuple[list[str],list[tuple]]:
     queries: list[str] = []
