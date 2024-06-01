@@ -83,7 +83,7 @@ def generate_query(template: str, query_id: int) -> tuple[list[str],list[tuple]]
         case 18:
             for param18 in range(312,316):
                 queries.append(template.format(QUANTITY = param18)) 
-                parameters.append((param18))
+                parameters.append(((param18,)))
         case 19:
             for param19 in it.product(range(1, 11), range(10, 21), range(20, 31), it.permutations(brand, 3)):
                 queries.append(template.format(QUANTITY1 = param19[0], QUANTITY2 = param19[1], QUANTITY3 = param19[2], BRAND1 = param19[3][0], BRAND2 = param19[3][1], BRAND3 = param19[3][2])) # Können die brands die gleichen sein?
