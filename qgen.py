@@ -1,3 +1,4 @@
+# based on https://github.com/klauck/tpch_query_generator 
 import datetime
 import itertools as it
 from verifySF import sf
