@@ -13,3 +13,5 @@ test.py
 inital_playground.py
 playground.py
 /__pycache__
+*.wal
+*.tmp
