@@ -8,6 +8,4 @@ def dummygen():
             data.append(i)
     random.shuffle(data)
     return data
-
-data = dummygen()
-print(len(data))
+#print(data)
