@@ -1,7 +1,7 @@
 import time
 import duckdb
 from qgen import generate_query
-from utils import format_tuple
+from utils.utils import format_tuple
 
 cursor = duckdb.connect("tpch.duckdb")
 #cursor = duckdb.connect("tpch_sf_100.duckdb")

@@ -1,4 +1,4 @@
-# based on https://github.com/klauck/tpch_query_generator 
+# based on https://github.com/klauck/tpch_query_generator
 import datetime
 import itertools as it
 # set scale factor used for tpc-h data 

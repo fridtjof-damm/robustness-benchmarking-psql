@@ -1,5 +1,5 @@
 import duckdb
-import dummy_data_gen as ddg
+import analysis.dummy.dummy_data_gen as ddg
 import json
 
 cursor = duckdb.connect('dummy_db.duckdb')

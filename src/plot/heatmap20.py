@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
-from qgen import dates_05, modes
-from utils import csv_to_data_list
+from src.qgen import dates_05, modes
+from src.utils.utils import csv_to_data_list
 # source file
-FILE = 'results/16.csv'
+FILE = 'results/20.csv'
 
 axis_len = csv_to_data_list(FILE)[1]
 # data to plot
@@ -51,5 +51,5 @@ ax.set_yticklabels(values_y) """
 ax.set_ylabel('p_container')
 
 plt.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)
-plt.savefig('plots/16.png')
+plt.savefig('plots/20.png')
 plt.show()

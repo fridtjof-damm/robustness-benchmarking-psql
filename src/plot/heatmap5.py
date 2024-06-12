@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
-from qgen import segments, dates_03
-from utils import csv_to_data_list
+from src.qgen import dates_05, modes
+from src.utils.utils import csv_to_data_list
 # source file
-FILE = 'results/7.csv'
+FILE = 'results/5.csv'
 
 axis_len = csv_to_data_list(FILE)[1]
 # data to plot
@@ -37,8 +37,8 @@ plt.xlim(0,axis_len)
 
 
 # define explicit labels for the x and y axis
-""" values_x = dates_03
-values_y = segments
+""" values_x = modes
+values_y = [(dates_05)]
 step_y = round(axis_len / len(values_y))
 print(values_y)
 ax.set_xticks(list(range(1, axis_len, 3)))
@@ -47,9 +47,9 @@ ax.set_xlabel('region')
 """ plt.xticks(rotation=45, ha='right')
 
 ax.set_yticks(list(range(2,axis_len,2)))
-ax.set_yticklabels(values_y) """
-ax.set_ylabel('country')
+ax.set_yticklabels(values_y) """ 
+ax.set_ylabel('receiptdate')
 
 plt.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)
-plt.savefig('plots/7.png')
+plt.savefig('plots/5.png')
 plt.show()
