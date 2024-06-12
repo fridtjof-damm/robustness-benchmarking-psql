@@ -1,9 +1,8 @@
 # based on https://github.com/klauck/tpch_query_generator 
 import datetime
 import itertools as it
-from verifySF import sf
-
-SCALE_FACTOR = sf
+# set scale factor used for tpc-h data 
+SCALE_FACTOR = 10
 
 def generate_query(template: str, query_id: int) -> tuple[list[str],list[tuple]]:
     queries: list[str] = []
@@ -60,7 +59,7 @@ def generate_query(template: str, query_id: int) -> tuple[list[str],list[tuple]]
         case 12:
             for param12 in it.product(it.permutations(modes, 2), dates_05):
                 queries.append(template.format(SHIPMODE1 = param12[0][0], SHIPMODE2 = param12[0][1], DATE = param12[1]))
-                parameters.append((param12,))
+                parameters.append((param12))
         case 13:
             for param13 in it.product(word1, word2):
                 queries.append(template.format(WORD1 = param13[0], WORD2 = param13[1]))
@@ -92,7 +91,7 @@ def generate_query(template: str, query_id: int) -> tuple[list[str],list[tuple]]
         case 20:
             for param20 in it.product(colors, dates_05, nations):
                 queries.append(template.format(COLOR = param20[0], DATE = param20[1], NATION = param20[2][1]))
-                parameters.append((param20,))
+                parameters.append((param20))
         case 21:
             for param21 in nations:
                 queries.append(template.format(NATION = param21[1]))
