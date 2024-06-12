@@ -7,7 +7,7 @@ from matplotlib.colors import LinearSegmentedColormap
 from src.qgen import segments, dates_03
 from src.utils.utils import csv_to_data_list
 # source file
-FILE = 'results/3.csv'
+FILE = 'results/plots/3.csv'
 
 axis_len = csv_to_data_list(FILE)[1]
 # data to plot
