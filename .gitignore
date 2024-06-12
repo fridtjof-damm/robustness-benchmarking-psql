@@ -12,7 +12,7 @@
 test.py
 inital_playground.py
 playground.py
-/__pycache__
+**/__pycache__
 *.wal
 *.tmp
 /results
