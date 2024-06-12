@@ -3,10 +3,10 @@ import duckdb
 from qgen import generate_query
 from utils.utils import format_tuple
 
-cursor = duckdb.connect("tpch.duckdb")
+cursor = duckdb.connect("resources/db/tpch.duckdb")
 #cursor = duckdb.connect("tpch_sf_100.duckdb")
 def run_query(query_id: int, execution_file):   
-    with open(f'queries/{query_id}.sql', encoding="UTF8") as statement_file:
+    with open(f'resources/queries/{query_id}.sql', encoding="UTF8") as statement_file:
         template = statement_file.read()
         queries, parameters = generate_query(template, query_id)
         assert len(queries) == len(parameters)
@@ -17,5 +17,5 @@ def run_query(query_id: int, execution_file):
             execution_file.write(str(end)+';'+format_tuple(p)+'\n')
 
 for qid in range(21,23):
-    with open(f'results/{qid}.csv', encoding='UTF8', mode='a') as execution:
+    with open(f'results/queryresults_sf10/results{qid}.csv', encoding='UTF8', mode='w') as execution:
         run_query(qid, execution)
