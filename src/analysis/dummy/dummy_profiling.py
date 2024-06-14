@@ -14,3 +14,6 @@ for number in range(20):
         conn.execute(QUERY.format(number))
         conn.execute("PRAGMA disable_profiling;")
         file.close()
+
+
+
