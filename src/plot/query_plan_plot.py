@@ -14,7 +14,7 @@ with open(FILE, encoding='UTF8') as file:
     file.close()
 
 for row in csv_data:
-    exec_times.append(row[0])
+    exec_times.append(float(row[0]))
     scan_types.append(row[1])
 assert len(exec_times) == len(scan_types)
 # plotting 
