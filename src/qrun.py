@@ -17,5 +17,5 @@ def run_query(query_id: int, execution_file):
             execution_file.write(str(end)+';'+format_tuple(p)+'\n')
 
 for qid in range(21,23):
-    with open(f'results/queryresults_sf10/results{qid}.csv', encoding='UTF8', mode='w') as execution:
+    with open(f'results/parameters_sf10/{qid}.csv', encoding='UTF8', mode='w') as execution:
         run_query(qid, execution)
