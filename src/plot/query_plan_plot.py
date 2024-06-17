@@ -19,22 +19,21 @@ for row in csv_data:
 assert len(exec_times) == len(scan_types)
 # plotting 
 fig, ax = plt.subplots(1,1)
-
-numbers = [x for x in range(0,20)]
+# numbers = [x for x in range(0,20)]
 colors = ['darkseagreen','lightskyblue']
 bar_labels = ['index scan', 'seq scan']
-bar_colors = []
-for scan in scan_types:
-    if scan == 'index_scan':
-        bar_colors.append(colors[0])
-    if scan == 'seq_scan':
-        bar_colors.append(colors[1])
+bar_colors = [colors[0] if scan == 'index_scan' else colors[1] for scan in scan_types]
 
-ax.bar(numbers, exec_times,color=bar_colors)
-ax.set_xticks(np.arange(len(exec_times)))
-ax.set_ylabel('execution time')
 
+x_ticks = np.arange(len(exec_times))
+ax.set_xticks(x_ticks)
+ax.set_xticklabels(x_ticks)
+ax.set_xlabel('queries w/ selection on attribute with number i')
+ax.set_yticks(list(range(2,len(exec_times),4)))
+print(x_ticks)
+print(exec_times)
+ax.set_yticklabels([0.18, 0.30, 0.45, 0.60, 0.80])
+ax.set_ylabel('exection time in ms')
+ax.bar(x_ticks, exec_times, color=bar_colors)
+ax.legend(['index scan', 'seq scan'])
 plt.show()
-
-
-
