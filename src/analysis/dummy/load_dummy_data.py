@@ -13,3 +13,8 @@ data = ddg.dummygen()
 df = pd.DataFrame(data)
 cursor.sql("INSERT INTO numbers (number) SELECT * FROM df;")
 cursor.sql("CREATE INDEX n_idx ON numbers (number);")
+
+cardinalities = cursor.sql("SELECT COUNT(*) as card FROM numbers GROUP BY number;").df()
+
+
+print(cardinalities)
