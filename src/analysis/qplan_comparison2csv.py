@@ -11,11 +11,14 @@ for i in range(0,20):
 # write scan 
 with open('results/dummyresults/queryplans.csv', mode='w', encoding='UTF-8') as file:
     for i, plan  in enumerate(query_plans):
-        file.write(str(plan['result']) +';')
-        plan = str(plan)
-        if "INDEX_SCAN " in plan:
+        t_s = plan['result'] 
+        t_ms = round(t_s * 1000,3)
+
+        file.write(str(t_ms) +';')
+        pl = str(plan)
+        if "INDEX_SCAN " in pl:
             file.write('index_scan'+'\n')
-        if "SEQ_SCAN " in plan:
+        if "SEQ_SCAN " in pl:
            file.write('seq_scan'+'\n')
     file.close()
     
