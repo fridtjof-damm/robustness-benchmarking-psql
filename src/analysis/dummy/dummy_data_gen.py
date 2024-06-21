@@ -9,4 +9,4 @@ def dummygen():
     random.shuffle(data)
     return data
 
-print(len(dummygen()))
+#print(len(dummygen()))
