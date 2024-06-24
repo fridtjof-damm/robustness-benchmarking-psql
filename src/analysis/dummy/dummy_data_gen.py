@@ -9,4 +9,16 @@ def dummygen():
     random.shuffle(data)
     return data
 
-#print(len(dummygen()))
+with open('results/dummyresults/data.csv', encoding='UTF-8', mode='w') as file:
+    data = dummygen()
+    for row in data:
+        file.write(str(row) + '\n')
+    file.close()
+
+def dummygen2tuples():
+    data_as_tuples = []  
+    for val in dummygen():
+        data_as_tuples.append((val,))
+    return data_as_tuples
+
+
