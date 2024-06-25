@@ -19,8 +19,10 @@ cur.execute('''CREATE TABLE IF NOT EXISTS numbers(
             ) ;''')
 # get dummmy data and insert into table
 #dataset = dd.dummygen2tuples()
-
+###
+# here comes the data insert 
 #insert_stmt = 'INSERT INTO numbers (number) VALUES %s;'
+###
 #execute_values(cur, insert_stmt, dataset)
 #conn.commit()
 # check for correct insertion
