@@ -22,10 +22,21 @@ def psql_profiling():
     conn = pg.connect(**db_params)
     cur = conn.cursor()
 
-    queries = []
+    query = "EXPLAIN SELECT * FROM numbers WHERE number = %s;"
+
     for i in range(0,20):
-        queries.append(f'SELECT * FROM numbers WHERE number = {i};')
-    print(queries)
+        cur.execute(query, i)
+        with open(f'results/postgres/qplan{i}.json', encoding='UTF-8', mode='w') as file:
+            file.write(str(cur.fetchall()))
+            file.close()
     
+    cur.close()
+    conn.close()
+    
+
+    
+
+
+psql_profiling()
 
     
