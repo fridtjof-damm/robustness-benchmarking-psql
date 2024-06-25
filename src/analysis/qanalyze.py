@@ -20,4 +20,12 @@ def duckdb_profiling():
 
 def psql_profiling():
     conn = pg.connect(**db_params)
+    cur = conn.cursor()
+
+    queries = []
+    for i in range(0,20):
+        queries.append(f'SELECT * FROM numbers WHERE number = {i};')
+    print(queries)
+    
+
     
