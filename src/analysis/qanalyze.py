@@ -19,24 +19,27 @@ def duckdb_profiling():
     cursor.execute("PRAGMA disable_profiling;")
 
 def psql_profiling():
-    conn = pg.connect(**db_params)
+   # conn = pg.connect(**db_params)
+    conn = pg.connect(
+    database="dummydb",
+    user='fridtjofdamm',
+    password='',
+    host='localhost',
+    port='5432'
+)
     cur = conn.cursor()
+    # add format = json 
+    query = "EXPLAIN (FORMAT JSON) SELECT * FROM numbers WHERE number = %s;"
 
-    query = "EXPLAIN SELECT * FROM numbers WHERE number = %s;"
-
-    for i in range(0,20):
-        cur.execute(query, i)
+    for i in range(5,6):
+        cur.execute(query, str(i))
         with open(f'results/postgres/qplan{i}.json', encoding='UTF-8', mode='w') as file:
-            file.write(str(cur.fetchall()))
+            cur.fetchall()
             file.close()
-    
+    print(cur.fetchall())
     cur.close()
     conn.close()
     
-
-    
-
-
 psql_profiling()
 
     
