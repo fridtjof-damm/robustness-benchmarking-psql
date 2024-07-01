@@ -14,9 +14,11 @@ conn = pg.connect(**db_params)
 # cursor
 cur = conn.cursor()
 #cur.execute('DROP TABLE IF EXISTS numbers;')
-cur.execute('''CREATE TABLE IF NOT EXISTS numbers(
+""" cur.execute('''CREATE TABLE IF NOT EXISTS numbers(
             number integer
-            ) ;''')
+            ) ;''') """
+cur.execute("CREATE INDEX IF NOT EXISTS idx_nmb ON numbers (number);")
+conn.commit()
 # get dummmy data and insert into table
 #dataset = dd.dummygen2tuples()
 ###
@@ -26,9 +28,9 @@ cur.execute('''CREATE TABLE IF NOT EXISTS numbers(
 #execute_values(cur, insert_stmt, dataset)
 #conn.commit()
 # check for correct insertion
-cur.execute("SELECT COUNT(*) as cnt, number FROM numbers GROUP BY number;")
-res = cur.fetchall()
-print(res)
+#cur.execute("SELECT COUNT(*) as cnt, number FROM numbers GROUP BY number;")
+#res = cur.fetchall()
+#print(res)
 
 cur.close()
 conn.close()
