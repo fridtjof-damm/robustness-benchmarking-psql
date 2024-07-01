@@ -43,7 +43,7 @@ def psql_profiling():
     cur.close()
     conn.close()
 # uncomment to re run profiling of parametrized queries  
-#psql_profiling()
+psql_profiling()
 
 def json_analyze(i):
     with open(f'results/postgres/qplan{i}.json', encoding='UTF-8', mode='r') as file:
@@ -90,7 +90,7 @@ def simplify(qplan):
         match = re.search(r'\(([^=]+)\s*=\s*[^)]+\)', qplan['Index Cond'])
         if match:
             attr = match.group(1).strip()
-            val = f'({attr})'
+            val = f'{attr}'
             qplan['Index Cond'] = val
 
 
@@ -106,8 +106,6 @@ def persist_pg_profiling():
         query_plan = json_analyze(i)
         simplified = simplify(query_plan)
         # add label of which realtion parameter was used 
-        if 'Index Cond' in query_plan:
-            plans.append('"'+str(query_plan['Index Cond']+'": "'+str(i)+'"'))
         plans.append(simplified)
 
         with open('results/postgres/simplified/plans_idx_nmb.json', encoding='UTF-8', mode='w') as file:
