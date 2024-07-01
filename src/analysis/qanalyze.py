@@ -104,6 +104,12 @@ def persist_pg_profiling():
     plans = []
     for i in range(0,20):
         query_plan = json_analyze(i)
-        plans.append(simplify(query_plan))
-    return plans
-print(persist_pg_profiling())
+        simplified = simplify(query_plan)
+        # add label of which realtion parameter was used 
+        if 'Index Cond' in query_plan:
+            plans.append('"'+str(query_plan['Index Cond']+'": "'+str(i)+'"'))
+        plans.append(simplified)
+
+        with open('results/postgres/simplified/plans_idx_nmb.json', encoding='UTF-8', mode='w') as file:
+            json.dump(plans, file, indent=4)
+persist_pg_profiling()
