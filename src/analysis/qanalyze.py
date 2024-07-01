@@ -1,4 +1,6 @@
 # https://stackoverflow.com/questions/5243596/python-sql-query-string-formatting
+import json
+import re
 import duckdb
 import psycopg2 as pg 
 
@@ -31,15 +33,77 @@ def psql_profiling():
     # add format = json 
     query = "EXPLAIN (FORMAT JSON) SELECT * FROM numbers WHERE number = %s;"
 
-    for i in range(5,6):
-        cur.execute(query, str(i))
+    for i in range(0,20):
+        cur.execute(query, (i,))
+        json_plan = cur.fetchall()[0][0][0]['Plan']
+        json_str = json.dumps(json_plan, indent=4)
         with open(f'results/postgres/qplan{i}.json', encoding='UTF-8', mode='w') as file:
-            cur.fetchall()
+            file.write(json_str)
             file.close()
-    print(cur.fetchall())
     cur.close()
     conn.close()
-    
-psql_profiling()
+# uncomment to re run profiling of parametrized queries  
+#psql_profiling()
 
-    
+def json_analyze(i):
+    with open(f'results/postgres/qplan{i}.json', encoding='UTF-8', mode='r') as file:
+        file_str = file.read()
+        file_json = json.loads(file_str)
+        file.close()
+        return file_json
+
+def simplify(qplan):
+    # check if exists, then delete
+    # first selection from basic seq scan query plan 
+    if 'Parallel Aware' in qplan:
+        del qplan['Parallel Aware']
+    if 'Async Capable' in qplan:
+        del qplan['Async Capable']
+    if 'Startup Cost' in qplan:
+        del qplan['Startup Cost']
+    if 'Total Cost' in qplan:
+        del qplan['Total Cost']
+    if 'Plan Rows' in qplan:
+        del qplan['Plan Rows']
+    if 'Plan Width' in qplan:
+        del qplan['Plan Width']
+    if 'Single Copy' in qplan:
+        del qplan['Single Copy']
+    if 'Workers Planned' in qplan:
+        del qplan['Workers Planned']
+    if 'Alias' in qplan:
+        del qplan['Alias']
+    if 'Parent Relationship' in qplan:
+        del qplan['Parent Relationship']
+    if 'Relation Name' in qplan:
+        del qplan['Relation Name']
+    if 'Filter' in qplan:
+        match = re.search(r'\(([^=]+)\s*=\s*[^)]+\)', qplan['Filter'])
+        if match:
+            attr = match.group(1).strip()
+            val = f'({attr})'
+            qplan['Filter'] = val
+    # further selection from index scan queries 
+    # if '' in qplan:
+    #     del qplan['']
+    if 'Index Cond' in qplan:
+        match = re.search(r'\(([^=]+)\s*=\s*[^)]+\)', qplan['Index Cond'])
+        if match:
+            attr = match.group(1).strip()
+            val = f'({attr})'
+            qplan['Index Cond'] = val
+
+
+
+    if 'Plans' in qplan:
+        for child in qplan['Plans']:
+            simplify(child)
+    return qplan
+
+def persist_pg_profiling():
+    plans = []
+    for i in range(0,20):
+        query_plan = json_analyze(i)
+        plans.append(simplify(query_plan))
+    return plans
+print(persist_pg_profiling())
