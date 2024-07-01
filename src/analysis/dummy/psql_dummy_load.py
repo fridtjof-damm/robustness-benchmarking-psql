@@ -17,8 +17,9 @@ cur = conn.cursor()
 """ cur.execute('''CREATE TABLE IF NOT EXISTS numbers(
             number integer
             ) ;''') """
-cur.execute("CREATE INDEX IF NOT EXISTS idx_nmb ON numbers (number);")
-conn.commit()
+#cur.execute("CREATE INDEX IF NOT EXISTS idx_nmb ON numbers (number);")
+#cur.execute("DELETE FROM numbers WHERE number = 16;")
+#conn.commit()
 # get dummmy data and insert into table
 #dataset = dd.dummygen2tuples()
 ###
@@ -29,8 +30,9 @@ conn.commit()
 #conn.commit()
 # check for correct insertion
 #cur.execute("SELECT COUNT(*) as cnt, number FROM numbers GROUP BY number;")
-#res = cur.fetchall()
-#print(res)
+cur.execute("SELECT COUNT(*) as cnt FROM numbers WHERE number = 17;")
+res = cur.fetchall()
+print(res)
 
 cur.close()
 conn.close()
