@@ -12,41 +12,11 @@ db_params = {
     'port':'5432'
 }
 
-def duckdb_profiling():
-    cursor = duckdb.connect('dummy_db.duckdb')
-    # mit Q9 ausprobieren !!
-    cursor.execute("PRAGMA enable_profiling = 'json'")
-    cursor.execute(f"PRAGMA profiling_output='{'analysis/dummy_with_index.json'}';")
-    cursor.execute("SELECT COUNT(*) FROM numbers;")
-    cursor.execute("PRAGMA disable_profiling;")
-#duckdb_profiling()
-def psql_profiling():
-   # conn = pg.connect(**db_params)
-    conn = pg.connect(
-    database="dummydb",
-    user='fridtjofdamm',
-    password='',
-    host='localhost',
-    port='5432'
-)
-    cur = conn.cursor()
-    # add format = json 
-    query = "EXPLAIN (FORMAT JSON) SELECT * FROM numbers WHERE number = %s;"
-
-    for i in range(0,20):
-        cur.execute(query, (i,))
-        json_plan = cur.fetchall()[0][0][0]['Plan']
-        json_str = json.dumps(json_plan, indent=4)
-        with open(f'results/postgres/qplan{i}.json', encoding='UTF-8', mode='w') as file:
-            file.write(json_str)
-            file.close()
-    cur.close()
-    conn.close()
-# uncomment to re run profiling of parametrized queries  
-#psql_profiling()
-
 def json_analyze(i):
-    with open(f'results/postgres/qplan{i}.json', encoding='UTF-8', mode='r') as file:
+    ### add right path to json files first ###
+    dummy_psql = 'results/postgres/qplan'
+
+    with open(f'{dummy_psql}{i}.json', encoding='UTF-8', mode='r') as file:
         file_str = file.read()
         file_json = json.loads(file_str)
         file.close()
@@ -93,8 +63,6 @@ def simplify(qplan):
             val = f'{attr}'
             qplan['Index Cond'] = val
 
-
-
     if 'Plans' in qplan:
         for child in qplan['Plans']:
             simplify(child)
@@ -116,7 +84,34 @@ def persist_pg_profiling():
 def psql_tpch_profiling():
     conn = pg.connect(**db_params)
     cur = conn.cursor()
+    prefix = 'EXPLAIN (FORMAT JSON)'
     query = "SELECT COUNT(*) FROM customer;"
     cur.execute(query)
     print(cur.fetchone())
-psql_tpch_profiling()
+#psql_tpch_profiling()
+
+def duckdb_dummy_profiling():
+    cursor = duckdb.connect('dummy_db.duckdb')
+    # mit Q9 ausprobieren !!
+    cursor.execute("PRAGMA enable_profiling = 'json'")
+    cursor.execute(f"PRAGMA profiling_output='{'analysis/dummy_with_index.json'}';")
+    cursor.execute("SELECT COUNT(*) FROM numbers;")
+    cursor.execute("PRAGMA disable_profiling;")
+#duckdb_dummy_profiling()
+
+def psql_dummy_profiling():
+    conn = pg.connect(**db_params)
+    cur = conn.cursor()
+    # add format = json 
+    query = "EXPLAIN (FORMAT JSON) SELECT * FROM numbers WHERE number = %s;"
+
+    for i in range(0,20):
+        cur.execute(query, (i,))
+        json_plan = cur.fetchall()[0][0][0]['Plan']
+        json_str = json.dumps(json_plan, indent=4)
+        with open(f'results/postgres/qplan{i}.json', encoding='UTF-8', mode='w') as file:
+            file.write(json_str)
+            file.close()
+    cur.close()
+    conn.close()
+#psql_dummy_profiling()
