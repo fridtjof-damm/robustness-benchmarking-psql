@@ -80,7 +80,6 @@ def persist_pg_profiling():
             json.dump(plans, file, indent=4)
 #persist_pg_profiling()
 
-
 def psql_tpch_profiling():
     conn = pg.connect(**db_params)
     cur = conn.cursor()
