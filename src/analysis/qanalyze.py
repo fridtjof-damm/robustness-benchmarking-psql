@@ -5,7 +5,7 @@ import duckdb
 import psycopg2 as pg 
 
 db_params = {
-    'database': "dummydb",
+    'database': 'dummydb',
     'user':'fridtjofdamm',
     'password':'',
     'host':'localhost',
@@ -19,7 +19,7 @@ def duckdb_profiling():
     cursor.execute(f"PRAGMA profiling_output='{'analysis/dummy_with_index.json'}';")
     cursor.execute("SELECT COUNT(*) FROM numbers;")
     cursor.execute("PRAGMA disable_profiling;")
-
+#duckdb_profiling()
 def psql_profiling():
    # conn = pg.connect(**db_params)
     conn = pg.connect(
@@ -43,7 +43,7 @@ def psql_profiling():
     cur.close()
     conn.close()
 # uncomment to re run profiling of parametrized queries  
-psql_profiling()
+#psql_profiling()
 
 def json_analyze(i):
     with open(f'results/postgres/qplan{i}.json', encoding='UTF-8', mode='r') as file:
@@ -110,4 +110,13 @@ def persist_pg_profiling():
 
         with open('results/postgres/simplified/plans_idx_nmb.json', encoding='UTF-8', mode='w') as file:
             json.dump(plans, file, indent=4)
-persist_pg_profiling()
+#persist_pg_profiling()
+
+
+def psql_tpch_profiling():
+    conn = pg.connect(**db_params)
+    cur = conn.cursor()
+    query = "SELECT COUNT(*) FROM customer;"
+    cur.execute(query)
+    print(cur.fetchone())
+psql_tpch_profiling()
