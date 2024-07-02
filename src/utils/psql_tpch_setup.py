@@ -34,5 +34,4 @@ def load_tbl_data():
     except Exception as e:
         conn.rollback()
         print(f"Error loading table data: {e}")
-                #### to be continued ####
-load_tbl_data()
+#load_tbl_data()
