@@ -1,4 +1,5 @@
 import time
+import json
 import duckdb
 from qgen import generate_query
 from utils.utils import format_tuple
@@ -19,3 +20,15 @@ def run_query(query_id: int, execution_file):
 for qid in range(21,23):
     with open(f'results/parameters_sf10/{qid}.csv', encoding='UTF8', mode='w') as execution:
         run_query(qid, execution)
+
+def run_query_psql(cur, query_id, prefix, file):
+    with open(f'resources/queries/{query_id}.sql', encoding="UTF8") as statement_file:
+        template = statement_file.read()
+        queries = generate_query(template, query_id)[0]
+        for q in queries:
+            sql = prefix + q
+            cur.execute(sql)
+            json_plan = cur.fetchall()
+            json_str = json.dumps(json_plan, indent=4)
+            file.write(json_str)
+        
