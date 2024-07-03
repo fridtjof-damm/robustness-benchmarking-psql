@@ -3,6 +3,7 @@ import json
 import re
 import duckdb
 import psycopg2 as pg 
+from ...qrun import run_query_psql
 
 db_params = {
     'database': 'dummydb',
@@ -73,10 +74,10 @@ def persist_pg_profiling():
     for i in range(0,20):
         query_plan = json_analyze(i)
         simplified = simplify(query_plan)
-        # add label of which realtion parameter was used 
+        # add label of which relation parameter was used 
         plans.append(simplified)
 
-        with open('results/postgres/simplified/plans_idx_nmb.json', encoding='UTF-8', mode='w') as file:
+        with open('results/postgres/tpch/qplan{i}.json', encoding='UTF-8', mode='w') as file:
             json.dump(plans, file, indent=4)
 #persist_pg_profiling()
 
@@ -84,10 +85,11 @@ def psql_tpch_profiling():
     conn = pg.connect(**db_params)
     cur = conn.cursor()
     prefix = 'EXPLAIN (FORMAT JSON)'
-    query = "SELECT COUNT(*) FROM customer;"
-    cur.execute(query)
-    print(cur.fetchone())
-#psql_tpch_profiling()
+    for i in range(0,23):
+        with open('results/postgres/tpch/qplan{i}.json', mode='w' ,encoding='UTF-8') as rfile:
+            run_query_psql(cur, i, prefix, rfile)
+        rfile.close()
+psql_tpch_profiling()
 
 def duckdb_dummy_profiling():
     cursor = duckdb.connect('dummy_db.duckdb')
