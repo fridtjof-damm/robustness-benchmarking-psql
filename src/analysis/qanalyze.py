@@ -3,7 +3,7 @@ import json
 import re
 import duckdb
 import psycopg2 as pg 
-from ...qrun import run_query_psql
+import src.qrun as qr
 
 db_params = {
     'database': 'dummydb',
@@ -89,7 +89,7 @@ def psql_tpch_profiling():
         with open('results/postgres/tpch/qplan{i}.json', mode='w' ,encoding='UTF-8') as rfile:
             run_query_psql(cur, i, prefix, rfile)
         rfile.close()
-psql_tpch_profiling()
+#psql_tpch_profiling()
 
 def duckdb_dummy_profiling():
     cursor = duckdb.connect('dummy_db.duckdb')
@@ -115,4 +115,6 @@ def psql_dummy_profiling():
             file.close()
     cur.close()
     conn.close()
-#psql_dummy_profiling()
+#psql_dummy_profiling()   
+qr.test()
+
