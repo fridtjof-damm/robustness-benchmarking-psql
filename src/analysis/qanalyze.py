@@ -87,7 +87,7 @@ def psql_tpch_profiling():
     prefix = 'EXPLAIN (FORMAT JSON)'
     for i in range(0,23):
         with open('results/postgres/tpch/qplan{i}.json', mode='w' ,encoding='UTF-8') as rfile:
-            run_query_psql(cur, i, prefix, rfile)
+            qr.run_query_psql(cur, i, prefix, rfile)
         rfile.close()
 #psql_tpch_profiling()
 
