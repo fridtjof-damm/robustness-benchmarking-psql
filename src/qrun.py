@@ -31,6 +31,4 @@ def run_query_psql(cur, query_id, prefix, file):
             json_plan = cur.fetchall()
             json_str = json.dumps(json_plan, indent=4)
             file.write(json_str)
-
-def test():
-    print('Hello')
+            statement_file.close()
