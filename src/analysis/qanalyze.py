@@ -13,6 +13,20 @@ db_params = {
     'port':'5432'
 }
 
+def psql_tpch_profiling():
+    conn = pg.connect(**db_params)
+    cur = conn.cursor()
+    prefix = 'EXPLAIN (FORMAT JSON) '
+    # query 15 consists of view creation - "explain" not complatible
+    query_indices = [i for i in range(1,23) if i != 15]
+    for i in query_indices:
+        with open(f'results/postgres/tpch/qplan{i}.json', mode='w' ,encoding='UTF-8') as rfile:
+            qr.run_query_psql(cur, i, prefix, rfile)
+        rfile.close()
+psql_tpch_profiling()
+
+
+
 def json_analyze(i):
     ### add right path to json files first ###
     dummy_psql = 'results/postgres/qplan'
@@ -77,19 +91,16 @@ def persist_pg_profiling():
         # add label of which relation parameter was used 
         plans.append(simplified)
 
-        with open('results/postgres/tpch/qplan{i}.json', encoding='UTF-8', mode='w') as file:
+        with open('results/postgres/tpch/simplified/qplan{i}.json', encoding='UTF-8', mode='w') as file:
             json.dump(plans, file, indent=4)
 #persist_pg_profiling()
 
-def psql_tpch_profiling():
-    conn = pg.connect(**db_params)
-    cur = conn.cursor()
-    prefix = 'EXPLAIN (FORMAT JSON)'
-    for i in range(0,23):
-        with open('results/postgres/tpch/qplan{i}.json', mode='w' ,encoding='UTF-8') as rfile:
-            qr.run_query_psql(cur, i, prefix, rfile)
-        rfile.close()
-#psql_tpch_profiling()
+
+##############################################
+##############################################
+## DUCK DB, DUMMY DATA AND PLAYGROUND ########
+##############################################
+##############################################
 
 def duckdb_dummy_profiling():
     cursor = duckdb.connect('dummy_db.duckdb')
@@ -116,5 +127,5 @@ def psql_dummy_profiling():
     cur.close()
     conn.close()
 #psql_dummy_profiling()   
-qr.test()
+#qr.test()
 
