@@ -1,7 +1,6 @@
 /tpch-kit
 /queryresults
 /tpch-tables
-/thesis
 *.tbl
 *.duckdb
 .python-version
