@@ -5,6 +5,7 @@ import duckdb
 import psycopg2 as pg 
 import src.qrun as qr
 
+# setting db parameters
 db_params = {
     'database': 'dummydb',
     'user':'fridtjofdamm',
@@ -13,18 +14,26 @@ db_params = {
     'port':'5432'
 }
 
+# profiling tpch parameterized queries
 def psql_tpch_profiling():
     conn = pg.connect(**db_params)
     cur = conn.cursor()
     prefix = 'EXPLAIN (FORMAT JSON) '
     # query 15 consists of view creation - "explain" not complatible
-    query_indices = [i for i in range(1,23) if i != 15]
+    query_indices = [i for i in range(1,2) if i != 15]
     for i in query_indices:
-        with open(f'results/postgres/tpch/qplan{i}.json', mode='w' ,encoding='UTF-8') as rfile:
+        with open(f'results/postgres/tpch/qplan{i}.py', mode='w' ,encoding='UTF-8') as rfile:
             qr.run_query_psql(cur, i, prefix, rfile)
         rfile.close()
 psql_tpch_profiling()
 
+def compare_query_plans(query_id):
+    plan_path = f'results/postgres/tpch/qplan{query_id}.json'
+    with open(plan_path, encoding='UTF-8', mode='r') as file:
+        file_str = file.read()
+        file_json = json.loads(file_str)
+        print(type(file_json))
+#compare_query_plans(1)
 
 
 def json_analyze(i):
