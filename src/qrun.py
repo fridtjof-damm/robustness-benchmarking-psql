@@ -21,14 +21,16 @@ for qid in range(21,23):
     with open(f'results/parameters_sf10/{qid}.csv', encoding='UTF8', mode='w') as execution:
         run_query(qid, execution)
 
-def run_query_psql(cur, query_id, prefix, file):
+def run_query_psql(cur, query_id, prefix):
     with open(f'resources/queries/{query_id}.sql', encoding="UTF8") as statement_file:
         template = statement_file.read()
         queries = qg.generate_query(template, query_id)[0]
+        plans = []
         for q in queries:
             sql = prefix + q
             cur.execute(sql)
             json_plan = cur.fetchall()
             json_str = json.dumps(json_plan, indent=4)
-            file.write(json_str)
+            plans.append(json_str)
             statement_file.close()
+        return plans

@@ -22,9 +22,9 @@ def psql_tpch_profiling():
     # query 15 consists of view creation - "explain" not complatible
     query_indices = [i for i in range(1,2) if i != 15]
     for i in query_indices:
-        with open(f'results/postgres/tpch/qplan{i}.py', mode='w' ,encoding='UTF-8') as rfile:
-            qr.run_query_psql(cur, i, prefix, rfile)
-        rfile.close()
+#       with open(f'results/postgres/tpch/qplan{i}.json', mode='w' ,encoding='UTF-8') as rfile:'''
+        plans = qr.run_query_psql(cur, i, prefix)
+    print(type(plans))
 psql_tpch_profiling()
 
 def compare_query_plans(query_id):
@@ -59,12 +59,8 @@ def simplify(qplan):
         del qplan['Total Cost']
     if 'Plan Rows' in qplan:
         del qplan['Plan Rows']
-    if 'Plan Width' in qplan:
-        del qplan['Plan Width']
     if 'Single Copy' in qplan:
         del qplan['Single Copy']
-    if 'Workers Planned' in qplan:
-        del qplan['Workers Planned']
     if 'Alias' in qplan:
         del qplan['Alias']
     if 'Parent Relationship' in qplan:
