@@ -4,6 +4,7 @@ import re
 import duckdb
 import psycopg2 as pg 
 import src.qrun as qr
+import src.analysis.dummy.dummy_data_gen as ddg
 
 # setting db parameters
 db_params = {
@@ -13,38 +14,6 @@ db_params = {
     'host':'localhost',
     'port':'5432'
 }
-
-# profiling tpch parameterized queries
-def psql_tpch_profiling():
-    conn = pg.connect(**db_params)
-    cur = conn.cursor()
-    prefix = 'EXPLAIN (FORMAT JSON) '
-    # query 15 consists of view creation - "explain" not complatible
-    query_indices = [i for i in range(1,2) if i != 15]
-    for i in query_indices:
-#       with open(f'results/postgres/tpch/qplan{i}.json', mode='w' ,encoding='UTF-8') as rfile:'''
-        plans = qr.run_query_psql(cur, i, prefix)
-    print(type(plans))
-psql_tpch_profiling()
-
-def compare_query_plans(query_id):
-    plan_path = f'results/postgres/tpch/qplan{query_id}.json'
-    with open(plan_path, encoding='UTF-8', mode='r') as file:
-        file_str = file.read()
-        file_json = json.loads(file_str)
-        print(type(file_json))
-#compare_query_plans(1)
-
-
-def json_analyze(i):
-    ### add right path to json files first ###
-    dummy_psql = 'results/postgres/qplan'
-
-    with open(f'{dummy_psql}{i}.json', encoding='UTF-8', mode='r') as file:
-        file_str = file.read()
-        file_json = json.loads(file_str)
-        file.close()
-        return file_json
 
 def simplify(qplan):
     # check if exists, then delete
@@ -87,6 +56,80 @@ def simplify(qplan):
         for child in qplan['Plans']:
             simplify(child)
     return qplan
+
+# profiling tpch parameterized queries
+# returns simplified tpch query plans as list of list
+def psql_tpch_profiling():
+    conn = pg.connect(**db_params)
+    cur = conn.cursor()
+    prefix = 'EXPLAIN (FORMAT JSON) '
+    # query 15 consists of view creation - "explain" not compatible
+    query_indices = [i for i in range(21,22) if i != 15]
+    plans = []
+    for i in query_indices:
+        plans_query_i = qr.run_query_psql(cur, i, prefix)
+        plans_query_i_json = []
+        for plan in plans_query_i:
+            json_plan = json.loads(plan)
+            plans_query_i_json.append(json_plan)
+        plans.append(plans_query_i_json)
+#    print(len(plans))
+#    print(type(plans[0]))
+#    print(len(plans[0]))
+#    print(type(plans[0]))
+#    print(plans[0][0])
+    simplified = []
+    for qplan in plans[0]:
+        s = simplify(qplan[0][0][0]['Plan'])
+        simplified.append(s)
+    return simplified
+test_plans = psql_tpch_profiling()
+
+#def compare_query_plans(query_id):
+
+def compare_query_plans(query_plans):
+    #categories of query plans
+    categories = []
+    #query plans of i-th query
+    #query_plans = psql_tpch_profiling()[query_id]
+    for plan in query_plans:
+        category_found = False
+        for category in categories:
+            #
+            if plan == category[0]:
+                category.append(plan)
+                category_found = True
+        if not category_found:
+            categories.append([plan])
+    return categories
+
+# testen mit dummy data set
+#test_plans = ddg.dummygen()
+
+result = compare_query_plans(test_plans)
+
+total_plans = sum(len(category) for category in result)
+
+
+for i, category in enumerate(result):
+    frequency = (len(category) / total_plans) * 100
+    print(f"Plan Category {i}: {len(category)} plans, frequency: {frequency:.4f}%")
+
+print(f"\nTotal categories: {len(result)}")
+print(f"Total plans: {sum(len(category) for category in result)}")
+
+
+def json_analyze(i):
+    ### add right path to json files first ###
+    dummy_psql = 'results/postgres/qplan'
+
+    with open(f'{dummy_psql}{i}.json', encoding='UTF-8', mode='r') as file:
+        file_str = file.read()
+        file_json = json.loads(file_str)
+        file.close()
+        return file_json
+
+
 
 def persist_pg_profiling():
     plans = []
@@ -131,6 +174,5 @@ def psql_dummy_profiling():
             file.close()
     cur.close()
     conn.close()
-#psql_dummy_profiling()   
+#psql_dummy_profiling()
 #qr.test()
-
