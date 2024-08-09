@@ -42,7 +42,7 @@ def simplify(qplan):
             attr = match.group(1).strip()
             val = f'({attr})'
             qplan['Filter'] = val
-    # further selection from index scan queries 
+    # further selection from index scan queries
     # if '' in qplan:
     #     del qplan['']
     if 'Index Cond' in qplan:
@@ -59,31 +59,39 @@ def simplify(qplan):
 
 # profiling tpch parameterized queries
 # returns simplified tpch query plans as list of list
-def psql_tpch_profiling():
+# TPC-H Q15 consists of view creation - "explain" not compatible
+
+def psql_tpch_profiling(query_id, write_qp_to_file=False):
     conn = pg.connect(**db_params)
     cur = conn.cursor()
     prefix = 'EXPLAIN (FORMAT JSON) '
-    # query 15 consists of view creation - "explain" not compatible
-    query_indices = [i for i in range(21,22) if i != 15]
     plans = []
-    for i in query_indices:
-        plans_query_i = qr.run_query_psql(cur, i, prefix)
-        plans_query_i_json = []
-        for plan in plans_query_i:
-            json_plan = json.loads(plan)
-            plans_query_i_json.append(json_plan)
-        plans.append(plans_query_i_json)
-#    print(len(plans))
-#    print(type(plans[0]))
-#    print(len(plans[0]))
-#    print(type(plans[0]))
-#    print(plans[0][0])
+
+    # run queries and get the json format query plans
+    plans_query_i = qr.run_query_psql(cur, query_id, prefix)
+    plans_query_i_json = []
+    for plan in plans_query_i:
+        json_plan = json.loads(plan)
+        plans_query_i_json.append(json_plan)
+    plans.append(plans_query_i_json)
+
+    # simplify the query plans
     simplified = []
-    for qplan in plans[0]:
+    for i, qplan in enumerate(plans[0]):
         s = simplify(qplan[0][0][0]['Plan'])
         simplified.append(s)
+
+        # persist plans to file if intended
+        if write_qp_to_file:
+            write_qp_to_file(query_id, i, s)
+
     return simplified
-test_plans = psql_tpch_profiling()
+
+# persist query plans to files
+def write_qp_to_file(query_id, plan_index, plan_data):
+    filename = f'results/tpch/qplans/q{query_id}_p{plan_index}.json'
+    with open(filename, mode='w', encoding='UTF-8') as file:
+        file.write(json.dumps(plan_data, indent=4))
 
 #def compare_query_plans(query_id):
 
@@ -106,7 +114,7 @@ def compare_query_plans(query_plans):
 # testen mit dummy data set
 #test_plans = ddg.dummygen()
 
-result = compare_query_plans(test_plans)
+""" result = compare_query_plans(test_plans)
 
 total_plans = sum(len(category) for category in result)
 
@@ -116,7 +124,7 @@ for i, category in enumerate(result):
     print(f"Plan Category {i}: {len(category)} plans, frequency: {frequency:.4f}%")
 
 print(f"\nTotal categories: {len(result)}")
-print(f"Total plans: {sum(len(category) for category in result)}")
+print(f"Total plans: {sum(len(category) for category in result)}") """
 
 
 def json_analyze(i):
