@@ -139,14 +139,6 @@ print(f"Total plans: {sum(len(category) for category in result)}") """
 
 
 
-
-
-
-
-
-
-
-
 ##############################################
 ##############################################
 ## DUCK DB, DUMMY DATA AND PLAYGROUND ########
