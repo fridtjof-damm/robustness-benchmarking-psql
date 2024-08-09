@@ -6,7 +6,7 @@ import psycopg2 as pg
 import src.qrun as qr
 import src.analysis.dummy.dummy_data_gen as ddg
 
-# setting db parameters
+# db setup parameters
 db_params = {
     'database': 'dummydb',
     'user':'fridtjofdamm',
@@ -60,8 +60,9 @@ def simplify(qplan):
 # profiling tpch parameterized queries
 # returns simplified tpch query plans as list of list
 # TPC-H Q15 consists of view creation - "explain" not compatible
+query_ids = [i for i in range(1,23) if i != 15]
 
-def psql_tpch_profiling(query_id, write_qp_to_file=False):
+def psql_tpch_profiling(query_id, write_to_file=False):
     conn = pg.connect(**db_params)
     cur = conn.cursor()
     prefix = 'EXPLAIN (FORMAT JSON) '
@@ -82,7 +83,7 @@ def psql_tpch_profiling(query_id, write_qp_to_file=False):
         simplified.append(s)
 
         # persist plans to file if intended
-        if write_qp_to_file:
+        if write_to_file:
             write_qp_to_file(query_id, i, s)
 
     return simplified
@@ -93,26 +94,36 @@ def write_qp_to_file(query_id, plan_index, plan_data):
     with open(filename, mode='w', encoding='UTF-8') as file:
         file.write(json.dumps(plan_data, indent=4))
 
-#def compare_query_plans(query_id):
+# get all tpch queries to dict for comparison
+# returns dictionary of all 
+def all_qplans_tpch_to_dict(write_to_file=False):
+    all_qplans_tpch = {}
+    for query_id in query_ids:
+        qp_key = f'Q{query_id}'
+        try: 
+            simplified_plans = psql_tpch_profiling(query_id, write_to_file)
+            all_qplans_tpch[qp_key] = simplified_plans
+            print(f'Success proccesing {qp_key}')
+        except Exception as e:
+            print(f'Failed to process {qp_key}: {e}')
+    return all_qplans_tpch
+all_qplans_tpch_to_dict(write_to_file=True)
+
 
 def compare_query_plans(query_plans):
     #categories of query plans
     categories = []
-    #query plans of i-th query
-    #query_plans = psql_tpch_profiling()[query_id]
+
     for plan in query_plans:
         category_found = False
         for category in categories:
-            #
+
             if plan == category[0]:
                 category.append(plan)
                 category_found = True
         if not category_found:
             categories.append([plan])
     return categories
-
-# testen mit dummy data set
-#test_plans = ddg.dummygen()
 
 """ result = compare_query_plans(test_plans)
 
@@ -127,29 +138,13 @@ print(f"\nTotal categories: {len(result)}")
 print(f"Total plans: {sum(len(category) for category in result)}") """
 
 
-def json_analyze(i):
-    ### add right path to json files first ###
-    dummy_psql = 'results/postgres/qplan'
-
-    with open(f'{dummy_psql}{i}.json', encoding='UTF-8', mode='r') as file:
-        file_str = file.read()
-        file_json = json.loads(file_str)
-        file.close()
-        return file_json
 
 
 
-def persist_pg_profiling():
-    plans = []
-    for i in range(0,20):
-        query_plan = json_analyze(i)
-        simplified = simplify(query_plan)
-        # add label of which relation parameter was used 
-        plans.append(simplified)
 
-        with open('results/postgres/tpch/simplified/qplan{i}.json', encoding='UTF-8', mode='w') as file:
-            json.dump(plans, file, indent=4)
-#persist_pg_profiling()
+
+
+
 
 
 ##############################################
@@ -184,3 +179,28 @@ def psql_dummy_profiling():
     conn.close()
 #psql_dummy_profiling()
 #qr.test()
+
+
+def json_analyze(i):
+    ### add right path to json files first ###
+    dummy_psql = 'results/postgres/qplan'
+
+    with open(f'{dummy_psql}{i}.json', encoding='UTF-8', mode='r') as file:
+        file_str = file.read()
+        file_json = json.loads(file_str)
+        file.close()
+        return file_json
+
+
+
+def persist_pg_profiling():
+    plans = []
+    for i in range(0,20):
+        query_plan = json_analyze(i)
+        simplified = simplify(query_plan)
+        # add label of which relation parameter was used 
+        plans.append(simplified)
+
+        with open('results/postgres/tpch/simplified/qplan{i}.json', encoding='UTF-8', mode='w') as file:
+            json.dump(plans, file, indent=4)
+#persist_pg_profiling()
