@@ -5,15 +5,13 @@ import duckdb
 import psycopg2 as pg 
 import src.qrun as qr
 import src.analysis.dummy.dummy_data_gen as ddg
+from query_plan import QueryPlan
 
-# db setup parameters
-db_params = {
-    'database': 'dummydb',
-    'user':'fridtjofdamm',
-    'password':'',
-    'host':'localhost',
-    'port':'5432'
-}
+# db config
+def db_config(config_file='config.json'):
+    with open(config_file, mode='r', encoding='UTF-8') as file:
+        config = json.load(file)
+    return config[database]
 
 def simplify(qplan):
     # check if exists, then delete
@@ -63,6 +61,7 @@ def simplify(qplan):
 query_ids = [i for i in range(1,23) if i != 15]
 
 def psql_tpch_profiling(query_id, write_to_file=False):
+    db_params = db_config()
     conn = pg.connect(**db_params)
     cur = conn.cursor()
     prefix = 'EXPLAIN (FORMAT JSON) '
@@ -109,7 +108,7 @@ def all_qplans_tpch_to_dict(write_to_file=False):
     return all_qplans_tpch
 all_qplans_tpch_to_dict(write_to_file=True)
 
-
+# categorizing  query plans
 def compare_query_plans(query_plans):
     #categories of query plans
     categories = []
@@ -125,7 +124,8 @@ def compare_query_plans(query_plans):
             categories.append([plan])
     return categories
 
-""" result = compare_query_plans(test_plans)
+def main():
+    """ result = compare_query_plans(test_plans)
 
 total_plans = sum(len(category) for category in result)
 
@@ -137,62 +137,5 @@ for i, category in enumerate(result):
 print(f"\nTotal categories: {len(result)}")
 print(f"Total plans: {sum(len(category) for category in result)}") """
 
-
-
-##############################################
-##############################################
-## DUCK DB, DUMMY DATA AND PLAYGROUND ########
-##############################################
-##############################################
-
-def duckdb_dummy_profiling():
-    cursor = duckdb.connect('dummy_db.duckdb')
-    # mit Q9 ausprobieren !!
-    cursor.execute("PRAGMA enable_profiling = 'json'")
-    cursor.execute(f"PRAGMA profiling_output='{'analysis/dummy_with_index.json'}';")
-    cursor.execute("SELECT COUNT(*) FROM numbers;")
-    cursor.execute("PRAGMA disable_profiling;")
-#duckdb_dummy_profiling()
-
-def psql_dummy_profiling():
-    conn = pg.connect(**db_params)
-    cur = conn.cursor()
-    # add format = json 
-    query = "EXPLAIN (FORMAT JSON) SELECT * FROM numbers WHERE number = %s;"
-
-    for i in range(0,20):
-        cur.execute(query, (i,))
-        json_plan = cur.fetchall()[0][0][0]['Plan']
-        json_str = json.dumps(json_plan, indent=4)
-        with open(f'results/postgres/qplan{i}.json', encoding='UTF-8', mode='w') as file:
-            file.write(json_str)
-            file.close()
-    cur.close()
-    conn.close()
-#psql_dummy_profiling()
-#qr.test()
-
-
-def json_analyze(i):
-    ### add right path to json files first ###
-    dummy_psql = 'results/postgres/qplan'
-
-    with open(f'{dummy_psql}{i}.json', encoding='UTF-8', mode='r') as file:
-        file_str = file.read()
-        file_json = json.loads(file_str)
-        file.close()
-        return file_json
-
-
-
-def persist_pg_profiling():
-    plans = []
-    for i in range(0,20):
-        query_plan = json_analyze(i)
-        simplified = simplify(query_plan)
-        # add label of which relation parameter was used 
-        plans.append(simplified)
-
-        with open('results/postgres/tpch/simplified/qplan{i}.json', encoding='UTF-8', mode='w') as file:
-            json.dump(plans, file, indent=4)
-#persist_pg_profiling()
+if __name__ == "__main__":
+    main()
