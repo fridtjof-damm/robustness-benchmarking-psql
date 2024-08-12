@@ -1,4 +1,3 @@
-# https://stackoverflow.com/questions/5243596/python-sql-query-string-formatting
 import json
 import re
 import duckdb
