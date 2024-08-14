@@ -7,7 +7,7 @@ import src.utils.utils as ut
 cursor = duckdb.connect("resources/db/tpch.duckdb")
 #cursor = duckdb.connect("tpch_sf_100.duckdb")
 def run_query(query_id: int, execution_file):   
-    with open(f'resources/queries/{query_id}.sql', encoding="UTF8") as statement_file:
+    with open(f'resources/queries_tpch/{query_id}.sql', encoding="UTF8") as statement_file:
         template = statement_file.read()
         queries, parameters = qg.generate_query(template, query_id)
         assert len(queries) == len(parameters)
@@ -22,7 +22,7 @@ for qid in range(21,23):
         run_query(qid, execution)
 
 def run_query_psql(cur, query_id, prefix):
-    with open(f'resources/queries/{query_id}.sql', encoding="UTF8") as statement_file:
+    with open(f'resources/queries_tpch/{query_id}.sql', encoding="UTF8") as statement_file:
         template = statement_file.read()
         queries = qg.generate_query(template, query_id)[0]
         plans = []
