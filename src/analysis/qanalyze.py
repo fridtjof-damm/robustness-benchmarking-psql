@@ -1,16 +1,15 @@
 import json
 import re
-import duckdb
 import psycopg2 as pg 
 import src.qrun as qr
 import src.analysis.dummy.dummy_data_gen as ddg
 from query_plan import QueryPlan
 
 # db config
-def db_config(config_file='config.json'):
+def db_config(config_file='src/analysis/config.json'):
     with open(config_file, mode='r', encoding='UTF-8') as file:
         config = json.load(file)
-    return config[database]
+    return config[db]
 
 def simplify(qplan):
     # check if exists, then delete
@@ -123,8 +122,8 @@ def compare_query_plans(query_plans):
             categories.append([plan])
     return categories
 
-def main():
-    """ result = compare_query_plans(test_plans)
+"""def main():
+     result = compare_query_plans(test_plans)
 
 total_plans = sum(len(category) for category in result)
 
@@ -134,7 +133,17 @@ for i, category in enumerate(result):
     print(f"Plan Category {i}: {len(category)} plans, frequency: {frequency:.4f}%")
 
 print(f"\nTotal categories: {len(result)}")
-print(f"Total plans: {sum(len(category) for category in result)}") """
+print(f"Total plans: {sum(len(category) for category in result)}") 
 
 if __name__ == "__main__":
     main()
+"""
+
+def test_db():
+    db_params = db_config()
+    conn = pg.connect(**db_params)
+    cur = conn.cursor()
+    cur.execute('SELECT COUNT(*) FROM NATION;')
+    res = cur.fetchall()
+    print(res)
+test_db()
