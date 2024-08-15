@@ -104,7 +104,7 @@ def generate_query(template: str, query_id: int) -> tuple[list[str],list[tuple]]
     # print(query_id)   
     #print(parameters)
     return queries,parameters
-
+# tpc-h
 type_syllables_1 = ['STANDARD', 'SMALL', 'MEDIUM', 'LARGE', 'ECONOMY', 'PROMO']
 type_syllables_2 = ['ANODIZED', 'BURNISHED', 'PLATED', 'POLISHED', 'BRUSHED']
 type_syllables_3 = ['TIN', 'NICKEL', 'BRASS', 'STEEL', 'COPPER']
@@ -141,3 +141,79 @@ word2 = ['packages', 'requests', 'accounts', 'deposits']
 container_syllables_1 = ['SM', 'LG', 'MED', 'JUMBO', 'WRAP']
 container_syllables_2 = ['CASE', 'BOX', 'BAG', 'JAR', 'PKG', 'PACK', 'CAN', 'DRUM']
 brand = ['BRAND#11','BRAND#22','BRAND#33']
+
+# tpc picasso queries
+
+def gen_query_picasso(template: str, query_id: int) -> tuple[list[str],list[tuple]]:
+    queries: list[str] = []
+    parameters: list[tuple] = []
+    match query_id:
+        case 1:
+            for param1 in range(60, 121):
+                queries.append(template.format(DELTA = param1))
+                parameters.append((param1,))
+        case 2:
+            for s in range(1,51):
+                for t in type_syllables_3:
+                    for region in regions:
+                        queries.append(template.format(SIZE = s, TYPE = t, REGION = region[1]))
+                        parameters.append((s,t,region[1]))
+        case 3:
+            for seg in segments:
+                for d3 in dates_03:
+                    queries.append(template.format(SEGMENT = seg, DATE = d3))
+                    parameters.append((seg,str(d3)))
+        case 4:
+            for param4 in dates_04:
+                queries.append(template.format(DATE = param4))
+                parameters.append((str(param4),))
+        case 5:
+            for param5 in it.product(regions, dates_05):
+                queries.append(template.format(REGION = param5[0][1],DATE = param5[1]))
+                parameters.append((param5))
+        case 6:
+            for param6 in it.product(dates_05, discount, quantity):
+                queries.append(template.format(DATE = param6[0], DISCOUNT = param6[1], QUANTITY = param6[2]))
+                parameters.append((param6))
+        case 7:
+            for nation_pair in it.permutations(nations, 2):
+                queries.append(template.format(NATION1 = nation_pair[0][1], NATION2 = nation_pair[1][1]))
+                parameters.append((nation_pair))
+        case 8:
+            for param8 in it.product(nations,regions,type_syllables_3):
+                if param8[0][2] == param8[1][0]:
+                    queries.append(template.format(NATION = param8[0][1], REGION = param8[1][1], TYPE = param8[2]))
+                    parameters.append((param8))
+        case 9:
+            for param9 in colors:
+                queries.append(template.format(COLOR = param9))
+                parameters.append((param9,))
+        case 10:
+            for param10 in dates_10:
+                queries.append(template.format(DATE = param10))
+                parameters.append(((param10),))
+        case 11:
+            for param11 in nations:
+                queries.append(template.format(NATION = param11[1], FRACTION = 0.0001 / SCALE_FACTOR))
+                parameters.append((param11))
+        case 12:
+            for param12 in it.product(nations,regions,type_syllables_3):
+                if param8[0][2] == param8[1][0]:
+                    queries.append(template.format(NATION = param8[0][1], REGION = param8[1][1], TYPE = param8[2]))
+                    parameters.append((param8))
+        case 13:
+            for param13 in colors:
+                queries.append(template.format(COLOR = param9))
+                parameters.append((param9,))
+        case 16:
+            for param16 in dates_10:
+                queries.append(template.format(DATE = param10))
+                parameters.append(((param10),))
+        case 17:
+            for param17 in nations:
+                queries.append(template.format(NATION = param11[1], FRACTION = 0.0001 / SCALE_FACTOR))
+                parameters.append((param11))
+    return queries,parameters
+
+
+# picasso parameters values section
