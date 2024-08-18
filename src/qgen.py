@@ -217,3 +217,5 @@ def gen_query_picasso(template: str, query_id: int) -> tuple[list[str],list[tupl
 
 
 # picasso parameters values section
+
+# ['EXTENDED_PRICE', 'RETAIL_PRICE', 'SUPPLY_COST', 'TOTAL_PRICE', 'C_ACCTBAL', 'S_ACCTBAL']
