@@ -1,14 +1,7 @@
 import json 
 import os
+import time
 from deepdiff import DeepDiff
-
-# state target query, example Query 2: 'q2'
-target_query = 'q2'
-query_ids = [i for i in range(1,23) if i != 15]
-
-# dir of query plan json files
-base_dir = 'results/tpch/qplans/'
-dir = os.path.join(base_dir, target_query)
 
 def compare_json_files(json_file1, json_file2):
     diff = DeepDiff(json_file1, json_file2, verbose_level=1)
@@ -78,7 +71,6 @@ def process_all_queries(base_dir, query_ids):
 
         print_results(comparison_results)
         print("\n" + "="*50 + "\n")
-
 # mock data 
 mock_comparison_results = {
     ('file1.json', 'file2.json'): {
@@ -101,6 +93,16 @@ mock_comparison_results = {
     }
 }    
 # usage 
-process_all_queries(base_dir,)
+if __name__ == "__main__":
+    start_time = time.time()
+    target_query = 'q2'
+    query_ids = [i for i in range(1,23) if i != 15]
+    base_dir = 'results/tpch/qplans/'
+    dir = os.path.join(base_dir, target_query)
+    # run experiment
+    process_all_queries(base_dir,query_ids)
+    end_time = time.time()
+    duration = end_time - start_time
+    print(f"Total script run duration: {duration:.2f} seconds")
 
 
