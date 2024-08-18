@@ -1,15 +1,19 @@
 import json
 import re
+import os
 import psycopg2 as pg 
 import src.qrun as qr
 import src.analysis.dummy.dummy_data_gen as ddg
-from query_plan import QueryPlan
+
 
 # db config
-def db_config(config_file='src/analysis/config.json'):
-    with open(config_file, mode='r', encoding='UTF-8') as file:
-        config = json.load(file)
-    return config[db]
+db_params = {
+        "database": "dummydb",
+        "user": "fridtjofdamm",
+        "password": "",
+        "host": "localhost",
+        "port": "5432"
+    }
 
 def simplify(qplan):
     # check if exists, then delete
@@ -59,7 +63,6 @@ def simplify(qplan):
 query_ids = [i for i in range(1,23) if i != 15]
 
 def psql_tpch_profiling(query_id, write_to_file=False):
-    db_params = db_config()
     conn = pg.connect(**db_params)
     cur = conn.cursor()
     prefix = 'EXPLAIN (FORMAT JSON) '
@@ -87,7 +90,11 @@ def psql_tpch_profiling(query_id, write_to_file=False):
 
 # persist query plans to files
 def write_qp_to_file(query_id, plan_index, plan_data):
-    filename = f'results/tpch/qplans/q{query_id}_p{plan_index}.json'
+    # defining directory path
+    dir = f'results/tpch/qplans/q{query_id}'
+    # creating dir if not exist already
+    os.makedirs(dir, exist_ok=True)
+    filename = os.path.join(dir, f'q{query_id}_p{plan_index}.json')
     with open(filename, mode='w', encoding='UTF-8') as file:
         file.write(json.dumps(plan_data, indent=4))
 
@@ -138,12 +145,3 @@ print(f"Total plans: {sum(len(category) for category in result)}")
 if __name__ == "__main__":
     main()
 """
-
-def test_db():
-    db_params = db_config()
-    conn = pg.connect(**db_params)
-    cur = conn.cursor()
-    cur.execute('SELECT COUNT(*) FROM NATION;')
-    res = cur.fetchall()
-    print(res)
-test_db()
