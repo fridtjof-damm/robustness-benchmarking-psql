@@ -1,5 +1,6 @@
 import csv
 import math
+import re
 
 def format_tuple(t: tuple) -> str:
     # (1, "algeria", 10) -> 1; algeria; 10
@@ -39,3 +40,25 @@ def csv_to_values_list(file) -> tuple[list,list]:
     values_y = [values_y[i] for i in range(0,len(values_y), step_list)][:axis_len]
 
     return values_x,values_y
+
+# from picasso templates retrieve all parameters to prepare PICASSO qgen section
+
+def get_picasso_gen_list():
+    query_ids = [1,2,3,4,5,6,7,8,9,10,11,12,13,16,17]
+    query_templates = []
+    extract_vals = []
+    parameters = []
+    for query_id in query_ids:
+        with open(f"resources/queries_picasso/qt{query_id}.sql", encoding='UTF-8', mode='r') as f:
+            query_template = f.read()
+            query_templates.append(query_template)
+            f.close()
+    
+    for query in query_templates:
+        matches = re.findall(r'\{(.*?)\}', query)
+        for param in matches:
+            if param not in parameters:
+                parameters.append(param)
+    print(parameters)
+
+#get_picasso_gen_list()
