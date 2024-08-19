@@ -37,6 +37,8 @@ def simplify(qplan):
     if 'Relation Name' in qplan:
         del qplan['Relation Name']
     if 'Filter' in qplan:
+        qplan['Filter'] = re.sub(r'\(\(([^)]+?)\)::text[^)]+\)', r'(\1)', qplan['Filter']) # q2 TIN NICKEL etc.
+        qplan['Filter'] = re.sub(r'\(([^<>=!]+)\s*[<>=!]+\s*[^)]+\)', r'(\1)', qplan['Filter']) # q3 shipdate filter simplification
         match = re.search(r'\(([^=]+)\s*=\s*[^)]+\)', qplan['Filter'])
         if match:
             attr = match.group(1).strip()
@@ -51,6 +53,9 @@ def simplify(qplan):
             attr = match.group(1).strip()
             val = f'{attr}'
             qplan['Index Cond'] = val
+    if 'Join Filter' in qplan:
+        qplan['Join Filter'] = re.sub(r'\(([^=]+)\s*=\s*\'[^\']+\'::bpchar\)', r'(\1)', qplan['Join Filter'])
+        
 
     if 'Plans' in qplan:
         for child in qplan['Plans']:
