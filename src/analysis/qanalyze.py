@@ -55,7 +55,10 @@ def simplify(qplan):
             qplan['Index Cond'] = val
     if 'Join Filter' in qplan:
         qplan['Join Filter'] = re.sub(r'\(([^=]+)\s*=\s*\'[^\']+\'::bpchar\)', r'(\1)', qplan['Join Filter'])
-        
+        qplan['Join Filter'] = re.sub(r'\(([^=]+)\s*=\s*\'[^\']+\'::[^\)]+\)', r'(\1)', qplan['Join Filter'])
+        qplan['Join Filter'] = re.sub(r'\(([^=]+)\s*=\s*ANY\s*\(\{[^\}]+\}::[^\)]+\)\)', r'(\1)', qplan['Join Filter'])
+        qplan['Join Filter'] = re.sub(r'\(([^<>=!]+)\s*[<>=!]+\s*\'[^\']+\'::[^\)]+\)', r'(\1)', qplan['Join Filter'])
+
 
     if 'Plans' in qplan:
         for child in qplan['Plans']:
@@ -116,7 +119,7 @@ def all_qplans_tpch_to_dict(write_to_file=False):
         except Exception as e:
             print(f'Failed to process {qp_key}: {e}')
     return all_qplans_tpch
-all_qplans_tpch_to_dict(write_to_file=True)
+#all_qplans_tpch_to_dict(write_to_file=True)
 
 # categorizing  query plans
 def compare_query_plans(query_plans):
@@ -134,11 +137,9 @@ def compare_query_plans(query_plans):
             categories.append([plan])
     return categories
 
-"""def main():
-     result = compare_query_plans(test_plans)
-
+q9_plans = psql_tpch_profiling(9)
+result = compare_query_plans(q9_plans)
 total_plans = sum(len(category) for category in result)
-
 
 for i, category in enumerate(result):
     frequency = (len(category) / total_plans) * 100
@@ -147,6 +148,5 @@ for i, category in enumerate(result):
 print(f"\nTotal categories: {len(result)}")
 print(f"Total plans: {sum(len(category) for category in result)}") 
 
-if __name__ == "__main__":
-    main()
-"""
+
+
