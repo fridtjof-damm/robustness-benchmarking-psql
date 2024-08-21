@@ -142,7 +142,7 @@ container_syllables_1 = ['SM', 'LG', 'MED', 'JUMBO', 'WRAP']
 container_syllables_2 = ['CASE', 'BOX', 'BAG', 'JAR', 'PKG', 'PACK', 'CAN', 'DRUM']
 brand = ['BRAND#11','BRAND#22','BRAND#33']
 
-# tpc picasso queries
+# picasso queries
 
 def gen_query_picasso(template: str, query_id: int) -> tuple[list[str],list[tuple]]:
     queries: list[str] = []
@@ -213,9 +213,37 @@ def gen_query_picasso(template: str, query_id: int) -> tuple[list[str],list[tupl
             for param17 in nations:
                 queries.append(template.format(NATION = param11[1], FRACTION = 0.0001 / SCALE_FACTOR))
                 parameters.append((param11))
+        case 18:
+            for param18 in range(312,316):
+                queries.append(template.format(QUANTITY = param18)) 
+                parameters.append(((param18,)))
+        case 19:
+            for param19 in it.product(range(1, 11), range(10, 21), range(20, 31), brand):
+                queries.append(template.format(QUANTITY1 = param19[0], QUANTITY2 = param19[1], QUANTITY3 = param19[2], BRAND1 = param19[3][0], BRAND2 = param19[3][1], BRAND3 = param19[3][2])) # Können die brands die gleichen sein?
+                parameters.append((param19))
+        case 20:
+            for param20 in it.product(colors, dates_05, nations):
+                queries.append(template.format(COLOR = param20[0], DATE = param20[1], NATION = param20[2][1]))
+                parameters.append((param20))
+        case 21:
+            for param21 in nations:
+                queries.append(template.format(NATION = param21[1]))
+                parameters.append((param21,))
     return queries,parameters
 
 
 # picasso parameters values section
 
 # ['EXTENDED_PRICE', 'RETAIL_PRICE', 'SUPPLY_COST', 'TOTAL_PRICE', 'C_ACCTBAL', 'S_ACCTBAL']
+
+extended_prices = [i for i in range(0,105,5)]
+
+supply_costs = [i for i in range(0,105,5)]
+
+retail_prices = [i for i in range(0,105,5)]
+
+total_prices = [i for i in range(0,105,5)]
+
+c_acctbal = []
+
+s_acctbal = []
