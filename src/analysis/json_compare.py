@@ -7,7 +7,7 @@ query_ids = [i for i in range(1,23) if i != 15]
 
 # for single query comparison , change func call!
 # target query format: 'q1' ,etc...
-target_query = 'q9'
+target_query = 'q2'
 base_dir = 'results/tpch/qplans/'
 dir = os.path.join(base_dir, target_query)
 
@@ -50,14 +50,14 @@ def print_results(comparison_results):
             print(f'Comparison between {file1} and {file2}:')
             print(f"Found differences: {diff}")
             print("Comparison success")
-            print(f"="*50)
+            print(f"="*42)
             print(f"Count: {count}")
 
   
     else: 
-        print(f"="*50) 
+        print(f"="*42) 
         print(f"No differences found for Query {target_query[1:]}.")
-        print(f"="*50) 
+        print(f"="*42) 
         
 
 print_results(process_json_files(dir))
