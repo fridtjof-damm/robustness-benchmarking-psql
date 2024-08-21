@@ -4,7 +4,7 @@ select
 from
     orders
 where
-    o_totalprice :varies
+    o_totalprice = '{TOTAL_PRICE}'
     and exists (
         select *
         from
