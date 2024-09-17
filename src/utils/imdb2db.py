@@ -29,5 +29,13 @@ tables = parse_schema_file(job_schema)
 # establish connection to database
 conn = dc.get_db_connection('job')
 cur = conn.cursor()
+results = []
+table_names = tables.keys()
 
-print(tables['aka_name'])
+for table in table_names:
+    cur.execute(f'SELECT * FROM {table};')
+    res = cur.fetchall()
+    results.append(res)
+cur.close()
+conn.close()
+print(results)
