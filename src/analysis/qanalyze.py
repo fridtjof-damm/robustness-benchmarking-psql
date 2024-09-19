@@ -2,9 +2,11 @@ import json
 import re
 import os
 import psycopg2 as pg 
-import src.qrun as qr
+#import src.qrun as qr
 import src.analysis.dummy.dummy_data_gen as ddg
-
+from src.utils.utils import extract_number
+import src.utils.db_connector as dc
+import pprint as pp
 
 # db config
 db_params = {
@@ -68,10 +70,10 @@ def simplify(qplan):
 # profiling tpch parameterized queries
 # returns simplified tpch query plans as list of list
 # TPC-H Q15 consists of view creation - "explain" not compatible
-query_ids = [i for i in range(1,23) if i != 15]
+#query_ids = [i for i in range(1,23) if i != 15]
 
 def psql_tpch_profiling(query_id, write_to_file=False):
-    conn = pg.connect(**db_params)
+    conn = dc.get_db_connection('dummydb')
     cur = conn.cursor()
     prefix = 'EXPLAIN (FORMAT JSON) '
     plans = []
@@ -87,7 +89,7 @@ def psql_tpch_profiling(query_id, write_to_file=False):
     # simplify the query plans
     simplified = []
     for i, qplan in enumerate(plans[0]):
-        s = simplify(qplan[0][0][0]['Plan'])
+        s = simplify(qplan)
         simplified.append(s)
 
         # persist plans to file if intended
@@ -137,16 +139,73 @@ def compare_query_plans(query_plans):
             categories.append([plan])
     return categories
 
-q9_plans = psql_tpch_profiling(9)
-result = compare_query_plans(q9_plans)
-total_plans = sum(len(category) for category in result)
+def test_dump() -> None:
+    q9_plans = psql_tpch_profiling(9)
+    result = compare_query_plans(q9_plans)
+    total_plans = sum(len(category) for category in result)
 
-for i, category in enumerate(result):
-    frequency = (len(category) / total_plans) * 100
-    print(f"Plan Category {i}: {len(category)} plans, frequency: {frequency:.4f}%")
+    for i, category in enumerate(result):
+        frequency = (len(category) / total_plans) * 100
+        print(f"Plan Category {i}: {len(category)} plans, frequency: {frequency:.4f}%")
 
-print(f"\nTotal categories: {len(result)}")
-print(f"Total plans: {sum(len(category) for category in result)}") 
+    print(f"\nTotal categories: {len(result)}")
+    print(f"Total plans: {sum(len(category) for category in result)}") 
 
+def job_profiling() -> None:
+    conn = dc.get_db_connection('job')
+    cur = conn.cursor()
+    prefix = 'EXPLAIN (FORMAT JSON) '
+    plans = []
+    # get queries from job directory
+    job_dir = 'resources/queries_job/'
+    job_queries = os.listdir(job_dir)
+    job_queries = [file for file in job_queries if not file.startswith('.')]
+    job_queries.sort(key=extract_number) # see utils.py
+    
+    #print(job_queries)
+    #print(type(job_queries))
+    for query in job_queries:
+        query_id = query.split('.')[0]
+        query_path = os.path.join(job_dir, query)
+        with open(query_path, mode='r', encoding='UTF-8') as file:
+            query_template = file.read()
+            cur.execute(prefix + query_template)
+            plan = cur.fetchall()
+            plan = simplify(plan[0][0][0]['Plan'])
+            plans.append((query_id,plan))
+            file.close()
+    
+    # write plans to file
+    dir = f'results/job/qplans/'
+    for plan in plans:
+        filename = os.path.join(dir, f'{plan[0]}.json')
+        with open(filename, 'w', encoding='UTF-8') as file:
+            file.write(json.dumps(plan[1], indent=4))
+            file.close()
+            print(f'success writing plan {plan[0]} to file')
+
+job_profiling()
+
+
+def job_test_run():
+    conn = dc.get_db_connection('job')
+    cur = conn.cursor()
+    results = []
+    # get queries from job directory
+    job_dir = 'resources/queries_job/'
+    job_queries = os.listdir(job_dir)
+    job_queries = [file for file in job_queries if not file.startswith('.')]
+    job_queries.sort(key=extract_number) # see utils.py
+    
+    for query in job_queries:
+        query_id = query.split('.')[0]
+        query_path = os.path.join(job_dir, query)
+        with open(query_path, mode='r', encoding='UTF-8') as file:
+            query_template = file.read()
+            cur.execute(query_template)
+            result = cur.fetchall()
+            results.append((query_id, result))
+            file.close()
+    return results
 
 
