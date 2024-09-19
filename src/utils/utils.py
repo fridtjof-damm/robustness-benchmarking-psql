@@ -62,3 +62,13 @@ def get_picasso_gen_list():
     print(parameters)
 
 #get_picasso_gen_list()
+
+# function to extract number and suffix (letters for variations) from query filenames
+# used in qanalyze.py for example in the function job_profiling()
+def extract_number(filename) -> tuple[int,str]:
+    match = re.match(r'(\d+)([a-zA-Z]*)', filename)
+    if match:
+        number = int(match.group(1))
+        suffix = match.group(2)
+        return (number, suffix)
+    return (float('inf'), '')
