@@ -33,6 +33,14 @@ def load_schema(file_path, cur, conn):
     conn.commit()
     print('successfully loaded schema')
 
+def load_foreign_keys(cur, conn):
+    with open('/Users/fridtjofdamm/Documents/join-order-benchmark/fkindexes.sql', 'r') as f:
+        sql_script = f.read()
+    cur.execute(sql_script)
+    conn.commit()
+    print('successfully loaded foreign keys')
+
+
 
 def load_data(tables, csv_dir, cur, conn) -> None:
     for table in tables:
@@ -54,7 +62,9 @@ def check_data(tables, cur):
 
 #load_schema(job_schema, cur, conn)
 #load_data(tables, csv_dir, cur, conn)
-check_data(tables, cur)
+#check_data(tables, cur)
 
 cur.close()
 conn.close()
+
+print(tables)
