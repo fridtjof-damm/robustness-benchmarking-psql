@@ -41,6 +41,9 @@ def simplify(qplan):
     if 'Filter' in qplan:
         qplan['Filter'] = re.sub(r'\(\(([^)]+?)\)::text[^)]+\)', r'(\1)', qplan['Filter']) # q2 TIN NICKEL etc.
         qplan['Filter'] = re.sub(r'\(([^<>=!]+)\s*[<>=!]+\s*[^)]+\)', r'(\1)', qplan['Filter']) # q3 shipdate filter simplification
+        qplan['Filter'] = re.sub(r'\(*([^()]+)\)*(?:%\'::text)?(?:\s*(?:AND|OR)\s*\(*\1\)*(?:%\'::text)?)*', r'\1', qplan['Filter'])
+        #qplan['Filter'] = re.sub(r'(?:^|\s*(?:AND|OR)\s*)(?:\(*)([^()]+?)(?:\)*(?:%\'::text)?)(?=\s*(?:AND|OR|$))', r'\1', qplan['Filter'])
+        qplan['Filter'] = ''.join(sorted(set(re.sub(r'[^a-zA-Z]', '', re.sub(r'(?:^|\s*(?:AND|OR)\s*)(?:\(*)([^()]+?)(?:\)*(?:%\'::text)?)(?=\s*(?:AND|OR|$))', r'\1', qplan['Filter']))), key=lambda x: re.sub(r'[^a-zA-Z]', '', qplan['Filter']).index(x)))
         match = re.search(r'\(([^=]+)\s*=\s*[^)]+\)', qplan['Filter'])
         if match:
             attr = match.group(1).strip()
@@ -60,7 +63,14 @@ def simplify(qplan):
         qplan['Join Filter'] = re.sub(r'\(([^=]+)\s*=\s*\'[^\']+\'::[^\)]+\)', r'(\1)', qplan['Join Filter'])
         qplan['Join Filter'] = re.sub(r'\(([^=]+)\s*=\s*ANY\s*\(\{[^\}]+\}::[^\)]+\)\)', r'(\1)', qplan['Join Filter'])
         qplan['Join Filter'] = re.sub(r'\(([^<>=!]+)\s*[<>=!]+\s*\'[^\']+\'::[^\)]+\)', r'(\1)', qplan['Join Filter'])
-
+        qplan['Join Filter'] = re.sub(r'\(([^.]+)\.([^)=\s]+)[^)]*\)', r'\2', qplan['Join Filter'])
+    if 'Hash Cond' in qplan:
+        qplan['Hash Cond'] = re.search(r'\b(\w+)\.(\w+)', qplan['Hash Cond']).group(2) if re.search(r'\b(\w+)\.(\w+)', qplan['Hash Cond']) else qplan['Hash Cond']
+    if 'Recheck Cond' in qplan:
+        qplan['Recheck Cond'] = re.search(r'\((\w+)', qplan['Recheck Cond']).group(1) if re.search(r'\((\w+)', qplan['Recheck Cond']) else qplan['Recheck Cond']     
+    if 'Cache Key' in qplan:
+        qplan['Cache Key'] = re.search(r'\.(\w+)$', qplan['Cache Key']).group(1) if re.search(r'\.(\w+)$', qplan['Cache Key']) else qplan['Cache Key']
+        
 
     if 'Plans' in qplan:
         for child in qplan['Plans']:
