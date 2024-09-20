@@ -3,13 +3,16 @@ import os
 import time
 from deepdiff import DeepDiff
 
-query_ids = [i for i in range(1,23) if i != 15]
-
+# tpch 
+#query_ids = [i for i in range(1,23) if i != 15]
 # for single query comparison , change func call!
 # target query format: 'q1' ,etc...
-target_query = 'q2'
-base_dir = 'results/tpch/qplans/'
-dir = os.path.join(base_dir, target_query)
+#target_query = 'q2'
+#base_dir = 'results/tpch/qplans/'
+#dir = os.path.join(base_dir, target_query)
+
+# job
+dir = 'results/job/qplans/'
 
 
 
@@ -47,11 +50,12 @@ def print_results(comparison_results):
     if comparison_results:
         for (file1,file2), diff in comparison_results.items():
             count += 1
-            print(f'Comparison between {file1} and {file2}:')
-            print(f"Found differences: {diff}")
-            print("Comparison success")
-            print(f"="*42)
-            print(f"Count: {count}")
+            #print(f'Comparison between {file1} and {file2}:')
+            #print(f"Found differences: {diff}")
+            #print("Comparison success")
+            #print(f"="*42)
+            #print(f"Count: {count}")"""
+        print(count)
 
   
     else: 
