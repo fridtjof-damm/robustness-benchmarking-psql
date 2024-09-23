@@ -26,7 +26,7 @@ def extract_key(path):
     """
     return path.split("']")[-2].split("['")[-1]
 
-def summarize_diff(diff, show_full_paths=True) -> str:
+def summarize_diff(diff, show_full_paths=True, include_added_removed=True) -> str:
     """
     Summarize the differences between two query plans.
     """
@@ -39,16 +39,16 @@ def summarize_diff(diff, show_full_paths=True) -> str:
         for path, change in diff['type_changes'].items():
             key = path if show_full_paths else extract_key(path)
             summary.append((path,f"Type changed: {key}\nOld: {change['old_type']} {change['old_value']}\nNew: {change['new_type']} {change['new_value']}\n"))
-    if 'dictionary_item_added' in diff:
-        for item in diff['dictionary_item_added']:
-            key = item if show_full_paths else extract_key(item)
-            summary.append((item,f"Added: {key}\n"))
-    if 'dictionary_item_removed' in diff:
-        for item in diff['dictionary_item_removed']:
-            key = item if show_full_paths else extract_key(item)
-            summary.append((item,f"Removed: {key}\n"))
+    if include_added_removed:
+        if 'dictionary_item_added' in diff:
+            for item in diff['dictionary_item_added']:
+                key = item if show_full_paths else extract_key(item)
+                summary.append((item,f"Added: {key}\n"))
+        if 'dictionary_item_removed' in diff:
+            for item in diff['dictionary_item_removed']:
+                key = item if show_full_paths else extract_key(item)
+                summary.append((item,f"Removed: {key}\n"))
     summary.sort(key=lambda x: x[0])
-
     return "\n".join(change for _, change in summary)
 
 def main() -> None:
@@ -59,6 +59,8 @@ def main() -> None:
     query_number = None
     # show the full paths 
     show_full_paths = True
+    # set scope of comparison to only changed values
+    include_added_removed = False
     # using the job query plans
     folder = 'results/job/qplans'
     # create a logs folder if it does not exist
@@ -94,7 +96,7 @@ def main() -> None:
             plan1 = load_json(os.path.join(folder, file1))
             plan2 = load_json(os.path.join(folder, file2))
             diff = compare_plans(plan1, plan2)
-            summary = summarize_diff(diff, show_full_paths)
+            summary = summarize_diff(diff, show_full_paths, include_added_removed)
 
             # write to log file
             log_filename = f"comparison_{timestamp}_{number}_{file1.split('.')[0]}_{file2.split('.')[0]}.log"
@@ -103,7 +105,11 @@ def main() -> None:
             with open(log_path, 'w', encoding='UTF-8') as log_file:
                 log_file.write(f"Comparison performed on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
                 log_file.write(f"Comparison between {file1} and {file2}:\n")
+                log_file.write(f"Show full paths: {show_full_paths}\n")
+                log_file.write(f"Include added/removed items: {include_added_removed}\n")
+                log_file.write("--- Begin Summary ---\n")
                 log_file.write(summary if summary else "No significant differences found.")
+                log_file.write("--- End Summary ---\n")
 
             print(f"Comparison between {file1} and {file2}:")
             print(summary if summary else "No significant differences found.")
