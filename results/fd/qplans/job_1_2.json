@@ -1,0 +1,34 @@
+[
+    [
+        [
+            {
+                "Plan": {
+                    "Node Type": "Bitmap Heap Scan",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Relation Name": "title",
+                    "Alias": "title",
+                    "Startup Cost": 1006.64,
+                    "Total Cost": 38130.79,
+                    "Plan Rows": 90092,
+                    "Plan Width": 25,
+                    "Recheck Cond": "(kind_id = 2)",
+                    "Plans": [
+                        {
+                            "Node Type": "Bitmap Index Scan",
+                            "Parent Relationship": "Outer",
+                            "Parallel Aware": false,
+                            "Async Capable": false,
+                            "Index Name": "kind_id_title",
+                            "Startup Cost": 0.0,
+                            "Total Cost": 984.12,
+                            "Plan Rows": 90092,
+                            "Plan Width": 0,
+                            "Index Cond": "(kind_id = 2)"
+                        }
+                    ]
+                }
+            }
+        ]
+    ]
+]

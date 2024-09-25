@@ -1,0 +1,145 @@
+{
+    "Node Type": "Aggregate",
+    "Strategy": "Plain",
+    "Partial Mode": "Finalize",
+    "Plan Width": 64,
+    "Plans": [
+        {
+            "Node Type": "Gather",
+            "Plan Width": 64,
+            "Workers Planned": 2,
+            "Plans": [
+                {
+                    "Node Type": "Aggregate",
+                    "Strategy": "Plain",
+                    "Partial Mode": "Partial",
+                    "Plan Width": 64,
+                    "Plans": [
+                        {
+                            "Node Type": "Hash Join",
+                            "Join Type": "Inner",
+                            "Plan Width": 33,
+                            "Inner Unique": true,
+                            "Hash Cond": "role_id",
+                            "Plans": [
+                                {
+                                    "Node Type": "Hash Join",
+                                    "Join Type": "Inner",
+                                    "Plan Width": 37,
+                                    "Inner Unique": true,
+                                    "Hash Cond": "company_type_id",
+                                    "Plans": [
+                                        {
+                                            "Node Type": "Nested Loop",
+                                            "Join Type": "Inner",
+                                            "Plan Width": 41,
+                                            "Inner Unique": true,
+                                            "Plans": [
+                                                {
+                                                    "Node Type": "Nested Loop",
+                                                    "Join Type": "Inner",
+                                                    "Plan Width": 29,
+                                                    "Inner Unique": false,
+                                                    "Join Filter": "id",
+                                                    "Plans": [
+                                                        {
+                                                            "Node Type": "Hash Join",
+                                                            "Join Type": "Inner",
+                                                            "Plan Width": 29,
+                                                            "Inner Unique": false,
+                                                            "Hash Cond": "id",
+                                                            "Plans": [
+                                                                {
+                                                                    "Node Type": "Seq Scan",
+                                                                    "Plan Width": 21,
+                                                                    "Filter": "productinyea"
+                                                                },
+                                                                {
+                                                                    "Node Type": "Hash",
+                                                                    "Plan Width": 8,
+                                                                    "Plans": [
+                                                                        {
+                                                                            "Node Type": "Hash Join",
+                                                                            "Join Type": "Inner",
+                                                                            "Plan Width": 8,
+                                                                            "Inner Unique": true,
+                                                                            "Hash Cond": "company_id",
+                                                                            "Plans": [
+                                                                                {
+                                                                                    "Node Type": "Seq Scan",
+                                                                                    "Plan Width": 12
+                                                                                },
+                                                                                {
+                                                                                    "Node Type": "Hash",
+                                                                                    "Plan Width": 4,
+                                                                                    "Plans": [
+                                                                                        {
+                                                                                            "Node Type": "Seq Scan",
+                                                                                            "Plan Width": 4,
+                                                                                            "Filter": "countryde"
+                                                                                        }
+                                                                                    ]
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "Node Type": "Index Scan",
+                                                            "Scan Direction": "Forward",
+                                                            "Index Name": "movie_id_cast_info",
+                                                            "Plan Width": 12,
+                                                            "Index Cond": "movie_id",
+                                                            "Filter": "note"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "Node Type": "Memoize",
+                                                    "Plan Width": 20,
+                                                    "Cache Key": "person_role_id",
+                                                    "Cache Mode": "logical",
+                                                    "Plans": [
+                                                        {
+                                                            "Node Type": "Index Scan",
+                                                            "Scan Direction": "Forward",
+                                                            "Index Name": "char_name_pkey",
+                                                            "Plan Width": 20,
+                                                            "Index Cond": "id"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "Node Type": "Hash",
+                                            "Plan Width": 4,
+                                            "Plans": [
+                                                {
+                                                    "Node Type": "Seq Scan",
+                                                    "Plan Width": 4
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Node Type": "Hash",
+                                    "Plan Width": 4,
+                                    "Plans": [
+                                        {
+                                            "Node Type": "Seq Scan",
+                                            "Plan Width": 4
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,89 @@
+Comparison performed on: 2024-09-23 14:59:54
+Comparison between 25b.json and 25c.json:
+Show full paths: True
+Include added/removed items: False
+--- Begin Summary ---
+Changed: root['Plans'][0]['Plans'][0]['Plan Width']
+Old: 68
+New: 78
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Join Filter']
+Old: id
+New: movie_id
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plan Width']
+Old: 72
+New: 67
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Node Type']
+Old: Nested Loop
+New: Gather
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plan Width']
+Old: 42
+New: 59
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Node Type']
+Old: Gather
+New: Nested Loop
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plan Width']
+Old: 34
+New: 59
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Inner Unique']
+Old: True
+New: False
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plan Width']
+Old: 34
+New: 63
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][1]['Filter']
+Old: productinyeal
+New: info
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][1]['Index Cond']
+Old: id
+New: movie_id
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][1]['Index Name']
+Old: title_pkey
+New: movie_id_movie_info
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][1]['Plan Width']
+Old: 21
+New: 50
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][1]['Filter']
+Old: info
+New: notehadwribysx
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][1]['Index Name']
+Old: movie_id_movie_info
+New: movie_id_cast_info
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][1]['Plan Width']
+Old: 50
+New: 8
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][1]['Filter']
+Old: info
+New: gendr
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][1]['Index Name']
+Old: info_type_pkey
+New: name_pkey
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][1]['Plan Width']
+Old: 4
+New: 19
+
+Changed: root['Plans'][0]['Plans'][1]['Index Name']
+Old: name_pkey
+New: title_pkey
+
+Changed: root['Plans'][0]['Plans'][1]['Plan Width']
+Old: 19
+New: 21
+--- End Summary ---

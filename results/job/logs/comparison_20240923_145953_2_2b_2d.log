@@ -1,0 +1,53 @@
+Comparison performed on: 2024-09-23 14:59:53
+Comparison between 2b.json and 2d.json:
+Show full paths: True
+Include added/removed items: False
+--- Begin Summary ---
+Changed: root['Plans'][0]['Plans'][0]['Inner Unique']
+Old: True
+New: False
+
+Changed: root['Plans'][0]['Plans'][0]['Plan Width']
+Old: 8
+New: 21
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Inner Unique']
+Old: False
+New: True
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plan Width']
+Old: 12
+New: 25
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][1]['Index Cond']
+Old: movie_id
+New: id
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][1]['Index Name']
+Old: movie_id_movie_companies
+New: title_pkey
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][1]['Plan Width']
+Old: 8
+New: 21
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][1]['Index Cond']
+Old: id
+New: movie_id
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][1]['Index Name']
+Old: company_name_pkey
+New: movie_id_movie_companies
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][1]['Plan Width']
+Old: 4
+New: 8
+
+Changed: root['Plans'][0]['Plans'][1]['Index Name']
+Old: title_pkey
+New: company_name_pkey
+
+Changed: root['Plans'][0]['Plans'][1]['Plan Width']
+Old: 21
+New: 4
+--- End Summary ---

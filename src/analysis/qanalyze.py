@@ -2,7 +2,7 @@ import json
 import re
 import os
 import psycopg2 as pg 
-#import src.qrun as qr
+import src.qrun as qr
 import src.analysis.dummy.dummy_data_gen as ddg
 from src.utils.utils import extract_number
 import src.utils.db_connector as dc
@@ -194,7 +194,6 @@ def job_profiling() -> None:
             file.close()
             print(f'success writing plan {plan[0]} to file')
 
-job_profiling()
 
 
 def job_test_run():

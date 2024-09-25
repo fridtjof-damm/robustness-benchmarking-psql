@@ -1,0 +1,9 @@
+Comparison performed on: 2024-09-23 14:59:54
+Comparison between 17e.json and 17a.json:
+Show full paths: True
+Include added/removed items: False
+--- Begin Summary ---
+Changed: root['Plan Width']
+Old: 32
+New: 64
+--- End Summary ---

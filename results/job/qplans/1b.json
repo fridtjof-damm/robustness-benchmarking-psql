@@ -1,0 +1,99 @@
+{
+    "Node Type": "Aggregate",
+    "Strategy": "Plain",
+    "Partial Mode": "Finalize",
+    "Plan Width": 68,
+    "Plans": [
+        {
+            "Node Type": "Gather",
+            "Plan Width": 68,
+            "Workers Planned": 2,
+            "Plans": [
+                {
+                    "Node Type": "Aggregate",
+                    "Strategy": "Plain",
+                    "Partial Mode": "Partial",
+                    "Plan Width": 68,
+                    "Plans": [
+                        {
+                            "Node Type": "Nested Loop",
+                            "Join Type": "Inner",
+                            "Plan Width": 45,
+                            "Inner Unique": true,
+                            "Plans": [
+                                {
+                                    "Node Type": "Hash Join",
+                                    "Join Type": "Inner",
+                                    "Plan Width": 32,
+                                    "Inner Unique": true,
+                                    "Hash Cond": "company_type_id",
+                                    "Plans": [
+                                        {
+                                            "Node Type": "Nested Loop",
+                                            "Join Type": "Inner",
+                                            "Plan Width": 36,
+                                            "Inner Unique": false,
+                                            "Plans": [
+                                                {
+                                                    "Node Type": "Hash Join",
+                                                    "Join Type": "Inner",
+                                                    "Plan Width": 4,
+                                                    "Inner Unique": true,
+                                                    "Hash Cond": "info_type_id",
+                                                    "Plans": [
+                                                        {
+                                                            "Node Type": "Seq Scan",
+                                                            "Plan Width": 8
+                                                        },
+                                                        {
+                                                            "Node Type": "Hash",
+                                                            "Plan Width": 4,
+                                                            "Plans": [
+                                                                {
+                                                                    "Node Type": "Seq Scan",
+                                                                    "Plan Width": 4,
+                                                                    "Filter": "info"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "Node Type": "Index Scan",
+                                                    "Scan Direction": "Forward",
+                                                    "Index Name": "movie_id_movie_companies",
+                                                    "Plan Width": 32,
+                                                    "Index Cond": "movie_id",
+                                                    "Filter": "note"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "Node Type": "Hash",
+                                            "Plan Width": 4,
+                                            "Plans": [
+                                                {
+                                                    "Node Type": "Seq Scan",
+                                                    "Plan Width": 4,
+                                                    "Filter": "kind"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Node Type": "Index Scan",
+                                    "Scan Direction": "Forward",
+                                    "Index Name": "title_pkey",
+                                    "Plan Width": 25,
+                                    "Index Cond": "id",
+                                    "Filter": "productinyea"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

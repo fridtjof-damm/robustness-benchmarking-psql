@@ -1,0 +1,81 @@
+{
+    "Node Type": "Aggregate",
+    "Strategy": "Plain",
+    "Partial Mode": "Simple",
+    "Plan Width": 64,
+    "Plans": [
+        {
+            "Node Type": "Nested Loop",
+            "Join Type": "Inner",
+            "Plan Width": 22,
+            "Inner Unique": true,
+            "Join Filter": "movie_id",
+            "Plans": [
+                {
+                    "Node Type": "Nested Loop",
+                    "Join Type": "Inner",
+                    "Plan Width": 13,
+                    "Inner Unique": false,
+                    "Join Filter": "info_type_id",
+                    "Plans": [
+                        {
+                            "Node Type": "Seq Scan",
+                            "Plan Width": 4,
+                            "Filter": "info"
+                        },
+                        {
+                            "Node Type": "Nested Loop",
+                            "Join Type": "Inner",
+                            "Plan Width": 17,
+                            "Inner Unique": false,
+                            "Plans": [
+                                {
+                                    "Node Type": "Nested Loop",
+                                    "Join Type": "Inner",
+                                    "Plan Width": 4,
+                                    "Inner Unique": false,
+                                    "Plans": [
+                                        {
+                                            "Node Type": "Seq Scan",
+                                            "Plan Width": 4,
+                                            "Filter": "keyword"
+                                        },
+                                        {
+                                            "Node Type": "Bitmap Heap Scan",
+                                            "Plan Width": 8,
+                                            "Recheck Cond": "keyword_id",
+                                            "Plans": [
+                                                {
+                                                    "Node Type": "Bitmap Index Scan",
+                                                    "Index Name": "keyword_id_movie_keyword",
+                                                    "Plan Width": 0,
+                                                    "Index Cond": "keyword_id"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Node Type": "Index Scan",
+                                    "Scan Direction": "Forward",
+                                    "Index Name": "movie_id_movie_info_idx",
+                                    "Plan Width": 13,
+                                    "Index Cond": "movie_id",
+                                    "Filter": "info"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Node Type": "Index Scan",
+                    "Scan Direction": "Forward",
+                    "Index Name": "title_pkey",
+                    "Plan Width": 21,
+                    "Index Cond": "id",
+                    "Filter": "productinyea"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,53 @@
+Comparison performed on: 2024-09-23 14:59:54
+Comparison between 15c.json and 15a.json:
+Show full paths: True
+Include added/removed items: False
+--- Begin Summary ---
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plan Width']
+Old: 71
+New: 33
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plan Width']
+Old: 50
+New: 12
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Hash Cond']
+Old: info_type_id
+New: company_id
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plan Width']
+Old: 46
+New: 8
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Filter']
+Old: infoISNOTULte
+New: note
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plan Width']
+Old: 50
+New: 12
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][1]['Plans'][0]['Filter']
+Old: info
+New: countryde
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][1]['Index Name']
+Old: movie_id_movie_companies
+New: movie_id_movie_info
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][1]['Plan Width']
+Old: 12
+New: 50
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][1]['Index Name']
+Old: company_name_pkey
+New: company_type_pkey
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][1]['Node Type']
+Old: Index Scan
+New: Index Only Scan
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][1]['Node Type']
+Old: Index Only Scan
+New: Memoize
+--- End Summary ---

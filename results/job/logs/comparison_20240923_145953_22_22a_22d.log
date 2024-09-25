@@ -1,0 +1,81 @@
+Comparison performed on: 2024-09-23 14:59:54
+Comparison between 22a.json and 22d.json:
+Show full paths: True
+Include added/removed items: False
+--- Begin Summary ---
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Join Filter']
+Old: info_type_id
+New: company_type_id
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Inner Unique']
+Old: False
+New: True
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Inner Unique']
+Old: True
+New: False
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Join Filter']
+Old: company_type_id
+New: id
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plan Width']
+Old: 48
+New: 41
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plan Width']
+Old: 52
+New: 29
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plan Width']
+Old: 37
+New: 33
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][1]['Filter']
+Old: note
+New: info
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][1]['Index Name']
+Old: movie_id_movie_companies
+New: movie_id_movie_info
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][1]['Plan Width']
+Old: 12
+New: 8
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][1]['Filter']
+Old: countryde
+New: info
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][1]['Node Type']
+Old: Index Scan
+New: Seq Scan
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][1]['Plan Width']
+Old: 23
+New: 4
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][1]['Node Type']
+Old: Seq Scan
+New: Index Scan
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][1]['Plan Width']
+Old: 4
+New: 12
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][1]['Filter']
+Old: info
+New: countryde
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][1]['Index Cond']
+Old: movie_id
+New: id
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][1]['Index Name']
+Old: movie_id_movie_info
+New: company_name_pkey
+
+Changed: root['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][0]['Plans'][1]['Plan Width']
+Old: 8
+New: 23
+--- End Summary ---

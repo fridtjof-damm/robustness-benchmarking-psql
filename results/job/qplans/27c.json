@@ -1,0 +1,204 @@
+{
+    "Node Type": "Aggregate",
+    "Strategy": "Plain",
+    "Partial Mode": "Simple",
+    "Plan Width": 96,
+    "Plans": [
+        {
+            "Node Type": "Nested Loop",
+            "Join Type": "Inner",
+            "Plan Width": 118,
+            "Inner Unique": false,
+            "Join Filter": "movie_id",
+            "Plans": [
+                {
+                    "Node Type": "Nested Loop",
+                    "Join Type": "Inner",
+                    "Plan Width": 138,
+                    "Inner Unique": true,
+                    "Plans": [
+                        {
+                            "Node Type": "Nested Loop",
+                            "Join Type": "Inner",
+                            "Plan Width": 142,
+                            "Inner Unique": false,
+                            "Join Filter": "movie_id",
+                            "Plans": [
+                                {
+                                    "Node Type": "Nested Loop",
+                                    "Join Type": "Inner",
+                                    "Plan Width": 134,
+                                    "Inner Unique": true,
+                                    "Plans": [
+                                        {
+                                            "Node Type": "Nested Loop",
+                                            "Join Type": "Inner",
+                                            "Plan Width": 138,
+                                            "Inner Unique": true,
+                                            "Plans": [
+                                                {
+                                                    "Node Type": "Nested Loop",
+                                                    "Join Type": "Inner",
+                                                    "Plan Width": 123,
+                                                    "Inner Unique": false,
+                                                    "Join Filter": "movie_id",
+                                                    "Plans": [
+                                                        {
+                                                            "Node Type": "Nested Loop",
+                                                            "Join Type": "Inner",
+                                                            "Plan Width": 111,
+                                                            "Inner Unique": true,
+                                                            "Join Filter": "movie_id",
+                                                            "Plans": [
+                                                                {
+                                                                    "Node Type": "Nested Loop",
+                                                                    "Join Type": "Inner",
+                                                                    "Plan Width": 90,
+                                                                    "Inner Unique": true,
+                                                                    "Plans": [
+                                                                        {
+                                                                            "Node Type": "Nested Loop",
+                                                                            "Join Type": "Inner",
+                                                                            "Plan Width": 94,
+                                                                            "Inner Unique": true,
+                                                                            "Plans": [
+                                                                                {
+                                                                                    "Node Type": "Nested Loop",
+                                                                                    "Join Type": "Inner",
+                                                                                    "Plan Width": 98,
+                                                                                    "Inner Unique": false,
+                                                                                    "Plans": [
+                                                                                        {
+                                                                                            "Node Type": "Nested Loop",
+                                                                                            "Join Type": "Inner",
+                                                                                            "Plan Width": 86,
+                                                                                            "Inner Unique": false,
+                                                                                            "Plans": [
+                                                                                                {
+                                                                                                    "Node Type": "Seq Scan",
+                                                                                                    "Plan Width": 86,
+                                                                                                    "Filter": "link"
+                                                                                                },
+                                                                                                {
+                                                                                                    "Node Type": "Bitmap Heap Scan",
+                                                                                                    "Plan Width": 8,
+                                                                                                    "Recheck Cond": "link_type_id",
+                                                                                                    "Plans": [
+                                                                                                        {
+                                                                                                            "Node Type": "Bitmap Index Scan",
+                                                                                                            "Index Name": "link_type_id_movie_link",
+                                                                                                            "Plan Width": 0,
+                                                                                                            "Index Cond": "link_type_id"
+                                                                                                        }
+                                                                                                    ]
+                                                                                                }
+                                                                                            ]
+                                                                                        },
+                                                                                        {
+                                                                                            "Node Type": "Index Scan",
+                                                                                            "Scan Direction": "Forward",
+                                                                                            "Index Name": "movie_id_complete_cast",
+                                                                                            "Plan Width": 12,
+                                                                                            "Index Cond": "movie_id"
+                                                                                        }
+                                                                                    ]
+                                                                                },
+                                                                                {
+                                                                                    "Node Type": "Memoize",
+                                                                                    "Plan Width": 4,
+                                                                                    "Cache Key": "status_id",
+                                                                                    "Cache Mode": "logical",
+                                                                                    "Plans": [
+                                                                                        {
+                                                                                            "Node Type": "Index Scan",
+                                                                                            "Scan Direction": "Forward",
+                                                                                            "Index Name": "comp_cast_type_pkey",
+                                                                                            "Plan Width": 4,
+                                                                                            "Index Cond": "id",
+                                                                                            "Filter": "kind"
+                                                                                        }
+                                                                                    ]
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            "Node Type": "Index Scan",
+                                                                            "Scan Direction": "Forward",
+                                                                            "Index Name": "comp_cast_type_pkey",
+                                                                            "Plan Width": 4,
+                                                                            "Index Cond": "id",
+                                                                            "Filter": "kind"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "Node Type": "Index Scan",
+                                                                    "Scan Direction": "Forward",
+                                                                    "Index Name": "title_pkey",
+                                                                    "Plan Width": 21,
+                                                                    "Index Cond": "id",
+                                                                    "Filter": "productinyea"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "Node Type": "Index Scan",
+                                                            "Scan Direction": "Forward",
+                                                            "Index Name": "movie_id_movie_companies",
+                                                            "Plan Width": 12,
+                                                            "Index Cond": "movie_id",
+                                                            "Filter": "noteISNUL"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "Node Type": "Index Scan",
+                                                    "Scan Direction": "Forward",
+                                                    "Index Name": "company_name_pkey",
+                                                    "Plan Width": 23,
+                                                    "Index Cond": "id",
+                                                    "Filter": "countrydeam"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "Node Type": "Index Scan",
+                                            "Scan Direction": "Forward",
+                                            "Index Name": "company_type_pkey",
+                                            "Plan Width": 4,
+                                            "Index Cond": "id",
+                                            "Filter": "kind"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Node Type": "Index Scan",
+                                    "Scan Direction": "Forward",
+                                    "Index Name": "movie_id_movie_keyword",
+                                    "Plan Width": 8,
+                                    "Index Cond": "movie_id"
+                                }
+                            ]
+                        },
+                        {
+                            "Node Type": "Index Scan",
+                            "Scan Direction": "Forward",
+                            "Index Name": "keyword_pkey",
+                            "Plan Width": 4,
+                            "Index Cond": "id",
+                            "Filter": "keyword"
+                        }
+                    ]
+                },
+                {
+                    "Node Type": "Index Scan",
+                    "Scan Direction": "Forward",
+                    "Index Name": "movie_id_movie_info",
+                    "Plan Width": 4,
+                    "Index Cond": "movie_id",
+                    "Filter": "info"
+                }
+            ]
+        }
+    ]
+}

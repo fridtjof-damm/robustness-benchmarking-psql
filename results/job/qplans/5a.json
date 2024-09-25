@@ -1,0 +1,87 @@
+{
+    "Node Type": "Aggregate",
+    "Strategy": "Plain",
+    "Partial Mode": "Simple",
+    "Plan Width": 32,
+    "Plans": [
+        {
+            "Node Type": "Gather",
+            "Plan Width": 17,
+            "Workers Planned": 2,
+            "Plans": [
+                {
+                    "Node Type": "Nested Loop",
+                    "Join Type": "Inner",
+                    "Plan Width": 17,
+                    "Inner Unique": true,
+                    "Plans": [
+                        {
+                            "Node Type": "Nested Loop",
+                            "Join Type": "Inner",
+                            "Plan Width": 21,
+                            "Inner Unique": false,
+                            "Plans": [
+                                {
+                                    "Node Type": "Nested Loop",
+                                    "Join Type": "Inner",
+                                    "Plan Width": 25,
+                                    "Inner Unique": true,
+                                    "Plans": [
+                                        {
+                                            "Node Type": "Hash Join",
+                                            "Join Type": "Inner",
+                                            "Plan Width": 4,
+                                            "Inner Unique": true,
+                                            "Hash Cond": "company_type_id",
+                                            "Plans": [
+                                                {
+                                                    "Node Type": "Seq Scan",
+                                                    "Plan Width": 8,
+                                                    "Filter": "note"
+                                                },
+                                                {
+                                                    "Node Type": "Hash",
+                                                    "Plan Width": 4,
+                                                    "Plans": [
+                                                        {
+                                                            "Node Type": "Seq Scan",
+                                                            "Plan Width": 4,
+                                                            "Filter": "kind"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "Node Type": "Index Scan",
+                                            "Scan Direction": "Forward",
+                                            "Index Name": "title_pkey",
+                                            "Plan Width": 21,
+                                            "Index Cond": "id",
+                                            "Filter": "productinyea"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Node Type": "Index Scan",
+                                    "Scan Direction": "Forward",
+                                    "Index Name": "movie_id_movie_info",
+                                    "Plan Width": 8,
+                                    "Index Cond": "movie_id",
+                                    "Filter": "info"
+                                }
+                            ]
+                        },
+                        {
+                            "Node Type": "Index Only Scan",
+                            "Scan Direction": "Forward",
+                            "Index Name": "info_type_pkey",
+                            "Plan Width": 4,
+                            "Index Cond": "id"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
