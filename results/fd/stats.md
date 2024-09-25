@@ -9,7 +9,8 @@
 
 
 ## calc selectivity of each *kind*
-```sql SELECT 
+```sql 
+SELECT 
     kind_id,
     COUNT(*) AS count,
     COUNT(*) * 1.0 / SUM(COUNT(*)) OVER () AS selectivity
