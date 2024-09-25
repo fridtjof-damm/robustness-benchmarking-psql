@@ -15,18 +15,17 @@ def prepare_queries() -> list[str]:
             queries.append((i,sql))
     return queries
 
-print(prepare_queries())
 def profile_queries() -> None:
     conn = db_conn.get_db_connection('job')
     cur = conn.cursor()
     prefix = 'EXPLAIN (FORMAT JSON) '
     plans = []
     queries = prepare_queries()
-    for i, query in enumerate(queries):
-        cur.execute(prefix + query)
+    for query in queries:
+        cur.execute(prefix + query[1])
         plan = cur.fetchall()
         plan = simplify(plan)
-        plans.append((f'job_1_{i+1}', plan))
+        plans.append((f'own_imdb_1_{query[0]}', plan))
     
     # write plans to file
     dir = f'results/fd/qplans/'
@@ -37,4 +36,4 @@ def profile_queries() -> None:
             file.close()
             print(f'success writing plan {plan[0]} to file')
 
-#profile_queries()
+profile_queries()

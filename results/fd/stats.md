@@ -23,7 +23,7 @@ job=# SELECT COUNT(kind_id) FROM title;
 (1 row)
 
 ## calc selectivity of each *kind*
-job=# SELECT 
+```sql SELECT 
     kind_id,
     COUNT(*) AS count,
     COUNT(*) * 1.0 / SUM(COUNT(*)) OVER () AS selectivity
@@ -33,17 +33,9 @@ GROUP BY
     kind_id
 ORDER BY 
     kind_id;
- kind_id |  count  |      selectivity       
----------+---------+------------------------
-       1 |  662825 | 0.26216107822135875636
-       2 |   90852 | 0.03593385626457494170
-       3 |  100537 | 0.03976447527045712713
-       4 |  118234 | 0.04676400697382285098
-       6 |   12600 | 0.00498356215530361759
-       7 | 1543264 | 0.61039302111448270625
-(6 rows)
+```
 
-
+## selectivities and plans used
 
 | Scan Type | kind_id | count | selectivity |
 |-----------|---------|-------|-------------|
