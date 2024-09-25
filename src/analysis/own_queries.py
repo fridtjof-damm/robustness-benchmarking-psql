@@ -12,9 +12,10 @@ def prepare_queries() -> list[str]:
         template = file.read()
         for i in query_ids:
             sql = template.format(KIND = i)
-            queries.append(sql)
+            queries.append((i,sql))
     return queries
 
+print(prepare_queries())
 def profile_queries() -> None:
     conn = db_conn.get_db_connection('job')
     cur = conn.cursor()
@@ -36,4 +37,4 @@ def profile_queries() -> None:
             file.close()
             print(f'success writing plan {plan[0]} to file')
 
-profile_queries()
+#profile_queries()

@@ -14,5 +14,13 @@ playground.py
 **/__pycache__
 *.wal
 *.tmp
-/results
 config.json
+/results/tpch
+/results/tpch/analyse
+/results/dummyresults
+/results/parameters_sf10
+/results/parameters_sf100
+/results/plots
+/results/postgres
+/results/queryresults_sf10
+/results/queryresults_sf100
