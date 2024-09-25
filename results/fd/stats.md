@@ -3,24 +3,10 @@
  SELECT id, title, production_year FROM title WHERE kind_id = '{KIND}'
   ```
 
-## count per *kind*
-job=# SELECT COUNT(kind_id), kind_id  FROM title GROUP BY kind_id;
-  count  | kind_id 
----------+---------
-  662825 |       1   
-   90852 |       2
-  100537 |       3
-  118234 |       4
-   12600 |       6
- 1543264 |       7
-(6 rows)
-
-## total count
-job=# SELECT COUNT(kind_id) FROM title;
+## total count title
   count  
----------
- 2528312
-(1 row)
+ 2 528 312
+
 
 ## calc selectivity of each *kind*
 ```sql SELECT 
