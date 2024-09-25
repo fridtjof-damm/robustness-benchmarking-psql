@@ -3,6 +3,10 @@ import json
 import requests
 import webbrowser
 
+# DECIDE HOW TO GO THROUGH ALL COMPARISON
+    # 1. open all comparisons of specified query id in browser
+    # 2. return a .md file with all comparisons DiffChecker links
+
 # DiffChecker API
 API_URL = "https://api.diffchecker.com/public/text"
 API_EMAIL = "fridtjof.damm@t-online.de"
