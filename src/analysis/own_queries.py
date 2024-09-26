@@ -5,10 +5,20 @@ import src.utils.db_connector as db_conn
 from src.analysis.qanalyze import simplify
 
 # prepare queries
-def prepare_queries() -> list[str]:
+def prepare_queries1() -> list[str]:
     queries = []
     query_ids = [1, 2, 3, 4, 6, 7]
     with open('resources/queries_fd/job_1.sql', mode='r', encoding='UTF-8') as file:
+        template = file.read()
+        for i in query_ids:
+            sql = template.format(KIND = i)
+            queries.append((i,sql))
+    return queries
+
+def prepare_queries2() -> list[str]:
+    queries = []
+    query_ids = [i for i in range(2,2525746)]
+    with open('resources/queries_fd/job_2.sql', mode='r', encoding='UTF-8') as file:
         template = file.read()
         for i in query_ids:
             sql = template.format(KIND = i)
@@ -20,7 +30,7 @@ def profile_queries() -> None:
     cur = conn.cursor()
     prefix = 'EXPLAIN (FORMAT JSON) '
     plans = []
-    queries = prepare_queries()
+    queries = prepare_queries1()
     for query in queries:
         cur.execute(prefix + query[1])
         plan = cur.fetchall()
