@@ -236,7 +236,13 @@ def gen_query_picasso(template: str, query_id: int) -> tuple[list[str],list[tupl
 
 # ['EXTENDED_PRICE', 'RETAIL_PRICE', 'SUPPLY_COST', 'TOTAL_PRICE', 'C_ACCTBAL', 'S_ACCTBAL']
 
-extended_prices = [i for i in range(0,105,5)]
+
+# l_quantity = [i for i in range(1,51)]
+# l_extenedprice = l_quantity * p_retailprice
+    # where p_retailprice is from the part with p_partkey = l_partkey
+#extended_price = 
+
+
 
 supply_costs = [i for i in range(0,105,5)]
 
