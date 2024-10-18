@@ -1,8 +1,8 @@
 import os
 import json
 import psycopg2 as pg
-import src.utils.db_connector as db_conn
-from src.analysis.qanalyze import simplify
+içmport src.utils.db_connector as db_conn
+#from src.analysis.qanalyze import simplify
 
 # prepare queries
 def prepare_queries1() -> list[str]:
@@ -25,8 +25,8 @@ def prepare_queries2() -> list[str]:
             queries.append((i,sql))
     return queries
 
-def profile_queries() -> None:
-    conn = db_conn.get_db_connection('job')
+def profile_queries(db) -> None:
+    conn = db_conn.get_db_connection(f'db')
     cur = conn.cursor()
     prefix = 'EXPLAIN (FORMAT JSON) '
     plans = []
@@ -46,4 +46,20 @@ def profile_queries() -> None:
             file.close()
             print(f'success writing plan {plan[0]} to file')
 
-profile_queries()
+def get_extendedprice() -> list:
+    conn = db_conn.get_db_connection('dummydb')
+    cur = conn.cursor()
+    cur.execute('SELECT (l_quantity * p_retailprice) as extended_price FROM part as p, lineitem as l WHERE p.p_partkey = l.l_partkey;')
+    result = cur.fetchall()
+    return result
+
+
+def get_values(attr: str, rel: str) -> list:
+    # relation lookup ?
+    conn = db_conn.get_db_connection('dummydb')
+    cur = conn.cursor()
+    cur.execute(f'SELECT {attr} FROM {rel};')
+    result = cur.fetchall()
+    return result
+
+print(get_values('o_orderkey', 'orders'))
