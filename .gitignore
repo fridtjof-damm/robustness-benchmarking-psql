@@ -26,3 +26,4 @@ config.json
 /results/queryresults_sf100
 *.bib
 *.tex
+*.png
