@@ -203,7 +203,7 @@ def job_test_run():
     # get queries from job directory
     job_dir = 'resources/queries_job/'
     job_queries = os.listdir(job_dir)
-    job_queries = [file for file in job_queries if not file.startswith('.')]
+    job_queries = [file for file in job_queries]
     job_queries.sort(key=extract_number) # see utils.py
     
     for query in job_queries:
