@@ -1,7 +1,8 @@
 import os
 import json
 import psycopg2 as pg
-içmport src.utils.db_connector as db_conn
+import src.utils.db_connector as db_conn
+import matplotlib.pyplot as plt
 #from src.analysis.qanalyze import simplify
 
 # prepare queries
@@ -62,4 +63,28 @@ def get_values(attr: str, rel: str) -> list:
     result = cur.fetchall()
     return result
 
-print(get_values('o_orderkey', 'orders'))
+#print(get_values('o_orderkey', 'orders'))
+
+def analyze_production_years() -> list:
+    conn = db_conn.get_db_connection('job')
+    cur = conn.cursor()
+    cur.execute('SELECT production_year, COUNT(*) FROM aka_title GROUP BY production_year;')
+    result = cur.fetchall()
+    result = [(x,y) for x, y in result if x is not None and y is not None]
+    # sort by films produced
+    result = sorted(result, key=lambda x: (x[1], x[0]), reverse=True)
+    return result
+
+def viz_production_years(result: list) -> None:
+    years, counts = zip(*result)
+    plt.figure(figsize=(12, 6))
+    plt.bar(years, counts)
+    plt.xlabel('Production Year')
+    plt.ylabel('Number of Movies')
+    plt.title('Distribution of Movies by Production Year')
+    plt.xticks(rotation=90)
+    plt.tight_layout()
+    plt.show()
+
+viz_production_years(analyze_production_years())
+
