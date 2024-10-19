@@ -7,6 +7,7 @@ import src.analysis.dummy.dummy_data_gen as ddg
 from src.utils.utils import extract_number
 import src.utils.db_connector as dc
 import pprint as pp
+from typing import List, Tuple
 
 # db config
 db_params = {
@@ -77,10 +78,15 @@ def simplify(qplan):
             simplify(child)
     return qplan
 
-# profiling tpch parameterized queries
-# returns simplified tpch query plans as list of list
-# TPC-H Q15 consists of view creation - "explain" not compatible
-#query_ids = [i for i in range(1,23) if i != 15]
+# only keep the filter condition (e.g. Index Scan, Seq Scan)
+def analyze_filter(qplan) -> str:
+    filters = []
+    if 'Filter' in qplan:
+        filters.append(qplan['Filter'])
+    if 'Plans' in qplan:
+        for child in qplan['Plans']:
+            analyze_filter(child)
+        return filters
 
 def psql_tpch_profiling(query_id, write_to_file=False):
     conn = dc.get_db_connection('dummydb')
@@ -161,22 +167,21 @@ def test_dump() -> None:
     print(f"\nTotal categories: {len(result)}")
     print(f"Total plans: {sum(len(category) for category in result)}") 
 
-def job_profiling() -> None:
-    conn = dc.get_db_connection('job')
-    cur = conn.cursor()
-    prefix = 'EXPLAIN (FORMAT JSON) '
-    plans = []
-    # get queries from job directory
-    job_dir = 'resources/queries_job/'
-    job_queries = os.listdir(job_dir)
+###############################################################
+###### here begins the join order benchmark section ##########
+###############################################################
+
+def fetch_queries(dir: str) -> List(str):
+    job_queries = os.listdir(dir)
     job_queries = [file for file in job_queries if not file.startswith('.')]
     job_queries.sort(key=extract_number) # see utils.py
-    
-    #print(job_queries)
-    #print(type(job_queries))
-    for query in job_queries:
+    return job_queries
+
+def execute_queries(queries: List[str], cur, prefix: str, dir: str) -> List[Tuple[str, dict]]:
+    plans = []
+    for query in queries: 
         query_id = query.split('.')[0]
-        query_path = os.path.join(job_dir, query)
+        query_path = os.path.join(dir, query)
         with open(query_path, mode='r', encoding='UTF-8') as file:
             query_template = file.read()
             cur.execute(prefix + query_template)
@@ -184,15 +189,52 @@ def job_profiling() -> None:
             plan = simplify(plan[0][0][0]['Plan'])
             plans.append((query_id,plan))
             file.close()
-    
-    # write plans to file
-    dir = f'results/job/qplans/'
+    return plans
+
+def write_plans_to_file(plans: List[Tuple[str, dict]], dir: str) -> None:
     for plan in plans:
         filename = os.path.join(dir, f'{plan[0]}.json')
         with open(filename, 'w', encoding='UTF-8') as file:
             file.write(json.dumps(plan[1], indent=4))
             file.close()
             print(f'success writing plan {plan[0]} to file')
+
+def run_job_db() -> pg.cursor:
+    conn = dc.get_db_connection('job')
+    cur = conn.cursor()
+    return cur
+
+
+def job_profiling(prefix: int) -> None:
+    cur = run_job_db()
+    prefixes = ['EXPLAIN (FORMAT JSON) ', 'EXPLAIN (ANALYZE, FORMAT JSON) ']
+    job_dir = 'resources/queries_job/'
+    job_queries = fetch_queries(job_dir)
+    plans = execute_queries(job_queries, cur, prefixes[prefix], job_dir)
+    write_plans_to_file(plans, 'results/job/qplans/')
+
+
+def job_filters() -> None:
+    cur = run_job_db()
+    job_dir = 'resources/queries_job/'
+    job_queries = fetch_queries(job_dir)
+    for query in job_queries:
+        query_id = query.split('.')[0]
+        query_path = os.path.join(job_dir, query)
+        with open(query_path, mode='r', encoding='UTF-8') as file:
+            query_template = file.read()
+            cur.execute(f'EXPLAIN (FORMAT JSON) {query_template}')
+            plan = cur.fetchall()
+            filters = analyze_filter(plan)
+            print(f'Query {query_id} filters: {filters}')
+            file.close()
+
+        ### TODO: write filters to file
+
+
+
+
+
 
 
 
@@ -216,5 +258,4 @@ def job_test_run():
             results.append((query_id, result))
             file.close()
     return results
-
 
