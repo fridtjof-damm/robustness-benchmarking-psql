@@ -91,7 +91,7 @@ def analyze_filter(qplan) -> str:
         filtered_plans = [plan for plan in filtered_plans if plan]
         if filtered_plans:
             reduced_plan['Plans'] = filtered_plans
-        return reduced_plan
+    return simplify(reduced_plan)
 
 def psql_tpch_profiling(query_id, write_to_file=False):
     conn = dc.get_db_connection('dummydb')
@@ -197,12 +197,16 @@ def process_queries(queries: List[str], cur, prefix: str, dir: str, process_func
     return plans
 
 def write_plans_to_file(plans: List[Tuple[str, dict]], dir: str) -> None:
+    count_successful_writes = 0
     for plan in plans:
         filename = os.path.join(dir, f'{plan[0]}.json')
         with open(filename, 'w', encoding='UTF-8') as file:
             file.write(json.dumps(plan[1], indent=4))
             file.close()
-            print(f'success writing plan {plan[0]} to file')
+            count_successful_writes += 1
+    if count_successful_writes == len(plans):
+        print('all plans written successfully')
+    
 
 # e.g. db_cursor('job') for join order benchmark db, db_cursor('dummydb') for tpc-h db
 def db_cursor(db) -> cursor:
