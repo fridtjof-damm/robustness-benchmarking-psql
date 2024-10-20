@@ -75,12 +75,14 @@ def analyze_production_years() -> list:
     result = sorted(result, key=lambda x: (x[1], x[0]), reverse=True)
     return result
 
+# TODO: instead plot realtive orders of magnitude on y-axis (count movies in year / count total movies)
 def viz_production_years(result: list) -> None:
     years, counts = zip(*result)
+    orders_of_magnitude = [int(count / 10000) for count in counts]
     plt.figure(figsize=(12, 6))
-    plt.bar(years, counts)
+    plt.bar(years, orders_of_magnitude)
     plt.xlabel('Production Year')
-    plt.ylabel('Number of Movies')
+    plt.ylabel('Orders of Magnitude')
     plt.title('Distribution of Movies by Production Year')
     plt.xticks(rotation=90)
     plt.tight_layout()
