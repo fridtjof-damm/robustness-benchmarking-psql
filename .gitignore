@@ -24,6 +24,7 @@ config.json
 /results/postgres
 /results/queryresults_sf10
 /results/queryresults_sf100
+/results/job
 *.bib
 *.tex
 *.png
