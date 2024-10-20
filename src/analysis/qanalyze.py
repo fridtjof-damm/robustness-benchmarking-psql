@@ -2,6 +2,7 @@ import json
 import re
 import os
 import psycopg2 as pg 
+from psycopg2.extensions import cursor
 import src.qrun as qr
 import src.analysis.dummy.dummy_data_gen as ddg
 from src.utils.utils import extract_number
@@ -80,13 +81,17 @@ def simplify(qplan):
 
 # only keep the filter condition (e.g. Index Scan, Seq Scan)
 def analyze_filter(qplan) -> str:
-    filters = []
+    reduced_plan = {}
     if 'Filter' in qplan:
-        filters.append(qplan['Filter'])
+        reduced_plan['Node Type'] = qplan['Node Type']
+        reduced_plan['Filter'] = qplan['Filter']
     if 'Plans' in qplan:
-        for child in qplan['Plans']:
-            analyze_filter(child)
-        return filters
+        filtered_plans = [analyze_filter(child) for child in qplan['Plans']]
+        # only add non empty plans
+        filtered_plans = [plan for plan in filtered_plans if plan]
+        if filtered_plans:
+            reduced_plan['Plans'] = filtered_plans
+        return reduced_plan
 
 def psql_tpch_profiling(query_id, write_to_file=False):
     conn = dc.get_db_connection('dummydb')
@@ -171,13 +176,13 @@ def test_dump() -> None:
 ###### here begins the join order benchmark section ##########
 ###############################################################
 
-def fetch_queries(dir: str) -> List(str):
+def fetch_queries(dir: str) -> List[str]:
     job_queries = os.listdir(dir)
     job_queries = [file for file in job_queries if not file.startswith('.')]
     job_queries.sort(key=extract_number) # see utils.py
     return job_queries
 
-def execute_queries(queries: List[str], cur, prefix: str, dir: str) -> List[Tuple[str, dict]]:
+def process_queries(queries: List[str], cur, prefix: str, dir: str, process_func) -> List[Tuple[str, dict]]:
     plans = []
     for query in queries: 
         query_id = query.split('.')[0]
@@ -186,8 +191,8 @@ def execute_queries(queries: List[str], cur, prefix: str, dir: str) -> List[Tupl
             query_template = file.read()
             cur.execute(prefix + query_template)
             plan = cur.fetchall()
-            plan = simplify(plan[0][0][0]['Plan'])
-            plans.append((query_id,plan))
+            processed_plan = process_func(plan[0][0][0]['Plan'])
+            plans.append((query_id,processed_plan))
             file.close()
     return plans
 
@@ -199,63 +204,29 @@ def write_plans_to_file(plans: List[Tuple[str, dict]], dir: str) -> None:
             file.close()
             print(f'success writing plan {plan[0]} to file')
 
-def run_job_db() -> pg.cursor:
-    conn = dc.get_db_connection('job')
+# e.g. db_cursor('job') for join order benchmark db, db_cursor('dummydb') for tpc-h db
+def db_cursor(db) -> cursor:
+    conn = dc.get_db_connection(db)
     cur = conn.cursor()
     return cur
 
-
-def job_profiling(prefix: int) -> None:
-    cur = run_job_db()
+# 0 for EXPLAIN (FORMAT JSON), 1 for EXPLAIN (ANALYZE, FORMAT JSON)
+def job_profiling(prefix: int, process_func, output_dir: str) -> None:
+    cur = db_cursor('job')
     prefixes = ['EXPLAIN (FORMAT JSON) ', 'EXPLAIN (ANALYZE, FORMAT JSON) ']
     job_dir = 'resources/queries_job/'
     job_queries = fetch_queries(job_dir)
-    plans = execute_queries(job_queries, cur, prefixes[prefix], job_dir)
-    write_plans_to_file(plans, 'results/job/qplans/')
+    plans = process_queries(job_queries, cur, prefixes[prefix], job_dir, process_func)
+    write_plans_to_file(plans, output_dir)
 
 
-def job_filters() -> None:
-    cur = run_job_db()
-    job_dir = 'resources/queries_job/'
-    job_queries = fetch_queries(job_dir)
-    for query in job_queries:
-        query_id = query.split('.')[0]
-        query_path = os.path.join(job_dir, query)
-        with open(query_path, mode='r', encoding='UTF-8') as file:
-            query_template = file.read()
-            cur.execute(f'EXPLAIN (FORMAT JSON) {query_template}')
-            plan = cur.fetchall()
-            filters = analyze_filter(plan)
-            print(f'Query {query_id} filters: {filters}')
-            file.close()
+###############################################################
+###### here ends the join order benchmark section ############
+###############################################################
 
-        ### TODO: write filters to file
+def main():
+    #job_profiling(0, simplify, 'results/job/qplans/')
+    job_profiling(0, analyze_filter,'results/job/qplans_focus_filter/')
 
-
-
-
-
-
-
-
-def job_test_run():
-    conn = dc.get_db_connection('job')
-    cur = conn.cursor()
-    results = []
-    # get queries from job directory
-    job_dir = 'resources/queries_job/'
-    job_queries = os.listdir(job_dir)
-    job_queries = [file for file in job_queries]
-    job_queries.sort(key=extract_number) # see utils.py
-    
-    for query in job_queries:
-        query_id = query.split('.')[0]
-        query_path = os.path.join(job_dir, query)
-        with open(query_path, mode='r', encoding='UTF-8') as file:
-            query_template = file.read()
-            cur.execute(query_template)
-            result = cur.fetchall()
-            results.append((query_id, result))
-            file.close()
-    return results
-
+if __name__ == '__main__':
+    main()
