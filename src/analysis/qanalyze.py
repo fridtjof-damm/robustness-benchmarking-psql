@@ -217,7 +217,7 @@ def db_cursor(db) -> cursor:
 # 0 for EXPLAIN (FORMAT JSON), 1 for EXPLAIN (ANALYZE, FORMAT JSON)
 def job_profiling(prefix: int, process_func, output_dir: str) -> None:
     cur = db_cursor('job')
-    prefixes = ['EXPLAIN (FORMAT JSON) ', 'EXPLAIN (ANALYZE, FORMAT JSON) ']
+    prefixes = ['EXPLAIN (FORMAT JSON) ', 'EXPLAIN (FORMAT JSON, ANALYZE) ']
     job_dir = 'resources/queries_job/'
     job_queries = fetch_queries(job_dir)
     plans = process_queries(job_queries, cur, prefixes[prefix], job_dir, process_func)
@@ -230,7 +230,8 @@ def job_profiling(prefix: int, process_func, output_dir: str) -> None:
 
 def main():
     #job_profiling(0, simplify, 'results/job/qplans/')
-    job_profiling(0, analyze_filter,'results/job/qplans_focus_filter/')
+    job_profiling(1, analyze_filter,'results/job/qplans_focus_filter/')
 
 if __name__ == '__main__':
     main()
+
