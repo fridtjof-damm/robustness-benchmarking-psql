@@ -62,9 +62,9 @@ def main() -> None:
     # set scope of comparison to only changed values
     include_added_removed = False
     # using the job query plans
-    folder = 'results/job/qplans'
+    folder = 'results/job/qplans_focus_filter'
     # create a logs folder if it does not exist
-    logs_folder = 'results/job/logs'
+    logs_folder = 'results/job/logs_focus_filter'
     os.makedirs(logs_folder, exist_ok=True)
 
     # get timestamp
@@ -88,32 +88,42 @@ def main() -> None:
         sorted_groups = [(num, group) for num, group in sorted_groups if num == query_number]
         if not sorted_groups:
             print(f"No plans found for query {query_number}.")
-            return  
+            exit()
 
     for number, group in sorted_groups:
         print(f"\nComparing plans for groups {number}:")
-        for file1, file2 in  combinations(group, 2):
+        group_summaries = []
+        signif = 0
+        not_signif = 0 
+        for file1, file2 in combinations(group, 2):
             plan1 = load_json(os.path.join(folder, file1))
             plan2 = load_json(os.path.join(folder, file2))
             diff = compare_plans(plan1, plan2)
             summary = summarize_diff(diff, show_full_paths, include_added_removed)
+            
+            # Accumulate summaries if there are significant differences
+            if summary and summary.strip() != "No significant differences found.":
+                signif += 1
+                group_summaries.append(f"Comparison between {file1} and {file2}:\n{summary}\n")
+            else:
+                not_signif += 1
 
-            # write to log file
-            log_filename = f"comparison_{timestamp}_{number}_{file1.split('.')[0]}_{file2.split('.')[0]}.log"
+        # Write to log file only if there are significant differences
+        if group_summaries:
+            log_filename = f"comparison_{timestamp}_{number}.log"
             log_path = os.path.join(logs_folder, log_filename)
 
             with open(log_path, 'w', encoding='UTF-8') as log_file:
                 log_file.write(f"Comparison performed on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-                log_file.write(f"Comparison between {file1} and {file2}:\n")
                 log_file.write(f"Show full paths: {show_full_paths}\n")
                 log_file.write(f"Include added/removed items: {include_added_removed}\n")
                 log_file.write("--- Begin Summary ---\n")
-                log_file.write(summary if summary else "No significant differences found.")
+                for summary in group_summaries:
+                    log_file.write(summary)
                 log_file.write("--- End Summary ---\n")
 
-            print(f"Comparison between {file1} and {file2}:")
-            print(summary if summary else "No significant differences found.")
+        print(f"Successfully saved query plan difference logs for group {number}.")
+        print(f"With {not_signif} insignificant and {signif} significant differences out of {not_signif + signif}.")
 
 if __name__ == '__main__':
     main()
- 
