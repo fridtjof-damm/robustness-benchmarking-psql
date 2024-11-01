@@ -25,6 +25,7 @@ config.json
 /results/queryresults_sf10
 /results/queryresults_sf100
 /results/job
+/results/job/qplans
 *.bib
 *.tex
 *.png
