@@ -30,8 +30,6 @@ def simplify(qplan):
         del qplan['Startup Cost']
     if 'Total Cost' in qplan:
         del qplan['Total Cost']
-    if 'Plan Rows' in qplan:
-        del qplan['Plan Rows']
     if 'Single Copy' in qplan:
         del qplan['Single Copy']
     if 'Alias' in qplan:
@@ -230,7 +228,7 @@ def job_profiling(prefix: int, process_func, output_dir: str) -> None:
 
 def main():
     #job_profiling(0, simplify, 'results/job/qplans/')
-    job_profiling(1, analyze_filter,'results/job/qplans_focus_filter/')
+    job_profiling(1, simplify,'results/job/qplans/')
 
 if __name__ == '__main__':
     main()
