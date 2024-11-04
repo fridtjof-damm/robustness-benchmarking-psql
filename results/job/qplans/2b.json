@@ -2,47 +2,92 @@
     "Node Type": "Aggregate",
     "Strategy": "Plain",
     "Partial Mode": "Simple",
+    "Plan Rows": 1,
     "Plan Width": 32,
+    "Actual Startup Time": 338.017,
+    "Actual Total Time": 338.018,
+    "Actual Rows": 1,
+    "Actual Loops": 1,
     "Plans": [
         {
             "Node Type": "Nested Loop",
             "Join Type": "Inner",
+            "Plan Rows": 2,
             "Plan Width": 17,
+            "Actual Startup Time": 4.256,
+            "Actual Total Time": 335.389,
+            "Actual Rows": 5228,
+            "Actual Loops": 1,
             "Inner Unique": true,
             "Join Filter": "movie_id",
+            "Rows Removed by Join Filter": 0,
             "Plans": [
                 {
                     "Node Type": "Nested Loop",
                     "Join Type": "Inner",
+                    "Plan Rows": 2,
                     "Plan Width": 8,
+                    "Actual Startup Time": 3.908,
+                    "Actual Total Time": 264.711,
+                    "Actual Rows": 5228,
+                    "Actual Loops": 1,
                     "Inner Unique": true,
                     "Plans": [
                         {
                             "Node Type": "Nested Loop",
                             "Join Type": "Inner",
+                            "Plan Rows": 180,
                             "Plan Width": 12,
+                            "Actual Startup Time": 2.573,
+                            "Actual Total Time": 122.785,
+                            "Actual Rows": 148552,
+                            "Actual Loops": 1,
                             "Inner Unique": false,
                             "Plans": [
                                 {
                                     "Node Type": "Nested Loop",
                                     "Join Type": "Inner",
+                                    "Plan Rows": 34,
                                     "Plan Width": 4,
+                                    "Actual Startup Time": 2.369,
+                                    "Actual Total Time": 33.128,
+                                    "Actual Rows": 41840,
+                                    "Actual Loops": 1,
                                     "Inner Unique": false,
                                     "Plans": [
                                         {
                                             "Node Type": "Seq Scan",
+                                            "Plan Rows": 1,
                                             "Plan Width": 4,
-                                            "Filter": "keyword"
+                                            "Actual Startup Time": 0.27,
+                                            "Actual Total Time": 6.005,
+                                            "Actual Rows": 1,
+                                            "Actual Loops": 1,
+                                            "Filter": "keyword",
+                                            "Rows Removed by Filter": 134169
                                         },
                                         {
                                             "Node Type": "Bitmap Heap Scan",
+                                            "Plan Rows": 301,
                                             "Plan Width": 8,
+                                            "Actual Startup Time": 2.096,
+                                            "Actual Total Time": 25.447,
+                                            "Actual Rows": 41840,
+                                            "Actual Loops": 1,
                                             "Recheck Cond": "keyword_id",
+                                            "Rows Removed by Index Recheck": 0,
+                                            "Exact Heap Blocks": 11541,
+                                            "Lossy Heap Blocks": 0,
                                             "Plans": [
                                                 {
                                                     "Node Type": "Bitmap Index Scan",
                                                     "Index Name": "keyword_id_movie_keyword",
+                                                    "Plan Rows": 301,
                                                     "Plan Width": 0,
+                                                    "Actual Startup Time": 1.152,
+                                                    "Actual Total Time": 1.152,
+                                                    "Actual Rows": 41840,
+                                                    "Actual Loops": 1,
                                                     "Index Cond": "keyword_id"
                                                 }
                                             ]
@@ -53,8 +98,14 @@
                                     "Node Type": "Index Scan",
                                     "Scan Direction": "Forward",
                                     "Index Name": "movie_id_movie_companies",
+                                    "Plan Rows": 5,
                                     "Plan Width": 8,
-                                    "Index Cond": "movie_id"
+                                    "Actual Startup Time": 0.001,
+                                    "Actual Total Time": 0.002,
+                                    "Actual Rows": 4,
+                                    "Actual Loops": 41840,
+                                    "Index Cond": "movie_id",
+                                    "Rows Removed by Index Recheck": 0
                                 }
                             ]
                         },
@@ -62,9 +113,16 @@
                             "Node Type": "Index Scan",
                             "Scan Direction": "Forward",
                             "Index Name": "company_name_pkey",
+                            "Plan Rows": 1,
                             "Plan Width": 4,
+                            "Actual Startup Time": 0.001,
+                            "Actual Total Time": 0.001,
+                            "Actual Rows": 0,
+                            "Actual Loops": 148552,
                             "Index Cond": "id",
-                            "Filter": "countryde"
+                            "Rows Removed by Index Recheck": 0,
+                            "Filter": "countryde",
+                            "Rows Removed by Filter": 1
                         }
                     ]
                 },
@@ -72,8 +130,14 @@
                     "Node Type": "Index Scan",
                     "Scan Direction": "Forward",
                     "Index Name": "title_pkey",
+                    "Plan Rows": 1,
                     "Plan Width": 21,
-                    "Index Cond": "id"
+                    "Actual Startup Time": 0.013,
+                    "Actual Total Time": 0.013,
+                    "Actual Rows": 1,
+                    "Actual Loops": 5228,
+                    "Index Cond": "id",
+                    "Rows Removed by Index Recheck": 0
                 }
             ]
         }

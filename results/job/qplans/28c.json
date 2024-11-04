@@ -2,101 +2,194 @@
     "Node Type": "Aggregate",
     "Strategy": "Plain",
     "Partial Mode": "Simple",
+    "Plan Rows": 1,
     "Plan Width": 96,
+    "Actual Startup Time": 3415.949,
+    "Actual Total Time": 3415.952,
+    "Actual Rows": 1,
+    "Actual Loops": 1,
     "Plans": [
         {
             "Node Type": "Nested Loop",
             "Join Type": "Inner",
+            "Plan Rows": 1,
             "Plan Width": 41,
+            "Actual Startup Time": 6.117,
+            "Actual Total Time": 3406.821,
+            "Actual Rows": 8373,
+            "Actual Loops": 1,
             "Inner Unique": true,
             "Plans": [
                 {
                     "Node Type": "Nested Loop",
                     "Join Type": "Inner",
+                    "Plan Rows": 1,
                     "Plan Width": 45,
+                    "Actual Startup Time": 6.114,
+                    "Actual Total Time": 3395.64,
+                    "Actual Rows": 24803,
+                    "Actual Loops": 1,
                     "Inner Unique": false,
                     "Join Filter": "id",
+                    "Rows Removed by Join Filter": 0,
                     "Plans": [
                         {
                             "Node Type": "Nested Loop",
                             "Join Type": "Inner",
+                            "Plan Rows": 1,
                             "Plan Width": 56,
+                            "Actual Startup Time": 6.105,
+                            "Actual Total Time": 3375.049,
+                            "Actual Rows": 8493,
+                            "Actual Loops": 1,
                             "Inner Unique": true,
                             "Plans": [
                                 {
                                     "Node Type": "Nested Loop",
                                     "Join Type": "Inner",
+                                    "Plan Rows": 1,
                                     "Plan Width": 60,
+                                    "Actual Startup Time": 6.103,
+                                    "Actual Total Time": 3369.665,
+                                    "Actual Rows": 9609,
+                                    "Actual Loops": 1,
                                     "Inner Unique": false,
                                     "Join Filter": "id",
+                                    "Rows Removed by Join Filter": 0,
                                     "Plans": [
                                         {
                                             "Node Type": "Nested Loop",
                                             "Join Type": "Inner",
+                                            "Plan Rows": 1,
                                             "Plan Width": 52,
+                                            "Actual Startup Time": 3.496,
+                                            "Actual Total Time": 2474.168,
+                                            "Actual Rows": 8286,
+                                            "Actual Loops": 1,
                                             "Inner Unique": true,
                                             "Plans": [
                                                 {
                                                     "Node Type": "Nested Loop",
                                                     "Join Type": "Inner",
+                                                    "Plan Rows": 2,
                                                     "Plan Width": 56,
+                                                    "Actual Startup Time": 3.095,
+                                                    "Actual Total Time": 1481.05,
+                                                    "Actual Rows": 1147691,
+                                                    "Actual Loops": 1,
                                                     "Inner Unique": false,
                                                     "Plans": [
                                                         {
                                                             "Node Type": "Nested Loop",
                                                             "Join Type": "Inner",
+                                                            "Plan Rows": 1,
                                                             "Plan Width": 48,
+                                                            "Actual Startup Time": 0.978,
+                                                            "Actual Total Time": 1274.036,
+                                                            "Actual Rows": 14086,
+                                                            "Actual Loops": 1,
                                                             "Inner Unique": true,
                                                             "Plans": [
                                                                 {
                                                                     "Node Type": "Nested Loop",
                                                                     "Join Type": "Inner",
+                                                                    "Plan Rows": 1,
                                                                     "Plan Width": 33,
+                                                                    "Actual Startup Time": 0.976,
+                                                                    "Actual Total Time": 1234.01,
+                                                                    "Actual Rows": 14833,
+                                                                    "Actual Loops": 1,
                                                                     "Inner Unique": true,
                                                                     "Plans": [
                                                                         {
                                                                             "Node Type": "Nested Loop",
                                                                             "Join Type": "Inner",
+                                                                            "Plan Rows": 1,
                                                                             "Plan Width": 37,
+                                                                            "Actual Startup Time": 0.974,
+                                                                            "Actual Total Time": 1227.379,
+                                                                            "Actual Rows": 14833,
+                                                                            "Actual Loops": 1,
                                                                             "Inner Unique": false,
                                                                             "Plans": [
                                                                                 {
                                                                                     "Node Type": "Nested Loop",
                                                                                     "Join Type": "Inner",
+                                                                                    "Plan Rows": 1,
                                                                                     "Plan Width": 25,
+                                                                                    "Actual Startup Time": 0.075,
+                                                                                    "Actual Total Time": 1121.859,
+                                                                                    "Actual Rows": 13304,
+                                                                                    "Actual Loops": 1,
                                                                                     "Inner Unique": true,
                                                                                     "Plans": [
                                                                                         {
                                                                                             "Node Type": "Nested Loop",
                                                                                             "Join Type": "Inner",
+                                                                                            "Plan Rows": 2,
                                                                                             "Plan Width": 29,
+                                                                                            "Actual Startup Time": 0.057,
+                                                                                            "Actual Total Time": 1113.71,
+                                                                                            "Actual Rows": 14467,
+                                                                                            "Actual Loops": 1,
                                                                                             "Inner Unique": true,
                                                                                             "Plans": [
                                                                                                 {
                                                                                                     "Node Type": "Nested Loop",
                                                                                                     "Join Type": "Inner",
+                                                                                                    "Plan Rows": 4,
                                                                                                     "Plan Width": 4,
+                                                                                                    "Actual Startup Time": 0.014,
+                                                                                                    "Actual Total Time": 30.035,
+                                                                                                    "Actual Rows": 68062,
+                                                                                                    "Actual Loops": 1,
                                                                                                     "Inner Unique": true,
                                                                                                     "Plans": [
                                                                                                         {
                                                                                                             "Node Type": "Hash Join",
                                                                                                             "Join Type": "Inner",
+                                                                                                            "Plan Rows": 761,
                                                                                                             "Plan Width": 8,
+                                                                                                            "Actual Startup Time": 0.009,
+                                                                                                            "Actual Total Time": 16.297,
+                                                                                                            "Actual Rows": 85941,
+                                                                                                            "Actual Loops": 1,
                                                                                                             "Inner Unique": true,
                                                                                                             "Hash Cond": "subject_id",
                                                                                                             "Plans": [
                                                                                                                 {
                                                                                                                     "Node Type": "Seq Scan",
-                                                                                                                    "Plan Width": 12
+                                                                                                                    "Plan Rows": 135086,
+                                                                                                                    "Plan Width": 12,
+                                                                                                                    "Actual Startup Time": 0.005,
+                                                                                                                    "Actual Total Time": 4.97,
+                                                                                                                    "Actual Rows": 135086,
+                                                                                                                    "Actual Loops": 1
                                                                                                                 },
                                                                                                                 {
                                                                                                                     "Node Type": "Hash",
+                                                                                                                    "Plan Rows": 4,
                                                                                                                     "Plan Width": 4,
+                                                                                                                    "Actual Startup Time": 0.002,
+                                                                                                                    "Actual Total Time": 0.003,
+                                                                                                                    "Actual Rows": 1,
+                                                                                                                    "Actual Loops": 1,
+                                                                                                                    "Hash Buckets": 1024,
+                                                                                                                    "Original Hash Buckets": 1024,
+                                                                                                                    "Hash Batches": 1,
+                                                                                                                    "Original Hash Batches": 1,
+                                                                                                                    "Peak Memory Usage": 9,
                                                                                                                     "Plans": [
                                                                                                                         {
                                                                                                                             "Node Type": "Seq Scan",
+                                                                                                                            "Plan Rows": 4,
                                                                                                                             "Plan Width": 4,
-                                                                                                                            "Filter": "kind"
+                                                                                                                            "Actual Startup Time": 0.002,
+                                                                                                                            "Actual Total Time": 0.002,
+                                                                                                                            "Actual Rows": 1,
+                                                                                                                            "Actual Loops": 1,
+                                                                                                                            "Filter": "kind",
+                                                                                                                            "Rows Removed by Filter": 3
                                                                                                                         }
                                                                                                                     ]
                                                                                                                 }
@@ -104,17 +197,34 @@
                                                                                                         },
                                                                                                         {
                                                                                                             "Node Type": "Memoize",
+                                                                                                            "Plan Rows": 1,
                                                                                                             "Plan Width": 4,
+                                                                                                            "Actual Startup Time": 0.0,
+                                                                                                            "Actual Total Time": 0.0,
+                                                                                                            "Actual Rows": 1,
+                                                                                                            "Actual Loops": 85941,
                                                                                                             "Cache Key": "status_id",
                                                                                                             "Cache Mode": "logical",
+                                                                                                            "Cache Hits": 85939,
+                                                                                                            "Cache Misses": 2,
+                                                                                                            "Cache Evictions": 0,
+                                                                                                            "Cache Overflows": 0,
+                                                                                                            "Peak Memory Usage": 1,
                                                                                                             "Plans": [
                                                                                                                 {
                                                                                                                     "Node Type": "Index Scan",
                                                                                                                     "Scan Direction": "Forward",
                                                                                                                     "Index Name": "comp_cast_type_pkey",
+                                                                                                                    "Plan Rows": 1,
                                                                                                                     "Plan Width": 4,
+                                                                                                                    "Actual Startup Time": 0.001,
+                                                                                                                    "Actual Total Time": 0.001,
+                                                                                                                    "Actual Rows": 0,
+                                                                                                                    "Actual Loops": 2,
                                                                                                                     "Index Cond": "id",
-                                                                                                                    "Filter": "kind"
+                                                                                                                    "Rows Removed by Index Recheck": 0,
+                                                                                                                    "Filter": "kind",
+                                                                                                                    "Rows Removed by Filter": 0
                                                                                                                 }
                                                                                                             ]
                                                                                                         }
@@ -124,9 +234,16 @@
                                                                                                     "Node Type": "Index Scan",
                                                                                                     "Scan Direction": "Forward",
                                                                                                     "Index Name": "title_pkey",
+                                                                                                    "Plan Rows": 1,
                                                                                                     "Plan Width": 25,
+                                                                                                    "Actual Startup Time": 0.016,
+                                                                                                    "Actual Total Time": 0.016,
+                                                                                                    "Actual Rows": 0,
+                                                                                                    "Actual Loops": 68062,
                                                                                                     "Index Cond": "id",
-                                                                                                    "Filter": "productinyea"
+                                                                                                    "Rows Removed by Index Recheck": 0,
+                                                                                                    "Filter": "productinyea",
+                                                                                                    "Rows Removed by Filter": 1
                                                                                                 }
                                                                                             ]
                                                                                         },
@@ -134,9 +251,16 @@
                                                                                             "Node Type": "Index Scan",
                                                                                             "Scan Direction": "Forward",
                                                                                             "Index Name": "kind_type_pkey",
+                                                                                            "Plan Rows": 1,
                                                                                             "Plan Width": 4,
+                                                                                            "Actual Startup Time": 0.0,
+                                                                                            "Actual Total Time": 0.0,
+                                                                                            "Actual Rows": 1,
+                                                                                            "Actual Loops": 14467,
                                                                                             "Index Cond": "id",
-                                                                                            "Filter": "kind"
+                                                                                            "Rows Removed by Index Recheck": 0,
+                                                                                            "Filter": "kind",
+                                                                                            "Rows Removed by Filter": 0
                                                                                         }
                                                                                     ]
                                                                                 },
@@ -144,9 +268,16 @@
                                                                                     "Node Type": "Index Scan",
                                                                                     "Scan Direction": "Forward",
                                                                                     "Index Name": "movie_id_movie_companies",
+                                                                                    "Plan Rows": 1,
                                                                                     "Plan Width": 12,
+                                                                                    "Actual Startup Time": 0.007,
+                                                                                    "Actual Total Time": 0.008,
+                                                                                    "Actual Rows": 1,
+                                                                                    "Actual Loops": 13304,
                                                                                     "Index Cond": "movie_id",
-                                                                                    "Filter": "note"
+                                                                                    "Rows Removed by Index Recheck": 0,
+                                                                                    "Filter": "note",
+                                                                                    "Rows Removed by Filter": 2
                                                                                 }
                                                                             ]
                                                                         },
@@ -154,8 +285,15 @@
                                                                             "Node Type": "Index Only Scan",
                                                                             "Scan Direction": "Forward",
                                                                             "Index Name": "company_type_pkey",
+                                                                            "Plan Rows": 1,
                                                                             "Plan Width": 4,
-                                                                            "Index Cond": "id"
+                                                                            "Actual Startup Time": 0.0,
+                                                                            "Actual Total Time": 0.0,
+                                                                            "Actual Rows": 1,
+                                                                            "Actual Loops": 14833,
+                                                                            "Index Cond": "id",
+                                                                            "Rows Removed by Index Recheck": 0,
+                                                                            "Heap Fetches": 14833
                                                                         }
                                                                     ]
                                                                 },
@@ -163,9 +301,16 @@
                                                                     "Node Type": "Index Scan",
                                                                     "Scan Direction": "Forward",
                                                                     "Index Name": "company_name_pkey",
+                                                                    "Plan Rows": 1,
                                                                     "Plan Width": 23,
+                                                                    "Actual Startup Time": 0.003,
+                                                                    "Actual Total Time": 0.003,
+                                                                    "Actual Rows": 1,
+                                                                    "Actual Loops": 14833,
                                                                     "Index Cond": "id",
-                                                                    "Filter": "countryde"
+                                                                    "Rows Removed by Index Recheck": 0,
+                                                                    "Filter": "countryde",
+                                                                    "Rows Removed by Filter": 0
                                                                 }
                                                             ]
                                                         },
@@ -173,8 +318,14 @@
                                                             "Node Type": "Index Scan",
                                                             "Scan Direction": "Forward",
                                                             "Index Name": "movie_id_movie_keyword",
+                                                            "Plan Rows": 47,
                                                             "Plan Width": 8,
-                                                            "Index Cond": "movie_id"
+                                                            "Actual Startup Time": 0.006,
+                                                            "Actual Total Time": 0.011,
+                                                            "Actual Rows": 81,
+                                                            "Actual Loops": 14086,
+                                                            "Index Cond": "movie_id",
+                                                            "Rows Removed by Index Recheck": 0
                                                         }
                                                     ]
                                                 },
@@ -182,9 +333,16 @@
                                                     "Node Type": "Index Scan",
                                                     "Scan Direction": "Forward",
                                                     "Index Name": "keyword_pkey",
+                                                    "Plan Rows": 1,
                                                     "Plan Width": 4,
+                                                    "Actual Startup Time": 0.001,
+                                                    "Actual Total Time": 0.001,
+                                                    "Actual Rows": 0,
+                                                    "Actual Loops": 1147691,
                                                     "Index Cond": "id",
-                                                    "Filter": "keyword"
+                                                    "Rows Removed by Index Recheck": 0,
+                                                    "Filter": "keyword",
+                                                    "Rows Removed by Filter": 1
                                                 }
                                             ]
                                         },
@@ -192,9 +350,16 @@
                                             "Node Type": "Index Scan",
                                             "Scan Direction": "Forward",
                                             "Index Name": "movie_id_movie_info",
+                                            "Plan Rows": 2,
                                             "Plan Width": 8,
+                                            "Actual Startup Time": 0.091,
+                                            "Actual Total Time": 0.108,
+                                            "Actual Rows": 1,
+                                            "Actual Loops": 8286,
                                             "Index Cond": "movie_id",
-                                            "Filter": "info"
+                                            "Rows Removed by Index Recheck": 0,
+                                            "Filter": "info",
+                                            "Rows Removed by Filter": 213
                                         }
                                     ]
                                 },
@@ -202,9 +367,16 @@
                                     "Node Type": "Index Scan",
                                     "Scan Direction": "Forward",
                                     "Index Name": "info_type_pkey",
+                                    "Plan Rows": 1,
                                     "Plan Width": 4,
+                                    "Actual Startup Time": 0.0,
+                                    "Actual Total Time": 0.0,
+                                    "Actual Rows": 1,
+                                    "Actual Loops": 9609,
                                     "Index Cond": "id",
-                                    "Filter": "info"
+                                    "Rows Removed by Index Recheck": 0,
+                                    "Filter": "info",
+                                    "Rows Removed by Filter": 0
                                 }
                             ]
                         },
@@ -212,9 +384,16 @@
                             "Node Type": "Index Scan",
                             "Scan Direction": "Forward",
                             "Index Name": "movie_id_movie_info_idx",
+                            "Plan Rows": 3,
                             "Plan Width": 13,
+                            "Actual Startup Time": 0.001,
+                            "Actual Total Time": 0.002,
+                            "Actual Rows": 3,
+                            "Actual Loops": 8493,
                             "Index Cond": "movie_id",
-                            "Filter": "info"
+                            "Rows Removed by Index Recheck": 0,
+                            "Filter": "info",
+                            "Rows Removed by Filter": 0
                         }
                     ]
                 },
@@ -222,9 +401,16 @@
                     "Node Type": "Index Scan",
                     "Scan Direction": "Forward",
                     "Index Name": "info_type_pkey",
+                    "Plan Rows": 1,
                     "Plan Width": 4,
+                    "Actual Startup Time": 0.0,
+                    "Actual Total Time": 0.0,
+                    "Actual Rows": 0,
+                    "Actual Loops": 24803,
                     "Index Cond": "id",
-                    "Filter": "info"
+                    "Rows Removed by Index Recheck": 0,
+                    "Filter": "info",
+                    "Rows Removed by Filter": 1
                 }
             ]
         }

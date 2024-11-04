@@ -2,81 +2,177 @@
     "Node Type": "Aggregate",
     "Strategy": "Plain",
     "Partial Mode": "Finalize",
+    "Plan Rows": 1,
     "Plan Width": 64,
+    "Actual Startup Time": 10187.22,
+    "Actual Total Time": 10192.626,
+    "Actual Rows": 1,
+    "Actual Loops": 1,
     "Plans": [
         {
             "Node Type": "Gather",
+            "Plan Rows": 2,
             "Plan Width": 64,
+            "Actual Startup Time": 10179.892,
+            "Actual Total Time": 10192.616,
+            "Actual Rows": 3,
+            "Actual Loops": 1,
             "Workers Planned": 2,
+            "Workers Launched": 2,
             "Plans": [
                 {
                     "Node Type": "Aggregate",
                     "Strategy": "Plain",
                     "Partial Mode": "Partial",
+                    "Plan Rows": 1,
                     "Plan Width": 64,
+                    "Actual Startup Time": 10181.69,
+                    "Actual Total Time": 10181.718,
+                    "Actual Rows": 1,
+                    "Actual Loops": 3,
+                    "Workers": [],
                     "Plans": [
                         {
                             "Node Type": "Hash Join",
                             "Join Type": "Inner",
+                            "Plan Rows": 191038,
                             "Plan Width": 33,
+                            "Actual Startup Time": 5650.201,
+                            "Actual Total Time": 10181.692,
+                            "Actual Rows": 3,
+                            "Actual Loops": 3,
                             "Inner Unique": true,
                             "Hash Cond": "role_id",
+                            "Workers": [],
                             "Plans": [
                                 {
                                     "Node Type": "Hash Join",
                                     "Join Type": "Inner",
+                                    "Plan Rows": 191038,
                                     "Plan Width": 37,
+                                    "Actual Startup Time": 5650.169,
+                                    "Actual Total Time": 10181.658,
+                                    "Actual Rows": 3,
+                                    "Actual Loops": 3,
                                     "Inner Unique": true,
                                     "Hash Cond": "company_type_id",
+                                    "Workers": [],
                                     "Plans": [
                                         {
                                             "Node Type": "Nested Loop",
                                             "Join Type": "Inner",
+                                            "Plan Rows": 191038,
                                             "Plan Width": 41,
+                                            "Actual Startup Time": 5650.15,
+                                            "Actual Total Time": 10181.635,
+                                            "Actual Rows": 3,
+                                            "Actual Loops": 3,
                                             "Inner Unique": true,
+                                            "Workers": [],
                                             "Plans": [
                                                 {
                                                     "Node Type": "Nested Loop",
                                                     "Join Type": "Inner",
+                                                    "Plan Rows": 391123,
                                                     "Plan Width": 29,
+                                                    "Actual Startup Time": 420.268,
+                                                    "Actual Total Time": 10133.535,
+                                                    "Actual Rows": 260701,
+                                                    "Actual Loops": 3,
                                                     "Inner Unique": false,
                                                     "Join Filter": "id",
+                                                    "Rows Removed by Join Filter": 0,
+                                                    "Workers": [],
                                                     "Plans": [
                                                         {
                                                             "Node Type": "Hash Join",
                                                             "Join Type": "Inner",
+                                                            "Plan Rows": 270882,
                                                             "Plan Width": 29,
+                                                            "Actual Startup Time": 417.037,
+                                                            "Actual Total Time": 672.367,
+                                                            "Actual Rows": 198750,
+                                                            "Actual Loops": 3,
                                                             "Inner Unique": false,
                                                             "Hash Cond": "id",
+                                                            "Workers": [],
                                                             "Plans": [
                                                                 {
                                                                     "Node Type": "Seq Scan",
+                                                                    "Plan Rows": 724179,
                                                                     "Plan Width": 21,
-                                                                    "Filter": "productinyea"
+                                                                    "Actual Startup Time": 0.819,
+                                                                    "Actual Total Time": 148.632,
+                                                                    "Actual Rows": 583011,
+                                                                    "Actual Loops": 3,
+                                                                    "Filter": "productinyea",
+                                                                    "Rows Removed by Filter": 259760,
+                                                                    "Workers": []
                                                                 },
                                                                 {
                                                                     "Node Type": "Hash",
+                                                                    "Plan Rows": 394053,
                                                                     "Plan Width": 8,
+                                                                    "Actual Startup Time": 181.993,
+                                                                    "Actual Total Time": 182.019,
+                                                                    "Actual Rows": 384599,
+                                                                    "Actual Loops": 3,
+                                                                    "Hash Buckets": 262144,
+                                                                    "Original Hash Buckets": 262144,
+                                                                    "Hash Batches": 8,
+                                                                    "Original Hash Batches": 8,
+                                                                    "Peak Memory Usage": 7712,
+                                                                    "Workers": [],
                                                                     "Plans": [
                                                                         {
                                                                             "Node Type": "Hash Join",
                                                                             "Join Type": "Inner",
+                                                                            "Plan Rows": 394053,
                                                                             "Plan Width": 8,
+                                                                            "Actual Startup Time": 12.987,
+                                                                            "Actual Total Time": 134.93,
+                                                                            "Actual Rows": 384599,
+                                                                            "Actual Loops": 3,
                                                                             "Inner Unique": true,
                                                                             "Hash Cond": "company_id",
+                                                                            "Workers": [],
                                                                             "Plans": [
                                                                                 {
                                                                                     "Node Type": "Seq Scan",
-                                                                                    "Plan Width": 12
+                                                                                    "Plan Rows": 1087137,
+                                                                                    "Plan Width": 12,
+                                                                                    "Actual Startup Time": 0.023,
+                                                                                    "Actual Total Time": 38.613,
+                                                                                    "Actual Rows": 869710,
+                                                                                    "Actual Loops": 3,
+                                                                                    "Workers": []
                                                                                 },
                                                                                 {
                                                                                     "Node Type": "Hash",
+                                                                                    "Plan Rows": 50105,
                                                                                     "Plan Width": 4,
+                                                                                    "Actual Startup Time": 12.888,
+                                                                                    "Actual Total Time": 12.888,
+                                                                                    "Actual Rows": 28281,
+                                                                                    "Actual Loops": 3,
+                                                                                    "Hash Buckets": 131072,
+                                                                                    "Original Hash Buckets": 131072,
+                                                                                    "Hash Batches": 1,
+                                                                                    "Original Hash Batches": 1,
+                                                                                    "Peak Memory Usage": 4352,
+                                                                                    "Workers": [],
                                                                                     "Plans": [
                                                                                         {
                                                                                             "Node Type": "Seq Scan",
+                                                                                            "Plan Rows": 50105,
                                                                                             "Plan Width": 4,
-                                                                                            "Filter": "countryde"
+                                                                                            "Actual Startup Time": 0.014,
+                                                                                            "Actual Total Time": 9.505,
+                                                                                            "Actual Rows": 28281,
+                                                                                            "Actual Loops": 3,
+                                                                                            "Filter": "countryde",
+                                                                                            "Rows Removed by Filter": 50051,
+                                                                                            "Workers": []
                                                                                         }
                                                                                     ]
                                                                                 }
@@ -90,24 +186,67 @@
                                                             "Node Type": "Index Scan",
                                                             "Scan Direction": "Forward",
                                                             "Index Name": "movie_id_cast_info",
+                                                            "Plan Rows": 1,
                                                             "Plan Width": 12,
+                                                            "Actual Startup Time": 0.031,
+                                                            "Actual Total Time": 0.047,
+                                                            "Actual Rows": 1,
+                                                            "Actual Loops": 596250,
                                                             "Index Cond": "movie_id",
-                                                            "Filter": "note"
+                                                            "Rows Removed by Index Recheck": 0,
+                                                            "Filter": "note",
+                                                            "Rows Removed by Filter": 34,
+                                                            "Workers": []
                                                         }
                                                     ]
                                                 },
                                                 {
                                                     "Node Type": "Memoize",
+                                                    "Plan Rows": 1,
                                                     "Plan Width": 20,
+                                                    "Actual Startup Time": 0.0,
+                                                    "Actual Total Time": 0.0,
+                                                    "Actual Rows": 0,
+                                                    "Actual Loops": 782104,
                                                     "Cache Key": "person_role_id",
                                                     "Cache Mode": "logical",
+                                                    "Cache Hits": 258170,
+                                                    "Cache Misses": 1,
+                                                    "Cache Evictions": 0,
+                                                    "Cache Overflows": 0,
+                                                    "Peak Memory Usage": 1,
+                                                    "Workers": [
+                                                        {
+                                                            "Worker Number": 0,
+                                                            "Cache Hits": 261546,
+                                                            "Cache Misses": 2,
+                                                            "Cache Evictions": 0,
+                                                            "Cache Overflows": 0,
+                                                            "Peak Memory Usage": 1
+                                                        },
+                                                        {
+                                                            "Worker Number": 1,
+                                                            "Cache Hits": 262383,
+                                                            "Cache Misses": 2,
+                                                            "Cache Evictions": 0,
+                                                            "Cache Overflows": 0,
+                                                            "Peak Memory Usage": 1
+                                                        }
+                                                    ],
                                                     "Plans": [
                                                         {
                                                             "Node Type": "Index Scan",
                                                             "Scan Direction": "Forward",
                                                             "Index Name": "char_name_pkey",
+                                                            "Plan Rows": 1,
                                                             "Plan Width": 20,
-                                                            "Index Cond": "id"
+                                                            "Actual Startup Time": 0.045,
+                                                            "Actual Total Time": 0.045,
+                                                            "Actual Rows": 0,
+                                                            "Actual Loops": 5,
+                                                            "Index Cond": "id",
+                                                            "Rows Removed by Index Recheck": 0,
+                                                            "Workers": []
                                                         }
                                                     ]
                                                 }
@@ -115,11 +254,28 @@
                                         },
                                         {
                                             "Node Type": "Hash",
+                                            "Plan Rows": 710,
                                             "Plan Width": 4,
+                                            "Actual Startup Time": 0.015,
+                                            "Actual Total Time": 0.015,
+                                            "Actual Rows": 4,
+                                            "Actual Loops": 3,
+                                            "Hash Buckets": 1024,
+                                            "Original Hash Buckets": 1024,
+                                            "Hash Batches": 1,
+                                            "Original Hash Batches": 1,
+                                            "Peak Memory Usage": 9,
+                                            "Workers": [],
                                             "Plans": [
                                                 {
                                                     "Node Type": "Seq Scan",
-                                                    "Plan Width": 4
+                                                    "Plan Rows": 710,
+                                                    "Plan Width": 4,
+                                                    "Actual Startup Time": 0.013,
+                                                    "Actual Total Time": 0.014,
+                                                    "Actual Rows": 4,
+                                                    "Actual Loops": 3,
+                                                    "Workers": []
                                                 }
                                             ]
                                         }
@@ -127,11 +283,28 @@
                                 },
                                 {
                                     "Node Type": "Hash",
+                                    "Plan Rows": 710,
                                     "Plan Width": 4,
+                                    "Actual Startup Time": 0.022,
+                                    "Actual Total Time": 0.022,
+                                    "Actual Rows": 12,
+                                    "Actual Loops": 3,
+                                    "Hash Buckets": 1024,
+                                    "Original Hash Buckets": 1024,
+                                    "Hash Batches": 1,
+                                    "Original Hash Batches": 1,
+                                    "Peak Memory Usage": 9,
+                                    "Workers": [],
                                     "Plans": [
                                         {
                                             "Node Type": "Seq Scan",
-                                            "Plan Width": 4
+                                            "Plan Rows": 710,
+                                            "Plan Width": 4,
+                                            "Actual Startup Time": 0.013,
+                                            "Actual Total Time": 0.014,
+                                            "Actual Rows": 12,
+                                            "Actual Loops": 3,
+                                            "Workers": []
                                         }
                                     ]
                                 }

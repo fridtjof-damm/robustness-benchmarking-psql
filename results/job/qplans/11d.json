@@ -2,77 +2,168 @@
     "Node Type": "Aggregate",
     "Strategy": "Plain",
     "Partial Mode": "Simple",
+    "Plan Rows": 1,
     "Plan Width": 96,
+    "Actual Startup Time": 115.249,
+    "Actual Total Time": 117.686,
+    "Actual Rows": 1,
+    "Actual Loops": 1,
     "Plans": [
         {
             "Node Type": "Nested Loop",
             "Join Type": "Inner",
+            "Plan Rows": 69,
             "Plan Width": 60,
+            "Actual Startup Time": 65.157,
+            "Actual Total Time": 98.983,
+            "Actual Rows": 14899,
+            "Actual Loops": 1,
             "Inner Unique": true,
             "Plans": [
                 {
                     "Node Type": "Nested Loop",
                     "Join Type": "Inner",
+                    "Plan Rows": 69,
                     "Plan Width": 64,
+                    "Actual Startup Time": 65.15,
+                    "Actual Total Time": 96.548,
+                    "Actual Rows": 15493,
+                    "Actual Loops": 1,
                     "Inner Unique": true,
                     "Plans": [
                         {
                             "Node Type": "Nested Loop",
                             "Join Type": "Inner",
+                            "Plan Rows": 77,
                             "Plan Width": 49,
+                            "Actual Startup Time": 65.145,
+                            "Actual Total Time": 84.45,
+                            "Actual Rows": 15510,
+                            "Actual Loops": 1,
                             "Inner Unique": false,
                             "Join Filter": "movie_id",
+                            "Rows Removed by Join Filter": 0,
                             "Plans": [
                                 {
                                     "Node Type": "Nested Loop",
                                     "Join Type": "Inner",
+                                    "Plan Rows": 28,
                                     "Plan Width": 29,
+                                    "Actual Startup Time": 65.138,
+                                    "Actual Total Time": 80.594,
+                                    "Actual Rows": 1460,
+                                    "Actual Loops": 1,
                                     "Inner Unique": true,
                                     "Plans": [
                                         {
                                             "Node Type": "Nested Loop",
                                             "Join Type": "Inner",
+                                            "Plan Rows": 28,
                                             "Plan Width": 33,
+                                            "Actual Startup Time": 65.132,
+                                            "Actual Total Time": 80.275,
+                                            "Actual Rows": 1460,
+                                            "Actual Loops": 1,
                                             "Inner Unique": true,
                                             "Join Filter": "movie_id",
+                                            "Rows Removed by Join Filter": 0,
                                             "Plans": [
                                                 {
                                                     "Node Type": "Merge Join",
                                                     "Join Type": "Inner",
+                                                    "Plan Rows": 31,
                                                     "Plan Width": 12,
+                                                    "Actual Startup Time": 64.897,
+                                                    "Actual Total Time": 70.703,
+                                                    "Actual Rows": 1460,
+                                                    "Actual Loops": 1,
                                                     "Inner Unique": false,
                                                     "Merge Cond": "(mk.movie_id = ml.movie_id)",
                                                     "Plans": [
                                                         {
                                                             "Node Type": "Gather Merge",
+                                                            "Plan Rows": 101,
                                                             "Plan Width": 4,
+                                                            "Actual Startup Time": 64.844,
+                                                            "Actual Total Time": 67.826,
+                                                            "Actual Rows": 481,
+                                                            "Actual Loops": 1,
                                                             "Workers Planned": 2,
+                                                            "Workers Launched": 2,
                                                             "Plans": [
                                                                 {
                                                                     "Node Type": "Nested Loop",
                                                                     "Join Type": "Inner",
+                                                                    "Plan Rows": 42,
                                                                     "Plan Width": 4,
+                                                                    "Actual Startup Time": 0.725,
+                                                                    "Actual Total Time": 75.922,
+                                                                    "Actual Rows": 736,
+                                                                    "Actual Loops": 3,
                                                                     "Inner Unique": true,
+                                                                    "Workers": [],
                                                                     "Plans": [
                                                                         {
                                                                             "Node Type": "Index Scan",
                                                                             "Scan Direction": "Forward",
                                                                             "Index Name": "movie_id_movie_keyword",
-                                                                            "Plan Width": 8
+                                                                            "Plan Rows": 1884971,
+                                                                            "Plan Width": 8,
+                                                                            "Actual Startup Time": 0.006,
+                                                                            "Actual Total Time": 15.376,
+                                                                            "Actual Rows": 151676,
+                                                                            "Actual Loops": 3,
+                                                                            "Workers": []
                                                                         },
                                                                         {
                                                                             "Node Type": "Memoize",
+                                                                            "Plan Rows": 1,
                                                                             "Plan Width": 4,
+                                                                            "Actual Startup Time": 0.0,
+                                                                            "Actual Total Time": 0.0,
+                                                                            "Actual Rows": 0,
+                                                                            "Actual Loops": 455027,
                                                                             "Cache Key": "keyword_id",
                                                                             "Cache Mode": "logical",
+                                                                            "Cache Hits": 290,
+                                                                            "Cache Misses": 600,
+                                                                            "Cache Evictions": 0,
+                                                                            "Cache Overflows": 0,
+                                                                            "Peak Memory Usage": 40,
+                                                                            "Workers": [
+                                                                                {
+                                                                                    "Worker Number": 0,
+                                                                                    "Cache Hits": 186989,
+                                                                                    "Cache Misses": 37873,
+                                                                                    "Cache Evictions": 0,
+                                                                                    "Cache Overflows": 0,
+                                                                                    "Peak Memory Usage": 2516
+                                                                                },
+                                                                                {
+                                                                                    "Worker Number": 1,
+                                                                                    "Cache Hits": 192211,
+                                                                                    "Cache Misses": 37064,
+                                                                                    "Cache Evictions": 0,
+                                                                                    "Cache Overflows": 0,
+                                                                                    "Peak Memory Usage": 2462
+                                                                                }
+                                                                            ],
                                                                             "Plans": [
                                                                                 {
                                                                                     "Node Type": "Index Scan",
                                                                                     "Scan Direction": "Forward",
                                                                                     "Index Name": "keyword_pkey",
+                                                                                    "Plan Rows": 1,
                                                                                     "Plan Width": 4,
+                                                                                    "Actual Startup Time": 0.001,
+                                                                                    "Actual Total Time": 0.001,
+                                                                                    "Actual Rows": 0,
+                                                                                    "Actual Loops": 75537,
                                                                                     "Index Cond": "id",
-                                                                                    "Filter": "keyword"
+                                                                                    "Rows Removed by Index Recheck": 0,
+                                                                                    "Filter": "keyword",
+                                                                                    "Rows Removed by Filter": 1,
+                                                                                    "Workers": []
                                                                                 }
                                                                             ]
                                                                         }
@@ -84,7 +175,12 @@
                                                             "Node Type": "Index Scan",
                                                             "Scan Direction": "Forward",
                                                             "Index Name": "movie_id_movie_link",
-                                                            "Plan Width": 8
+                                                            "Plan Rows": 29997,
+                                                            "Plan Width": 8,
+                                                            "Actual Startup Time": 0.01,
+                                                            "Actual Total Time": 1.802,
+                                                            "Actual Rows": 30043,
+                                                            "Actual Loops": 1
                                                         }
                                                     ]
                                                 },
@@ -92,24 +188,48 @@
                                                     "Node Type": "Index Scan",
                                                     "Scan Direction": "Forward",
                                                     "Index Name": "title_pkey",
+                                                    "Plan Rows": 1,
                                                     "Plan Width": 21,
+                                                    "Actual Startup Time": 0.006,
+                                                    "Actual Total Time": 0.006,
+                                                    "Actual Rows": 1,
+                                                    "Actual Loops": 1460,
                                                     "Index Cond": "id",
-                                                    "Filter": "productinyea"
+                                                    "Rows Removed by Index Recheck": 0,
+                                                    "Filter": "productinyea",
+                                                    "Rows Removed by Filter": 0
                                                 }
                                             ]
                                         },
                                         {
                                             "Node Type": "Memoize",
+                                            "Plan Rows": 1,
                                             "Plan Width": 4,
+                                            "Actual Startup Time": 0.0,
+                                            "Actual Total Time": 0.0,
+                                            "Actual Rows": 1,
+                                            "Actual Loops": 1460,
                                             "Cache Key": "link_type_id",
                                             "Cache Mode": "logical",
+                                            "Cache Hits": 1445,
+                                            "Cache Misses": 15,
+                                            "Cache Evictions": 0,
+                                            "Cache Overflows": 0,
+                                            "Peak Memory Usage": 2,
                                             "Plans": [
                                                 {
                                                     "Node Type": "Index Only Scan",
                                                     "Scan Direction": "Forward",
                                                     "Index Name": "link_type_pkey",
+                                                    "Plan Rows": 1,
                                                     "Plan Width": 4,
-                                                    "Index Cond": "id"
+                                                    "Actual Startup Time": 0.001,
+                                                    "Actual Total Time": 0.001,
+                                                    "Actual Rows": 1,
+                                                    "Actual Loops": 15,
+                                                    "Index Cond": "id",
+                                                    "Rows Removed by Index Recheck": 0,
+                                                    "Heap Fetches": 15
                                                 }
                                             ]
                                         }
@@ -119,9 +239,16 @@
                                     "Node Type": "Index Scan",
                                     "Scan Direction": "Forward",
                                     "Index Name": "movie_id_movie_companies",
+                                    "Plan Rows": 3,
                                     "Plan Width": 36,
+                                    "Actual Startup Time": 0.001,
+                                    "Actual Total Time": 0.002,
+                                    "Actual Rows": 11,
+                                    "Actual Loops": 1460,
                                     "Index Cond": "movie_id",
-                                    "Filter": "noteISNOTUL"
+                                    "Rows Removed by Index Recheck": 0,
+                                    "Filter": "noteISNOTUL",
+                                    "Rows Removed by Filter": 2
                                 }
                             ]
                         },
@@ -129,25 +256,49 @@
                             "Node Type": "Index Scan",
                             "Scan Direction": "Forward",
                             "Index Name": "company_name_pkey",
+                            "Plan Rows": 1,
                             "Plan Width": 23,
+                            "Actual Startup Time": 0.001,
+                            "Actual Total Time": 0.001,
+                            "Actual Rows": 1,
+                            "Actual Loops": 15510,
                             "Index Cond": "id",
-                            "Filter": "countryde"
+                            "Rows Removed by Index Recheck": 0,
+                            "Filter": "countryde",
+                            "Rows Removed by Filter": 0
                         }
                     ]
                 },
                 {
                     "Node Type": "Memoize",
+                    "Plan Rows": 1,
                     "Plan Width": 4,
+                    "Actual Startup Time": 0.0,
+                    "Actual Total Time": 0.0,
+                    "Actual Rows": 1,
+                    "Actual Loops": 15493,
                     "Cache Key": "company_type_id",
                     "Cache Mode": "logical",
+                    "Cache Hits": 15491,
+                    "Cache Misses": 2,
+                    "Cache Evictions": 0,
+                    "Cache Overflows": 0,
+                    "Peak Memory Usage": 1,
                     "Plans": [
                         {
                             "Node Type": "Index Scan",
                             "Scan Direction": "Forward",
                             "Index Name": "company_type_pkey",
+                            "Plan Rows": 1,
                             "Plan Width": 4,
+                            "Actual Startup Time": 0.003,
+                            "Actual Total Time": 0.003,
+                            "Actual Rows": 0,
+                            "Actual Loops": 2,
                             "Index Cond": "id",
-                            "Filter": "kindISNOTUL"
+                            "Rows Removed by Index Recheck": 0,
+                            "Filter": "kindISNOTUL",
+                            "Rows Removed by Filter": 0
                         }
                     ]
                 }
