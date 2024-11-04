@@ -226,6 +226,20 @@ def job_profiling(prefix: int, process_func, output_dir: str) -> None:
 ###### here ends the join order benchmark section ############
 ###############################################################
 
+
+###############################################################
+###### here starts the countries example section ############
+###############################################################
+
+def benchmark_country_example():
+    
+
+###############################################################
+###### here ends the countries example section ############
+###############################################################
+
+
+
 def main():
     #job_profiling(0, simplify, 'results/job/qplans/')
     job_profiling(1, simplify,'results/job/qplans/')
