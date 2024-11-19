@@ -31,3 +31,4 @@ config.json
 *.tex
 *.png
 src/plot/3d_costdiagram_test.py
+resources/query_examples/countries.ipynb
