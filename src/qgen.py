@@ -253,3 +253,25 @@ total_prices = [i for i in range(0,105,5)]
 c_acctbal = []
 
 s_acctbal = []
+
+# countries for the country example
+countries = ['Vatican City', 'Christmas Island (Australia)', 'Tokelau (New Zealand)', 'Niue (New Zealand)', 'Norfolk Island (Australia)', 'Falkland Islands (UK)', 'Montserrat (UK)', 'Saint Helena, Ascension and Tristan da Cunha (UK)', 'Saint Pierre and Miquelon (France)', 'Saint Barthélemy (France)', 'Tuvalu', 'Wallis and Futuna (France)', 'Nauru', 'Cook Islands', 'Anguilla (UK)', 'Palau', 'British Virgin Islands (UK)', 'Saint Martin (France)', 'San Marino', 'Gibraltar (UK)', 'Monaco', 'Liechtenstein', 'Sint Maarten (Netherlands)', 'Marshall Islands', 'Northern Mariana Islands (US)', 'Turks and Caicos Islands (UK)', 'American Samoa (US)', 'Saint Kitts and Nevis', 'Faroe Islands (Denmark)', 'South Ossetia', 'Greenland (Denmark)', 'Guernsey (UK)', 'Bermuda (UK)', 'Dominica', 'Cayman Islands (UK)', 'Isle of Man (UK)', 'Andorra', 'U.S. Virgin Islands (US)', 'Tonga', 'Jersey (UK)', 'Antigua and Barbuda', 'Micronesia', 'Aruba (Netherlands)', 'Saint Vincent and the Grenadines', 'Grenada', 'Kiribati', 'Seychelles', 'Guam (US)', 'Curaçao (Netherlands)', 'Saint Lucia', 'Samoa', 'São Tomé and Príncipe', 'Abkhazia', 'Barbados', 'New Caledonia (France)', 'French Polynesia (France)', 'Vanuatu', 'Transnistria', 'Northern Cyprus', 'Iceland', 'Bahamas', 'Belize', 'Brunei', 'Cape Verde', 'Maldives', 'Malta', 'Western Sahara', 'Suriname', 'Montenegro', 'Luxembourg', 'Macau (China)', 'Solomon Islands', 'Guyana', 'Bhutan', 'Fiji', 'Comoros', 'Cyprus', 'Djibouti', 'Eswatini', 'Mauritius', 'Trinidad and Tobago', 'East Timor', 'Estonia', 'Equatorial Guinea', 'Bahrain', 'Kosovo', 'Guinea-Bissau', 'North Macedonia', 'Latvia', 'Slovenia', 'Lesotho', 'Albania', 'Gabon', 'Botswana', 'Gambia', 'Moldova', 'Jamaica', 'Qatar', 'Lithuania', 'Namibia', 'Armenia', 'Puerto Rico (US)', 'Bosnia and Herzegovina', 'Uruguay', 'Mongolia', 'Georgia', 'Eritrea', 'Croatia', 'Panama', 'Kuwait', 'Mauritania', 'Oman', 'Liberia', 'Costa Rica', 'New Zealand', 'Ireland', 'Slovakia', 'Palestine', 'Lebanon', 'Norway', 'Finland', 'Denmark', 'Singapore', 'Paraguay', 'Republic of the Congo', 'El Salvador', 'Bulgaria', 'Central African Republic', 'Serbia', 'Nicaragua', 'Turkmenistan', 'Kyrgyzstan', 'Libya', 'Laos', 'Hong Kong (China)', 'Togo', 'Sierra Leone', 'Switzerland', 'Belarus', 'Austria', 'Hungary', 'Honduras', 'Israel', 'Azerbaijan', 'Tajikistan', 'United Arab Emirates', 'Greece', 'Sweden', 'Portugal', 'Dominican Republic', 'Czech Republic', 'Cuba', 'Jordan', 'Papua New Guinea', 'Belgium', 'Tunisia', 'Bolivia', 'Haiti', 'Burundi', 'Benin', 'Guinea', 'Rwanda', 'Zimbabwe', 'South Sudan', 'Ecuador', 'Cambodia', 'Guatemala', 'Netherlands', 'Senegal', 'Somalia', 'Chad', 'Romania', 'Zambia', 'Chile', 'Kazakhstan', 'Malawi', 'Sri Lanka', 'Mali', 'Taiwan', 'Burkina Faso', 'Syria', 'North Korea', 'Niger', 'Australia', 'Venezuela', 'Cameroon', 'Nepal', 'Ivory Coast', 'Madagascar', 'Saudi Arabia', 'Yemen', 'Mozambique', 'Ghana', 'Malaysia', 'Peru', 'Afghanistan', 'Angola', 'Ukraine', 'Uzbekistan', 'Morocco', 'Poland', 'Canada', 'Iraq', 'Uganda', 'Algeria', 'Argentina', 'Spain', 'Sudan', 'South Korea', 'Kenya', 'Colombia', 'Myanmar', 'Italy', 'Tanzania', 'South Africa', 'Thailand', 'United Kingdom', 'France', 'Germany', 'Turkey', 'Iran', 'Vietnam', 'Democratic Republic of the Congo', 'Egypt', 'Ethiopia', 'Philippines', 'Japan', 'Mexico', 'Russia', 'Bangladesh', 'Brazil', 'Nigeria', 'Pakistan', 'Indonesia', 'United States', 'India', 'China']
+
+## Country example
+def generate_country_queries() -> list[str]: 
+   # template = "SELECT id, country FROM users WHERE country = '{COUNTRY}';"
+    template = "SELECT id, country FROM users WHERE country LIKE '{COUNTRY}' LIMIT 10;"
+    queries: list[str] = []
+    for idx, country in enumerate(countries):
+        queries.append(template.format(COUNTRY = country))
+    return queries
+#print(generate_country_queries()[0])
+
+# skew example
+def generate_skew_queries() -> list[str]:
+    template = "SELECT a,b FROM data WHERE a = '{A}' AND b = '{B}';"
+    queries: list[str] = []
+    for i in range(1, 19):
+        for j in range(100, 14500, 100):
+            queries.append(template.format(A = i, B = j))
+    return queries
