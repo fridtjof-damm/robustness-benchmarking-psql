@@ -30,3 +30,4 @@ config.json
 *.bib
 *.tex
 *.png
+src/plot/3d_costdiagram_test.py
