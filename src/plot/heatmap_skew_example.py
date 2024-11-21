@@ -23,6 +23,23 @@ with open(FILE, 'r') as csvfile:
         b_value = int(filter_dict['b'])
         data.append((a_value, b_value, execution_time))
 
+# Find the minimum and maximum execution times and their corresponding a, b values
+min_execution_time = float('inf')
+max_execution_time = float('-inf')
+min_a, min_b = None, None
+max_a, max_b = None, None
+
+for a_value, b_value, execution_time in data:
+    if execution_time < min_execution_time:
+        min_execution_time = execution_time
+        min_a, min_b = a_value, b_value
+    if execution_time > max_execution_time:
+        max_execution_time = execution_time
+        max_a, max_b = a_value, b_value
+
+print(f"Minimum execution time: {min_execution_time} at a={min_a}, b={min_b}")
+print(f"Maximum execution time: {max_execution_time} at a={max_a}, b={max_b}")
+
 # Get unique values for a and b and sort them numerically
 a_values = sorted(set(item[0] for item in data))
 b_values = sorted(set(item[1] for item in data))
@@ -36,8 +53,7 @@ for item in data:
     b_index = b_values.index(item[1])
     heatmap_data[b_index, a_index] = item[2]
 
-# Print the shape of the heatmap_data array
-print(f"Original grid shape: {heatmap_data.shape}")
+
 
 # Downsample the grid by a factor of 5 (reduce the number of data points by 25)
 downsample_factor = 1
@@ -71,28 +87,15 @@ ax.set_ylabel('b')
 cbar = fig.colorbar(cax)
 cbar.set_label('Execution Time in ms')
 
-# Find min, max, and median execution times
-min_exec_time = np.min(heatmap_data_downsampled)
-max_exec_time = np.max(heatmap_data_downsampled)
-median_exec_time = np.median(heatmap_data_downsampled)
-
-# Find the positions of min, max, and median execution times
-min_pos = np.unravel_index(np.argmin(heatmap_data_downsampled), heatmap_data_downsampled.shape)
-max_pos = np.unravel_index(np.argmax(heatmap_data_downsampled), heatmap_data_downsampled.shape)
-median_pos = np.unravel_index(np.argmin(np.abs(heatmap_data_downsampled - median_exec_time)), heatmap_data_downsampled.shape)
-
-# Annotate min, max, and median execution times on the heatmap
-ax.text(min_pos[1], min_pos[0], f'min\n{min_exec_time:.3f} ms', ha='center', va='center', color='black', fontsize=12)
-ax.text(max_pos[1], max_pos[0], f'max\n{max_exec_time:.3f} ms', ha='center', va='bottom', color='black', fontsize=12)
-ax.text(median_pos[1], median_pos[0], f'median\n{median_exec_time:.3f} ms', ha='center', va='center', color='black', fontsize=12)
-
 plt.title('Execution Time Heatmap for a and b values')
 plt.tight_layout()
 
-
+# Ensure the output directory exists
 output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots'
 os.makedirs(output_dir, exist_ok=True)
 
+# Save the plot
 output_path = os.path.join(output_dir, 'heatmap_skew_example.png')
 plt.savefig(output_path, dpi=600, bbox_inches='tight')
 plt.show()
+
