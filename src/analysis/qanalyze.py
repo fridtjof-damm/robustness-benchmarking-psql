@@ -367,12 +367,13 @@ def query_nodes_info(directory: str) -> dict[int, tuple[list[str], list[List[Tup
 def query_nodes_info_to_csv(query_info: dict[int, tuple[list[str], list[List[Tuple[str, str]]], list[float]]], output_dir: str, output_file: str) -> None:
     data = []
     for query_id, (node_types, filters, execution_times) in query_info.items():
-        for node_type, node_filters, execution_time in zip(node_types, filters, execution_times):
+        combined_node_types = ', '.join(node_types)
+        for node_filters, execution_time in zip(filters, execution_times):
             combined_filters = ','.join([f'({key},{value})' for key, value in node_filters])
-            data.append((query_id, node_type, combined_filters, execution_time))
+            data.append((query_id, combined_node_types, combined_filters, execution_time))
 
     # Convert the list of tuples into a DataFrame
-    df = pd.DataFrame(data, columns=['Query ID', 'Node Type', 'Filters', 'Execution Time'])
+    df = pd.DataFrame(data, columns=['Query ID', 'Node Types', 'Filters', 'Execution Time'])
 
     # Ensure the output directory exists
     os.makedirs(output_dir, exist_ok=True)
@@ -428,6 +429,7 @@ def main():
     output_dir = 'Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example'
     output_file = 'skew_example.csv'
     query_info = query_nodes_info(directory)
+    print(query_info)
     query_nodes_info_to_csv(query_info, output_dir, output_file)
 
 if __name__ == '__main__':
