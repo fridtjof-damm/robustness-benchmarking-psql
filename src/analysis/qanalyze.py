@@ -399,11 +399,11 @@ def profiling_skew_example() -> None:
         query = prefix + query
         cur.execute(query)
         plan = cur.fetchall()
-        #plan[0][0][0]['Plan'] = simplify(plan[0][0][0]['Plan'])
+        plan[0][0][0]['Plan'] = simplify(plan[0][0][0]['Plan'])
 
         plans.append((str(idx+1),plan))
     
-    output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example_plans'
+    output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example_plans_simplified'
     os.makedirs(output_dir, exist_ok=True)
 
     write_plans_to_file(plans, output_dir)
@@ -421,7 +421,7 @@ def main():
     #print(query_nodes_info('/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified')[236])
     
     # run skew example profiling
-    #profiling_skew_example()
+    profiling_skew_example()
     #print(query_nodes_info('/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example_plans_simplified'))
     
     # skew to csv 
