@@ -53,32 +53,27 @@ for item in data:
     b_index = b_values.index(item[1])
     heatmap_data[b_index, a_index] = item[2]
 
-
-
-# Downsample the grid by a factor of 5 (reduce the number of data points by 25)
-downsample_factor = 1
-heatmap_data_downsampled = zoom(heatmap_data, (1/downsample_factor, 1/downsample_factor))
-
 # Normalize the execution times for color mapping
-norm = mpl.colors.Normalize(vmin=np.min(heatmap_data_downsampled), vmax=np.max(heatmap_data_downsampled))
+norm = mpl.colors.Normalize(vmin=np.min(heatmap_data), vmax=np.max(heatmap_data))
 cmap = LinearSegmentedColormap.from_list('My color Map', colors=['green', 'yellow', 'red'])
 
 # Plot the heatmap
 fig, ax = plt.subplots(figsize=(10, 8))
-cax = ax.matshow(heatmap_data_downsampled, cmap=cmap, norm=norm, aspect='auto')
+cax = ax.matshow(heatmap_data, cmap=cmap, norm=norm, aspect='auto')
 
 # Invert the y-axis to have the lowest values at the bottom
 ax.invert_yaxis()
 
 # Set axis labels
-ax.set_xticks(np.arange(len(a_values) // downsample_factor))
-ax.set_xticklabels(np.linspace(min(a_values), max(a_values), len(a_values) // downsample_factor, dtype=int), rotation=90)
+ax.set_xticks(np.arange(len(a_values)))
+ax.set_xticklabels(a_values, rotation=0)  # Set rotation to 0 for horizontal alignment
 ax.xaxis.set_ticks_position('bottom')  # Move x-axis labels to the bottom
 
-# Set y-axis labels to show only 5 numbers over the whole range
-y_ticks = np.linspace(0, len(b_values) // downsample_factor - 1, 5, dtype=int)
+# Set y-axis labels to show values in steps of 100 and only show 10 values
+y_step = max(1, len(b_values) // 10)
+y_ticks = np.arange(0, len(b_values), y_step)
 ax.set_yticks(y_ticks)
-ax.set_yticklabels(np.linspace(min(b_values), max(b_values), 5, dtype=int))
+ax.set_yticklabels([b_values[i] for i in y_ticks])
 
 ax.set_xlabel('a')
 ax.set_ylabel('b')
