@@ -1,7 +1,7 @@
 import os
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.colors import Normalize
+from matplotlib.colors import Normalize, LinearSegmentedColormap
 from src.analysis.qanalyze import query_nodes_info, calc_qerror
 
 # Example usage
@@ -45,12 +45,15 @@ for query_id, qerror in qerrors.items():
         if a_value is not None and b_value is not None:
             a_index = a_values.index(a_value)
             b_index = b_values.index(b_value)
-            heatmap_data[b_index, a_index] = min(qerror, percentile_95_qerror)  # Clip q-error values to the 90th percentile
+            heatmap_data[b_index, a_index] = min(qerror, percentile_95_qerror)  # Clip q-error values to the 95th percentile
+
+# Define the green-to-red color map
+cmap = LinearSegmentedColormap.from_list('GreenRed', ['green', 'yellow', 'red'])
 
 # Plot the heatmap with linear normalization
 fig, ax = plt.subplots(figsize=(10, 8))
 norm = Normalize(vmin=np.min(heatmap_data[heatmap_data > 0]), vmax=percentile_95_qerror)
-cax = ax.matshow(heatmap_data, cmap='viridis', norm=norm, aspect='auto')
+cax = ax.matshow(heatmap_data, cmap=cmap, norm=norm, aspect='auto')
 
 # Invert the y-axis to have the lowest values at the bottom
 ax.invert_yaxis()
@@ -84,12 +87,14 @@ plt.tight_layout()
 plt.grid(True, which='major', linestyle='-', alpha=0.3)
 plt.grid(True, which='minor', linestyle='-', alpha=0.1)
 
-# Show the plot
-plt.show()
-
-output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots'
+# Ensure the output directory exists
+output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots/pdf'
 os.makedirs(output_dir, exist_ok=True)
 
-# Save the plot
-# plt.savefig('qerror_heatmap.png', dpi=300, bbox_inches='tight')
+# Save the plot as a PDF
+output_path = os.path.join(output_dir, 'qerror_heatmap_rg.pdf')
+plt.savefig(output_path, format='pdf', bbox_inches='tight')
+
+# Show the plot
+plt.show()
 plt.close()

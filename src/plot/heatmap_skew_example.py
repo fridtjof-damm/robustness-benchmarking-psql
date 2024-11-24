@@ -1,26 +1,26 @@
+import os
 from matplotlib.patches import Polygon
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from scipy.stats import mstats
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
-import csv
-import os
+from src.analysis.qanalyze import query_nodes_info
 
-# Source file
-FILE = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example/skew_example.csv'
+# Example usage
+directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example_plans_simplified'
+query_info = query_nodes_info(directory)
 
-# Read the CSV file and extract filters and execution times
+# Extract a, b, and execution time values from query_info
 data = []
-with open(FILE, 'r') as csvfile:
-    reader = csv.DictReader(csvfile)
-    for row in reader:
-        filters = row['Filters']
-        execution_time = float(row['Execution Time'])
-        filter_dict = dict(item.strip('()').split(',') for item in filters.split('),('))
-        a_value = int(filter_dict['a'])
-        b_value = int(filter_dict['b'])
-        data.append((a_value, b_value, execution_time))
+for query_id, (node_types, filters, execution_times, cardinalities) in query_info.items():
+    for filter_list in filters:
+        filter_dict = {k: int(v) for k, v in filter_list}
+        if 'a' in filter_dict and 'b' in filter_dict:
+            a_value = filter_dict['a']
+            b_value = filter_dict['b']
+            execution_time = sum(execution_times) / len(execution_times)  # Average execution time
+            data.append((a_value, b_value, execution_time))
 
 # Find the minimum and maximum execution times and their corresponding a, b values
 min_execution_time = float('inf')
@@ -37,10 +37,7 @@ for a_value, b_value, execution_time in data:
         max_a, max_b = a_value, b_value
 
 print(f"Minimum execution time: {min_execution_time} at a={min_a}, b={min_b}")
-print(f"Maximum execution time: {max_execution_time} at a={max_a}, b={max_b}")# Inspect specific data points and queries associated with the green outliers
-
-
-
+print(f"Maximum execution time: {max_execution_time} at a={max_a}, b={max_b}")
 
 # Get unique values for a and b and sort them numerically
 a_values = sorted(set(item[0] for item in data))
@@ -49,33 +46,22 @@ b_values = sorted(set(item[1] for item in data))
 # Create a grid for the heatmap
 heatmap_data = np.zeros((len(b_values), len(a_values)))
 
-# Populate the grid with execution times
-for item in data:
-    a_index = a_values.index(item[0])
-    b_index = b_values.index(item[1])
-    heatmap_data[b_index, a_index] = item[2]
+# Calculate the 68th percentile execution time
+execution_time_values = [item[2] for item in data]
+percentile_68_execution_time = np.percentile(execution_time_values, 68)
 
-# Calculate the 10th percentile of execution times
-percentile_10 = np.percentile([item[2] for item in data], 10)
+# Populate the grid with execution time values, clipping at the 68th percentile
+for a_value, b_value, execution_time in data:
+    a_index = a_values.index(a_value)
+    b_index = b_values.index(b_value)
+    heatmap_data[b_index, a_index] = min(execution_time, percentile_68_execution_time)  # Clip execution time values
 
-# Calculate Winsorized mean, trimming top 10% of values
-winsorized_mean = mstats.winsorize(np.array([item[2] for item in data]), limits=(0, 0.10)).mean()
+# Define the green-to-red color map
+cmap = LinearSegmentedColormap.from_list('GreenRed', ['green', 'yellow', 'red'])
 
-outliers = [item for item in data if item[2] < percentile_10 or item[2] > winsorized_mean]
-print("Outliers:")
-for outlier in outliers:
-    if outlier:
-        print("otliers found:")
-        print(outlier)
-if not outliers:
-    print("none found")
-
-# Normalize the execution times for color mapping, cutting out the lower 10% and using Winsorized mean for upper bound
-norm = mpl.colors.Normalize(vmin=percentile_10, vmax=winsorized_mean)
-cmap = LinearSegmentedColormap.from_list('My color Map', colors=['green', 'yellow', 'orange', 'red'])
-
-# Plot the heatmap
+# Plot the heatmap with linear normalization
 fig, ax = plt.subplots(figsize=(10, 8))
+norm = mpl.colors.Normalize(vmin=np.min(heatmap_data[heatmap_data > 0]), vmax=percentile_68_execution_time)
 cax = ax.matshow(heatmap_data, cmap=cmap, norm=norm, aspect='auto')
 
 # Invert the y-axis to have the lowest values at the bottom
@@ -86,29 +72,37 @@ ax.set_xticks(np.arange(len(a_values)))
 ax.set_xticklabels(a_values, rotation=0)  # Set rotation to 0 for horizontal alignment
 ax.xaxis.set_ticks_position('bottom')  # Move x-axis labels to the bottom
 
-# Set y-axis labels to show values in steps of 100 and only show 10 values
+# Set y-axis labels to show only 10 values over the range, divisible by 100
 y_step = max(1, len(b_values) // 10)
 y_ticks = np.arange(0, len(b_values), y_step)
+y_labels = [b_values[i] for i in y_ticks]
+y_labels = [label if label % 100 == 0 else '' for label in y_labels]  # Ensure labels are divisible by 100
 ax.set_yticks(y_ticks)
-ax.set_yticklabels([b_values[i] for i in y_ticks])
+ax.set_yticklabels(y_labels)
 
 ax.set_xlabel('a')
 ax.set_ylabel('b')
 
 # Add color bar
 cbar = fig.colorbar(cax)
-cbar.set_label('Execution Time in ms')
-cbar.ax.tick_params(size=0)  # Remove tick marks from color bar
+cbar.set_label('Execution Time')
 
-plt.title('Execution Time Heatmap for a and b values')
+
 plt.tight_layout()
 
-# Ensure the output directory exists
-output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots'
-os.makedirs(output_dir, exist_ok=True)
+# Customize grid
+plt.grid(True, which='major', linestyle='-', alpha=0.3)
+plt.grid(True, which='minor', linestyle='-', alpha=0.1)
 
 # Save the plot
-output_path = os.path.join(output_dir, 'heatmap_skew_example.png')
-plt.savefig(output_path, dpi=600, bbox_inches='tight')
-plt.show()
+# Ensure the output directory exists
+output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots/pdf'
+os.makedirs(output_dir, exist_ok=True)
+
+# Save the plot as a PDF
+output_path = os.path.join(output_dir, 'execution_time_heatmap_68_clip.pdf')
+plt.savefig(output_path, format='pdf', bbox_inches='tight')
+
+
+plt.close()
 

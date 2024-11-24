@@ -6,8 +6,10 @@ import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
 from src.qgen import segments, dates_03
 from src.utils.utils import csv_to_data_list
+import os
+
 # source file
-FILE = 'results/7.csv'
+FILE = 'results/parameters_sf10/7.csv'
 
 axis_len = csv_to_data_list(FILE)[1]
 # data to plot
@@ -15,16 +17,25 @@ data = csv_to_data_list(FILE)[0]
 
 print(len(data))
 
+# Extract the third column values for clipping
+values = [i[2] for i in data]
+
+# Calculate the 98th percentile value
+percentile_98_value = np.percentile(values, 98)
+
+# Clip the values at the 98th percentile
+clipped_data = [(item[0], item[1], min(item[2], percentile_98_value)) for item in data]
+
 # get min and max to normalize color coding
-print(min([i[2] for i in data]), max([i[2] for i in data]))
-norm = mpl.colors.Normalize(min([i[2] for i in data]), max([i[2] for i in data]))
+print(min([i[2] for i in clipped_data]), max([i[2] for i in clipped_data]))
+norm = mpl.colors.Normalize(min([i[2] for i in clipped_data]), max([i[2] for i in clipped_data]))
 
 
 cmap = LinearSegmentedColormap.from_list('My color Map', colors=['green', 'yellow', 'red'])
 
 fig, ax = plt.subplots(1,1)
 
-for item in data:
+for item in clipped_data:
     y = item[0]
     x = item[1]
     
@@ -51,5 +62,14 @@ ax.set_yticklabels(values_y) """
 ax.set_ylabel('country')
 
 plt.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)
-plt.savefig('plots/7.png')
+
+# Ensure the output directory exists
+output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/plots'
+os.makedirs(output_dir, exist_ok=True)
+
+# Save the plot as a PNG
+output_path = os.path.join(output_dir, '7_clip_98.png')
+plt.savefig(output_path, format='png', bbox_inches='tight')
+
 plt.show()
+plt.close()

@@ -1,7 +1,7 @@
 import csv
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.colors import Normalize
+from matplotlib.colors import Normalize, LinearSegmentedColormap
 import os
 
 # Source file
@@ -46,20 +46,23 @@ b_values = sorted(set(item[1] for item in data))
 # Create a grid for the heatmap
 heatmap_data = np.zeros((len(b_values), len(a_values)))
 
-# Calculate the 85th percentile cardinality
+# Calculate the 68th percentile cardinality
 cardinality_values = [item[2] for item in data]
-percentile_85_cardinality = np.percentile(cardinality_values, 85)
+percentile_68_cardinality = np.percentile(cardinality_values, 68)
 
-# Populate the grid with cardinality values, clipping at the 85th percentile
+# Populate the grid with cardinality values, clipping at the 68th percentile
 for a_value, b_value, cardinality in data:
     a_index = a_values.index(a_value)
     b_index = b_values.index(b_value)
-    heatmap_data[b_index, a_index] = min(cardinality, percentile_85_cardinality)  # Clip cardinality values
+    heatmap_data[b_index, a_index] = min(cardinality, percentile_68_cardinality)  # Clip cardinality values
+
+# Define the green-to-red color map
+cmap = LinearSegmentedColormap.from_list('GreenRed', ['green', 'yellow', 'red'])
 
 # Plot the heatmap with linear normalization
 fig, ax = plt.subplots(figsize=(10, 8))
-norm = Normalize(vmin=np.min(heatmap_data[heatmap_data > 0]), vmax=percentile_85_cardinality)
-cax = ax.matshow(heatmap_data, cmap='viridis', norm=norm, aspect='auto')
+norm = Normalize(vmin=np.min(heatmap_data[heatmap_data > 0]), vmax=percentile_68_cardinality)
+cax = ax.matshow(heatmap_data, cmap=cmap, norm=norm, aspect='auto')
 
 # Invert the y-axis to have the lowest values at the bottom
 ax.invert_yaxis()
@@ -82,19 +85,21 @@ ax.set_ylabel('b')
 
 # Add color bar
 cbar = fig.colorbar(cax)
-cbar.set_label('Cardinality')
 
-plt.title('Cardinality Heatmap for a and b values')
 plt.tight_layout()
 
 # Customize grid
 plt.grid(True, which='major', linestyle='-', alpha=0.3)
 plt.grid(True, which='minor', linestyle='-', alpha=0.1)
 
-# Show the plot
-plt.show()
+output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots/pdf'
+os.makedirs(output_dir, exist_ok=True)
 
-# Save the plot
-# plt.savefig('cardinality_heatmap.png', dpi=300, bbox_inches='tight')
+# Save the plot as a PDF
+output_path = os.path.join(output_dir, 'res_cardinalities_heatmap_68_clip.pdf')
+plt.savefig(output_path, format='pdf', bbox_inches='tight')
+
+# Show the plot
+#plt.show()
 plt.close()
 
