@@ -151,7 +151,7 @@ def clean_condition(condition: str) -> str:
 def psql_tpch_profiling(query_id, write_to_file=False):
     conn = dc.get_db_connection('dummydb')
     cur = conn.cursor()
-    prefix = 'EXPLAIN (FORMAT JSON) '
+    prefix = 'EXPLAIN (FORMAT JSON, ANALYZE) '
     plans = []
 
     # run queries and get the json format query plans
@@ -171,7 +171,6 @@ def psql_tpch_profiling(query_id, write_to_file=False):
         # persist plans to file if intended
         if write_to_file:
             write_qp_to_file(query_id, i, s)
-
     return simplified
 
 # persist query plans to files
@@ -184,20 +183,6 @@ def write_qp_to_file(query_id, plan_index, plan_data):
     with open(filename, mode='w', encoding='UTF-8') as file:
         file.write(json.dumps(plan_data, indent=4))
 
-# get all tpch queries to dict for comparison
-# returns dictionary of all 
-def all_qplans_tpch_to_dict(write_to_file=False):
-    all_qplans_tpch = {}
-    for query_id in query_ids:
-        qp_key = f'Q{query_id}'
-        try: 
-            simplified_plans = psql_tpch_profiling(query_id, write_to_file)
-            all_qplans_tpch[qp_key] = simplified_plans
-            print(f'Success proccesing {qp_key}')
-        except Exception as e:
-            print(f'Failed to process {qp_key}: {e}')
-    return all_qplans_tpch
-#all_qplans_tpch_to_dict(write_to_file=True)
 
 # categorizing  query plans
 def compare_query_plans(query_plans):
