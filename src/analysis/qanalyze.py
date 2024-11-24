@@ -10,7 +10,6 @@ import src.utils.db_connector as dc
 import pprint as pp
 from typing import List, Tuple
 import pandas as pd
-from src.analysis.qanalyze import query_nodes_info
 
 
 # db config
