@@ -198,10 +198,6 @@ def profile_parameterized_queries(query_id):
     # Print query nodes info
     print(query_info)
 
-# Example usage
-if __name__ == "__main__":
-    query_id = 1  # Replace with the desired query ID
-    profile_parameterized_queries(query_id)
 
 ###############################################################
 ###### here begins the join order benchmark section ##########
@@ -447,8 +443,10 @@ def main():
     ############################
     ############################
     ## standard tpch section ###
-    query_id = 8
-    profile_parameterized_queries(query_id)  # Replace with the desired query ID
+    query_id = 1 
+    for i in range(1,23):
+        profile_parameterized_queries(i)
+
 
 
     query_info 
