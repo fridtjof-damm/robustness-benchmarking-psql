@@ -5,7 +5,6 @@ import psycopg2 as pg
 from psycopg2.extensions import cursor
 import src.qrun as qr
 import src.qgen as qg
-import src.analysis.dummy.dummy_data_gen as ddg
 from src.utils.utils import extract_number
 import src.utils.db_connector as dc
 import pprint as pp
