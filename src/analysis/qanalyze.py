@@ -127,7 +127,9 @@ def clean_condition(condition: str) -> str:
     cleaned = cleaned.replace(')', '')  # Remove all remaining closing parentheses
     return cleaned
 
-
+###############################################################
+###### here begins the standard tpch  section ##########
+###############################################################
 
 def psql_tpch_profiling(query_id, write_to_file=False):
     conn = dc.get_db_connection('dummydb')
