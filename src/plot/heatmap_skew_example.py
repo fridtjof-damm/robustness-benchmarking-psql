@@ -1,12 +1,11 @@
-# based on https://git.tu-berlin.de/halfpap/heatmap
 from matplotlib.patches import Polygon
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+from scipy.stats import mstats
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
 import csv
 import os
-from scipy.ndimage import zoom
 
 # Source file
 FILE = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example/skew_example.csv'
@@ -38,7 +37,10 @@ for a_value, b_value, execution_time in data:
         max_a, max_b = a_value, b_value
 
 print(f"Minimum execution time: {min_execution_time} at a={min_a}, b={min_b}")
-print(f"Maximum execution time: {max_execution_time} at a={max_a}, b={max_b}")
+print(f"Maximum execution time: {max_execution_time} at a={max_a}, b={max_b}")# Inspect specific data points and queries associated with the green outliers
+
+
+
 
 # Get unique values for a and b and sort them numerically
 a_values = sorted(set(item[0] for item in data))
@@ -53,9 +55,24 @@ for item in data:
     b_index = b_values.index(item[1])
     heatmap_data[b_index, a_index] = item[2]
 
-# Normalize the execution times for color mapping
-norm = mpl.colors.Normalize(vmin=np.min(heatmap_data), vmax=np.max(heatmap_data))
-cmap = LinearSegmentedColormap.from_list('My color Map', colors=['green', 'yellow', 'red'])
+# Calculate the 10th percentile of execution times
+percentile_10 = np.percentile([item[2] for item in data], 10)
+
+# Calculate Winsorized mean, trimming top 10% of values
+winsorized_mean = mstats.winsorize(np.array([item[2] for item in data]), limits=(0, 0.10)).mean()
+
+outliers = [item for item in data if item[2] < percentile_10 or item[2] > winsorized_mean]
+print("Outliers:")
+for outlier in outliers:
+    if outlier:
+        print("otliers found:")
+        print(outlier)
+if not outliers:
+    print("none found")
+
+# Normalize the execution times for color mapping, cutting out the lower 10% and using Winsorized mean for upper bound
+norm = mpl.colors.Normalize(vmin=percentile_10, vmax=winsorized_mean)
+cmap = LinearSegmentedColormap.from_list('My color Map', colors=['green', 'yellow', 'orange', 'red'])
 
 # Plot the heatmap
 fig, ax = plt.subplots(figsize=(10, 8))
@@ -81,6 +98,7 @@ ax.set_ylabel('b')
 # Add color bar
 cbar = fig.colorbar(cax)
 cbar.set_label('Execution Time in ms')
+cbar.ax.tick_params(size=0)  # Remove tick marks from color bar
 
 plt.title('Execution Time Heatmap for a and b values')
 plt.tight_layout()
