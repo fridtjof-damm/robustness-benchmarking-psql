@@ -183,7 +183,6 @@ def write_qp_to_file(query_id, plan_index, plan_data):
     with open(filename, mode='w', encoding='UTF-8') as file:
         file.write(json.dumps(plan_data, indent=4))
 
-
 # categorizing  query plans
 def compare_query_plans(query_plans):
     #categories of query plans
@@ -200,17 +199,6 @@ def compare_query_plans(query_plans):
             categories.append([plan])
     return categories
 
-def test_dump() -> None:
-    q9_plans = psql_tpch_profiling(9)
-    result = compare_query_plans(q9_plans)
-    total_plans = sum(len(category) for category in result)
-
-    for i, category in enumerate(result):
-        frequency = (len(category) / total_plans) * 100
-        print(f"Plan Category {i}: {len(category)} plans, frequency: {frequency:.4f}%")
-
-    print(f"\nTotal categories: {len(result)}")
-    print(f"Total plans: {sum(len(category) for category in result)}") 
 
 ###############################################################
 ###### here begins the join order benchmark section ##########
