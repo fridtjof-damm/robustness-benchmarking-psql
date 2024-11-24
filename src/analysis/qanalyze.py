@@ -11,6 +11,7 @@ import src.utils.db_connector as dc
 import pprint as pp
 from typing import List, Tuple
 import pandas as pd
+from src.analysis.qanalyze import query_nodes_info
 
 
 # db config
@@ -182,6 +183,27 @@ def compare_query_plans(query_plans):
             categories.append([plan])
     return categories
 
+###############################################################
+###### new function to profile parameterized queries ##########
+###############################################################
+
+def profile_parameterized_queries(query_id):
+    # Profile the parameterized queries
+    simplified_plans = psql_tpch_profiling(query_id, write_to_file=True)
+
+    # Directory where the plans are saved
+    directory = f'results/tpch/qplans/q{query_id}'
+
+    # Get query nodes info
+    query_info = query_nodes_info(directory)
+
+    # Print query nodes info
+    print(query_info)
+
+# Example usage
+if __name__ == "__main__":
+    query_id = 1  # Replace with the desired query ID
+    profile_parameterized_queries(query_id)
 
 ###############################################################
 ###### here begins the join order benchmark section ##########
@@ -398,42 +420,40 @@ def profiling_skew_example() -> None:
 
 
 def main():
+    ##################
+    ## job section ###
     #job_profiling(0, simplify, 'results/job/qplans/')
     #job_profiling(1, simplify,'results/job/qplans/')
+    #################
+    ############################
+    ## country example #########
     #profiling_country_example()
     #print(query_nodes_info('/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified')[1])
     #print(query_nodes_info('/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified')[236])
-    
-    # run skew example profiling
-    #profiling_skew_example()
-    #print(query_nodes_info('/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example_plans_simplified'))
-    
+    ############################
+    ############################
+    #### skew example ##########
+    # profiling_skew_example()
+    # print(query_nodes_info('/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example_plans_simplified'))
     # skew to csv 
-
-    directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example_plans_simplified'
-    output_dir = '/results/fd/skew_example'
-    output_file = 'skew_example.csv'
-    query_info = query_nodes_info(directory)
+    #directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example_plans_simplified'
+    #output_dir = '/results/fd/skew_example'
+    #output_file = 'skew_example.csv'
+    #query_info = query_nodes_info(directory)
     #print(query_info)
     #query_nodes_info_to_csv(query_info, output_dir, output_file)
-
     # Calculate qerrors
-    qerrors = calc_qerror(query_info)
-    print(min(qerrors.values()))
-    print(max(qerrors.values()))
+    #qerrors = calc_qerror(query_info)
+    #print(min(qerrors.values()))
+    #print(max(qerrors.values()))
+    ############################
+    ############################
+    ## standard tpch section ###
+    query_id = 8
+    profile_parameterized_queries(query_id)  # Replace with the desired query ID
 
-    # list out keys and values separately
-    key_list = list(qerrors.keys())
-    val_list = list(qerrors.values())
 
-    # print key with val 100
-    min_key = val_list.index(min(qerrors.values()))
-    max_key = val_list.index(max(qerrors.values()))
-    print(key_list[min_key])
-    print(key_list[max_key])
-    print(query_info[key_list[min_key]])
-    print(query_info[key_list[max_key]])
-
+    query_info 
 if __name__ == '__main__':
     main()
 
