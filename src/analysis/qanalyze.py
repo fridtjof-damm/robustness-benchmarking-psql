@@ -316,10 +316,10 @@ def profiling_country_example() -> None:
 ####################################################
 
 # help function to traverse the dict 
-def traverse(plan: dict, node_types: List[str], filters: List[List[Tuple[str, str]]], execution_times: List[float]) -> None:
+def traverse(plan: dict, node_types: List[str], filters: List[List[Tuple[str, str]]], execution_times: List[float], cardinalities: List[Tuple[int, int]]) -> None:
     if isinstance(plan, list):
         for item in plan:
-            traverse(item, node_types, filters, execution_times)
+            traverse(item, node_types, filters, execution_times, cardinalities)
     elif isinstance(plan, dict):
         if 'Node Type' in plan and plan['Node Type'] not in  ['Limit', 'Gather']:
             node_types.append(plan['Node Type'])
@@ -334,56 +334,84 @@ def traverse(plan: dict, node_types: List[str], filters: List[List[Tuple[str, st
             filters.append(node_filters)
         if 'Execution Time' in plan:
             execution_times.append(plan['Execution Time'])
+        if 'Plan Rows' in plan and 'Actual Rows' in plan:
+            cardinalities.append((plan['Plan Rows'], plan['Actual Rows']))
         if 'Plans' in plan:
             for subplan in plan['Plans']:
-                traverse(subplan, node_types, filters,execution_times)
+                traverse(subplan, node_types, filters,execution_times, cardinalities)
         if 'Plan' in plan:
-            traverse(plan['Plan'], node_types, filters, execution_times)
+            traverse(plan['Plan'], node_types, filters, execution_times, cardinalities)
 
 # help funtion to collect the node types
-def extract_node_types_from_plan(plan: dict) -> Tuple[List[str], List[List[Tuple[str, str]]], List[float]]:
+def extract_node_types_from_plan(plan: dict) -> Tuple[List[str], List[List[Tuple[str, str]]], List[float], List[Tuple[int, int]]]:
     node_types = []
     filters = []
     execution_times = []
-    traverse(plan, node_types, filters, execution_times)
-    return node_types, filters, execution_times
+    cardinalities = []
+    traverse(plan, node_types, filters, execution_times, cardinalities)
+    return node_types, filters, execution_times, cardinalities
 
 
 ##
 ## structure of the query info dict: node_types e.g. Index Scan , filters e.g. (country , India) , execution_time e.g. 0.1 (ms)
 ##
-def query_nodes_info(directory: str) -> dict[int, tuple[list[str], list[List[Tuple[str, str]]], list[float]]]:
+def query_nodes_info(directory: str) -> dict[int, tuple[list[str], list[List[Tuple[str, str]]], list[float], list[Tuple[int, int]]]]:
     query_info = {}
 
     for filename in sorted([f for f in os.listdir(directory) if f.endswith('.json')], key=extract_number):
         query_id = int(filename.split('.')[0])
         with open(os.path.join(directory, filename), 'r') as file:
             plan = json.load(file)
-            node_types, filters, execution_times = extract_node_types_from_plan(plan)
-            query_info[query_id] = (node_types, filters, execution_times)
+            node_types, filters, execution_times, cardinalities = extract_node_types_from_plan(plan)
+            query_info[query_id] = (node_types, filters, execution_times, cardinalities)
     return query_info
 
 # write the query info dict to csv 
-def query_nodes_info_to_csv(query_info: dict[int, tuple[list[str], list[List[Tuple[str, str]]], list[float]]], output_dir: str, output_file: str) -> None:
+def query_nodes_info_to_csv(query_info: dict[int, tuple[list[str], list[List[Tuple[str, str]]], list[float], list[Tuple[int, int]]]], output_dir: str, output_file: str) -> None:
     data = []
-    for query_id, (node_types, filters, execution_times) in query_info.items():
+    for query_id, (node_types, filters, execution_times, cardinalities) in query_info.items():
         combined_node_types = ', '.join(node_types)
-        for node_filters, execution_time in zip(filters, execution_times):
-            combined_filters = ','.join([f'({key},{value})' for key, value in node_filters])
-            data.append((query_id, combined_node_types, combined_filters, execution_time))
-
-    # Convert the list of tuples into a DataFrame
-    df = pd.DataFrame(data, columns=['Query ID', 'Node Types', 'Filters', 'Execution Time'])
-
-    # Ensure the output directory exists
-    os.makedirs(output_dir, exist_ok=True)
-
-    # Write the DataFrame to a CSV file
+        combined_filters = ', '.join([f'({k},{v})' for filter_list in filters for k, v in filter_list])
+        combined_execution_time = sum(execution_times)  # Assuming you want the total execution time
+        combined_cardinality = ', '.join([f'({e},{a})' for e, a in cardinalities])
+        data.append([query_id, combined_node_types, combined_filters, combined_execution_time, combined_cardinality])
+    
+    df = pd.DataFrame(data, columns=['Query ID', 'Node Types', 'Filters', 'Execution Time', 'Cardinality e/a'])
     output_path = os.path.join(output_dir, output_file)
     df.to_csv(output_path, index=False)
-
     print(f"CSV file has been written successfully to {output_path}")
 
+# Example usage
+directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example_plans_simplified'
+output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example'
+output_file = 'skew_example.csv'
+query_info = query_nodes_info(directory)
+query_nodes_info_to_csv(query_info, output_dir, output_file)
+
+#########################################
+### qerror for cardinality estimation ###
+#########################################
+
+# calculate the query error for cardinality estimation accuracy
+def calc_qerror(query_info) -> dict[int, float]:
+    qerrors = {}
+    for query_id, (node_types, filters, execution_times, cardinalities) in query_info.items():
+        qerror_sum = 0
+        valid_cardinalities = 0
+        for estimated, actual in cardinalities:
+            if actual == 0 or estimated == 0:
+                continue
+            if actual >= estimated:
+                qerror = actual / estimated
+            else:
+                qerror = estimated / actual
+            qerror_sum += qerror
+            valid_cardinalities += 1
+        if valid_cardinalities > 0:
+            qerrors[query_id] = qerror_sum / len(cardinalities)
+        else: 
+            qerrors[query_id] = 0
+    return qerrors
 
 ###############################################################
 ###### here begins the skew example section ############
@@ -421,16 +449,34 @@ def main():
     #print(query_nodes_info('/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified')[236])
     
     # run skew example profiling
-    profiling_skew_example()
+    #profiling_skew_example()
     #print(query_nodes_info('/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example_plans_simplified'))
     
     # skew to csv 
+
     directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example_plans_simplified'
-    output_dir = 'Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example'
+    output_dir = '/results/fd/skew_example'
     output_file = 'skew_example.csv'
     query_info = query_nodes_info(directory)
-    print(query_info)
-    query_nodes_info_to_csv(query_info, output_dir, output_file)
+    #print(query_info)
+    #query_nodes_info_to_csv(query_info, output_dir, output_file)
+
+    # Calculate qerrors
+    qerrors = calc_qerror(query_info)
+    print(min(qerrors.values()))
+    print(max(qerrors.values()))
+
+    # list out keys and values separately
+    key_list = list(qerrors.keys())
+    val_list = list(qerrors.values())
+
+    # print key with val 100
+    min_key = val_list.index(min(qerrors.values()))
+    max_key = val_list.index(max(qerrors.values()))
+    print(key_list[min_key])
+    print(key_list[max_key])
+    print(query_info[key_list[min_key]])
+    print(query_info[key_list[max_key]])
 
 if __name__ == '__main__':
     main()
