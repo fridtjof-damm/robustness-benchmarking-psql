@@ -26,35 +26,16 @@ def simplify(qplan):
     # handling the plan structure
     # check if node exists, then delete
 
-    # GATHERED FROM EXPLAIN prefix
-    if 'Planning Time' in qplan:
-        del qplan['Planning Time']
-    if 'Parallel Aware' in qplan:
-        del qplan['Parallel Aware']
-    if 'Async Capable' in qplan:
-        del qplan['Async Capable']
-    if 'Single Copy' in qplan:
-        del qplan['Single Copy']
-    if 'Alias' in qplan:
-        del qplan['Alias']
-    if 'Parent Relationship' in qplan:
-        del qplan['Parent Relationship']
-    if 'Relation Name' in qplan:
-        del qplan['Relation Name']
-    if 'Alias' in qplan:
-        del qplan['Alias']
-    if 'Plan Width' in qplan:
-        del qplan['Plan Width']
-    if 'Actual Loops' in qplan:
-        del qplan['Actual Loops']
-    if 'Rows Removed by Index Recheck' in qplan:
-        del qplan['Rows Removed by Index Recheck']
-    if 'Exact Heap Blocks' in qplan:
-        del qplan['Exact Heap Blocks']
-    if 'Lossy Heap Blocks' in qplan:
-        del qplan['Lossy Heap Blocks']
-    if 'Parent Relationship' in qplan:
-        del qplan['Parent Relationship']
+    # add/remove nodes to be removed here
+    keys_to_remove = [
+    'Planning Time', 'Parallel Aware', 'Async Capable', 'Single Copy', 'Alias',
+    'Parent Relationship', 'Relation Name', 'Plan Width', 'Actual Loops',
+    'Rows Removed by Index Recheck', 'Exact Heap Blocks', 'Lossy Heap Blocks'
+]
+    # Remove the keys from qplan
+    for key in keys_to_remove:
+        if key in qplan:
+            del qplan[key]
     
     # EXPLAIN ANALYZE prefix
     if 'Filter' in qplan:
