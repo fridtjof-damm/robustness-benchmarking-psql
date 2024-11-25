@@ -443,8 +443,8 @@ def main():
     ############################
     ############################
     ## standard tpch section ###
-    query_id = 1 
-    for i in range(1,23):
+    query_ids = [2,3,7,8,12,17]
+    for i in query_ids:
         profile_parameterized_queries(i)
 
 
