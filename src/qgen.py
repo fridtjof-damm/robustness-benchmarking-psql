@@ -269,9 +269,9 @@ def generate_country_queries() -> list[str]:
 
 # skew example
 def generate_skew_queries() -> list[str]:
-    template = "SELECT a,b FROM data WHERE a = '{A}' AND b = '{B}';"
+    template = "SELECT a,b FROM data WHERE a < '{A}' AND b < '{B}';"
     queries: list[str] = []
-    for i in range(0, 20):
-        for j in range(100, 14600, 100):
+    for i in range(1, 21):
+        for j in range(200, 14700, 100):
             queries.append(template.format(A = i, B = j))
     return queries
