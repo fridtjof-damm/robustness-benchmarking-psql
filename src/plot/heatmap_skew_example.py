@@ -46,22 +46,22 @@ b_values = sorted(set(item[1] for item in data))
 # Create a grid for the heatmap
 heatmap_data = np.zeros((len(b_values), len(a_values)))
 
-# Calculate the 68th percentile execution time
+# Calculate the 90th percentile execution time
 execution_time_values = [item[2] for item in data]
-percentile_68_execution_time = np.percentile(execution_time_values, 68)
+percentile_90_execution_time = np.percentile(execution_time_values, 90)
 
-# Populate the grid with execution time values, clipping at the 68th percentile
+# Populate the grid with execution time values, clipping at the 90th percentile
 for a_value, b_value, execution_time in data:
     a_index = a_values.index(a_value)
     b_index = b_values.index(b_value)
-    heatmap_data[b_index, a_index] = min(execution_time, percentile_68_execution_time)  # Clip execution time values
+    heatmap_data[b_index, a_index] = min(execution_time, percentile_90_execution_time)  # Clip execution time values
 
 # Define the green-to-red color map
 cmap = LinearSegmentedColormap.from_list('GreenRed', ['green', 'yellow', 'red'])
 
 # Plot the heatmap with linear normalization
 fig, ax = plt.subplots(figsize=(10, 8))
-norm = mpl.colors.Normalize(vmin=np.min(heatmap_data[heatmap_data > 0]), vmax=percentile_68_execution_time)
+norm = mpl.colors.Normalize(vmin=np.min(heatmap_data[heatmap_data > 0]), vmax=percentile_90_execution_time)
 cax = ax.matshow(heatmap_data, cmap=cmap, norm=norm, aspect='auto')
 
 # Invert the y-axis to have the lowest values at the bottom
@@ -100,9 +100,10 @@ output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/resul
 os.makedirs(output_dir, exist_ok=True)
 
 # Save the plot as a PDF
-output_path = os.path.join(output_dir, 'execution_time_heatmap_68_clip.pdf')
+output_path = os.path.join(output_dir, 'skew2_execution_time_heatmap_90_clip.pdf')
 plt.savefig(output_path, format='pdf', bbox_inches='tight')
 
+plt.show()
 
 plt.close()
 

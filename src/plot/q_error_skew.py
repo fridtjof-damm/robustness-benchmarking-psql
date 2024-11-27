@@ -92,7 +92,7 @@ output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/resul
 os.makedirs(output_dir, exist_ok=True)
 
 # Save the plot as a PDF
-output_path = os.path.join(output_dir, 'qerror_heatmap_rg.pdf')
+output_path = os.path.join(output_dir, 'skew2_qerror_heatmap_rg.pdf')
 plt.savefig(output_path, format='pdf', bbox_inches='tight')
 
 # Show the plot

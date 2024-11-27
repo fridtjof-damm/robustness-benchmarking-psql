@@ -1,26 +1,20 @@
-import csv
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize, LinearSegmentedColormap
 import os
+from src.analysis.qanalyze import query_nodes_info, calc_qerror
 
-# Source file
-FILE = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example/skew_example.csv'
+directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example_plans_simplified'
+query_info = query_nodes_info(directory)
 
-# Read the CSV file and extract filters and cardinalities
+# Extract filters and cardinalities from query_info
 data = []
-with open(FILE, 'r') as csvfile:
-    reader = csv.DictReader(csvfile)
-    for row in reader:
-        filters = row['Filters']
-        cardinality = row['Cardinality e/a']
-        # Correctly parse the filters string
-        filter_dict = dict(item.strip('()').split(',') for item in filters.split('), ('))
-        a_value = int(filter_dict['a'])
-        b_value = int(filter_dict['b'])
-        # Extract the second position in the first tuple of the cardinality column
-        first_tuple_second_position = int(cardinality.split('), (')[0].strip('()').split(',')[1])
-        data.append((a_value, b_value, first_tuple_second_position))
+for query_id, info in query_info.items():
+    for node_type, filters, execution_time, cardinality in zip(info[0], info[1], info[2], info[3]):
+        filter_dict = {k: int(v) for k, v in filters}
+        a_value = filter_dict.get('a', 0)
+        b_value = filter_dict.get('b', 0)
+        data.append((a_value, b_value, cardinality[1]))  # Use the actual rows from cardinality
 
 # Find the minimum and maximum cardinalities and their corresponding a, b values
 min_cardinality = float('inf')
@@ -46,22 +40,22 @@ b_values = sorted(set(item[1] for item in data))
 # Create a grid for the heatmap
 heatmap_data = np.zeros((len(b_values), len(a_values)))
 
-# Calculate the 68th percentile cardinality
+# Calculate the 95th percentile cardinality
 cardinality_values = [item[2] for item in data]
-percentile_68_cardinality = np.percentile(cardinality_values, 68)
+percentile_95_cardinality = np.percentile(cardinality_values, 95)
 
-# Populate the grid with cardinality values, clipping at the 68th percentile
+# Populate the grid with cardinality values, clipping at the 95th percentile
 for a_value, b_value, cardinality in data:
     a_index = a_values.index(a_value)
     b_index = b_values.index(b_value)
-    heatmap_data[b_index, a_index] = min(cardinality, percentile_68_cardinality)  # Clip cardinality values
+    heatmap_data[b_index, a_index] = min(cardinality, percentile_95_cardinality)  # Clip cardinality values
 
 # Define the green-to-red color map
 cmap = LinearSegmentedColormap.from_list('GreenRed', ['green', 'yellow', 'red'])
 
 # Plot the heatmap with linear normalization
 fig, ax = plt.subplots(figsize=(10, 8))
-norm = Normalize(vmin=np.min(heatmap_data[heatmap_data > 0]), vmax=percentile_68_cardinality)
+norm = Normalize(vmin=np.min(heatmap_data[heatmap_data > 0]), vmax=percentile_95_cardinality)
 cax = ax.matshow(heatmap_data, cmap=cmap, norm=norm, aspect='auto')
 
 # Invert the y-axis to have the lowest values at the bottom
@@ -96,10 +90,10 @@ output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/resul
 os.makedirs(output_dir, exist_ok=True)
 
 # Save the plot as a PDF
-output_path = os.path.join(output_dir, 'res_cardinalities_heatmap_68_clip.pdf')
+output_path = os.path.join(output_dir, 'skew2_res_cardinalities_heatmap_95_clip.pdf')
 plt.savefig(output_path, format='pdf', bbox_inches='tight')
 
 # Show the plot
-#plt.show()
+plt.show()
 plt.close()
 
