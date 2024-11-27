@@ -298,7 +298,7 @@ def traverse(plan: dict, node_types: List[str], filters: List[List[Tuple[str, st
         node_filters = []
         for key in ['Filter', 'Recheck Cond', 'Index Cond', 'Seq Scan', 'Index Scan']:
             if key in plan:
-                matches = re.findall(r'(\w+)\s*(=|LIKE)\s*\'?([^\'\)]+)\'?', plan[key])
+                matches = re.findall(r'(\w+)\s*(=|LIKE|<|>|<=|>=)\s*\'?([^\'\)]+)\'?', plan[key])
                 for match in matches:
                     if len(match) == 3:
                         node_filters.append((match[0], match[2]))
@@ -309,7 +309,7 @@ def traverse(plan: dict, node_types: List[str], filters: List[List[Tuple[str, st
         if 'Plan Rows' in plan and 'Actual Rows' in plan:
             cardinalities.append((plan['Plan Rows'], plan['Actual Rows']))
         if 'Plans' in plan:
-            for subplan in plan['Plans']:
+            for subplan in plan:
                 traverse(subplan, node_types, filters,execution_times, cardinalities)
         if 'Plan' in plan:
             traverse(plan['Plan'], node_types, filters, execution_times, cardinalities)
@@ -427,15 +427,20 @@ def main():
     ############################
     ############################
     #### skew example ##########
-    # profiling_skew_example()
+    profiling_skew_example()
     # print(query_nodes_info('/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example_plans_simplified'))
     # skew to csv 
-    #directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example_plans_simplified'
-    #output_dir = '/results/fd/skew_example'
-    #output_file = 'skew_example.csv'
-    #query_info = query_nodes_info(directory)
-    #print(query_info)
-    #query_nodes_info_to_csv(query_info, output_dir, output_file)
+    directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example_plans_simplified'
+    output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example'
+    output_file = 'skew_example.csv'
+    
+    # Ensure the output directory exists
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    
+    query_info = query_nodes_info(directory)
+    print(query_info)
+    query_nodes_info_to_csv(query_info, output_dir, output_file)
     # Calculate qerrors
     #qerrors = calc_qerror(query_info)
     #print(min(qerrors.values()))
@@ -443,13 +448,10 @@ def main():
     ############################
     ############################
     ## standard tpch section ###
-    query_ids = [2,3,7,8,12,17]
-    for i in query_ids:
-        profile_parameterized_queries(i)
+    #query_ids = [2,3,7,8,12,17]
+    #for i in query_ids:
+    #    profile_parameterized_queries(i)
 
-
-
-    query_info 
 if __name__ == '__main__':
     main()
 
