@@ -72,3 +72,14 @@ def extract_number(filename) -> tuple[int,str]:
         suffix = match.group(2)
         return (number, suffix)
     return (float('inf'), '')
+
+# correctly split node filters of query plans into key value pairs
+def process_filters(filters: str) -> dict:
+    filters = filters.strip('"')  # Remove the leading and trailing quotes
+    filters = filters.strip('()')  # Remove the leading and trailing parentheses
+    filter_list = filters.split('), (')  # Split the string into individual filters
+    filter_dict = {}
+    for item in filter_list:
+        key, value = item.split(',')
+        filter_dict[key.strip()] = value.strip()
+    return filter_dict
