@@ -33,6 +33,7 @@ config.json
 *.pdf
 *.csv
 *.txt
+*.ipynb
 src/plot/3d_costdiagram_test.py
 resources/query_examples/countries.ipynb
 /resources/queries_fd/skew_example/p.py
