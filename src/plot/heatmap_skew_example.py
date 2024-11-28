@@ -74,12 +74,16 @@ ax.xaxis.set_ticks_position('bottom')  # Move x-axis labels to the bottom
 
 # Set y-axis labels to show only 10 values over the range, divisible by 100
 y_step = max(1, len(b_values) // 10)
+x_ticks = np.arange(0, len(a_values), 1)
+x_labels = [a_values[i] for i in x_ticks]
 y_ticks = np.arange(0, len(b_values), y_step)
 y_labels = [b_values[i] for i in y_ticks]
 y_labels = [label if label % 100 == 0 else '' for label in y_labels]  # Ensure labels are divisible by 100
 ax.set_yticks(y_ticks)
-ax.set_yticklabels(y_labels)
+ax.set_xticks(x_ticks)
 
+ax.set_yticklabels(y_labels)
+ax.set_xticklabels(x_labels)
 ax.set_xlabel('a')
 ax.set_ylabel('b')
 
