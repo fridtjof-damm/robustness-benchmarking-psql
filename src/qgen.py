@@ -269,9 +269,28 @@ def generate_country_queries() -> list[str]:
 
 # skew example
 def generate_skew_queries() -> list[str]:
-    template = "SELECT a,b FROM data WHERE a < '{A}' AND b < '{B}';"
+    template = "SELECT a,b FROM data WHERE a = '{A}' AND b = '{B}';"
     queries: list[str] = []
-    for i in range(1, 21):
-        for j in range(200, 14700, 100):
+    for i in range(1, 20):
+        for j in range(100, 14600, 100):
             queries.append(template.format(A = i, B = j))
     return queries
+
+
+##########
+# job
+
+def generate_job_queries() -> list[str]:
+    template_path = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/resources/job_parameterized/1d_qt.sql'
+    queries = []
+    
+    # read the query template from the file
+    with open(template_path, 'r') as file:
+        query_template = file.read()
+    
+    # generate queries for each year in the range from 1880 to 2019
+    for year in range(1880, 2020):
+        query = query_template.replace('{YEAR}', str(year))
+        queries.append(query)
+    return queries
+        
