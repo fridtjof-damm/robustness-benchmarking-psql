@@ -90,7 +90,7 @@ output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/resul
 os.makedirs(output_dir, exist_ok=True)
 
 # Save the plot as a PDF
-output_path = os.path.join(output_dir, 'skew2_res_cardinalities_heatmap_95_clip.pdf')
+output_path = os.path.join(output_dir, 'skew_res_cardinalities_heatmap_95_clip.pdf')
 plt.savefig(output_path, format='pdf', bbox_inches='tight')
 
 # Show the plot
