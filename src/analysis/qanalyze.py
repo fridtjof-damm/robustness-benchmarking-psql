@@ -250,6 +250,32 @@ def job_profiling(prefix: int, process_func, output_dir: str) -> None:
     plans = process_queries(job_queries, cur, prefixes[prefix], job_dir, process_func)
     write_plans_to_file(plans, output_dir)
 
+def profiling_parameterized_job_queries(output_dir: str) -> None:
+    # Ensure the output directory exists
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    
+
+    conn = dc.get_db_connection('job')
+    cur = conn.cursor()
+    # Generate the job queries
+    queries = qg.generate_job_queries()
+    
+    # Execute EXPLAIN ANALYZE for each query and save the plan as a JSON file
+    for i, query in enumerate(queries, start=1):
+        cur.execute(f"EXPLAIN (ANALYZE, FORMAT JSON) {query}")
+        plan = cur.fetchone()[0][0]  # Get the JSON plan
+        
+        # Save the plan to a JSON file
+        output_path = os.path.join(output_dir, f"{i}.json")
+        with open(output_path, 'w') as file:
+            json.dump(plan, file, indent=4)
+    
+    # Close the database connection
+    cur.close()
+    conn.close()
+
+
 
 ###############################################################
 ###### here ends the join order benchmark section ############
@@ -418,6 +444,10 @@ def main():
     ## job section ###
     #job_profiling(0, simplify, 'results/job/qplans/')
     #job_profiling(1, simplify,'results/job/qplans/')
+    output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/job/parameterized/1d'
+    profiling_parameterized_job_queries(output_dir)
+    query_info_job_1d = query_nodes_info(output_dir)
+    print(query_info_job_1d)
     #################
     ############################
     ## country example #########
@@ -427,20 +457,20 @@ def main():
     ############################
     ############################
     #### skew example ##########
-    profiling_skew_example()
+    #profiling_skew_example()
     # print(query_nodes_info('/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example_plans_simplified'))
     # skew to csv 
-    directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example_plans_simplified'
-    output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example'
-    output_file = 'skew_example.csv'
+    #directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example_plans_simplified'
+    #output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example'
+    #output_file = 'skew_example.csv'
     
     # Ensure the output directory exists
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    #if not os.path.exists(output_dir):
+    #    os.makedirs(output_dir)
     
-    query_info = query_nodes_info(directory)
-    print(query_info)
-    query_nodes_info_to_csv(query_info, output_dir, output_file)
+    #query_info = query_nodes_info(directory)
+    #print(query_info)
+    #query_nodes_info_to_csv(query_info, output_dir, output_file)
     # Calculate qerrors
     #qerrors = calc_qerror(query_info)
     #print(min(qerrors.values()))
