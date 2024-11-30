@@ -8,18 +8,8 @@ import src.qgen as qg
 from src.utils.utils import extract_number
 import src.utils.db_connector as dc
 import pprint as pp
-from typing import List, Tuple
+from typing import List, Tuple, Dict, Union
 import pandas as pd
-
-
-# db config
-db_params = {
-        "database": "dummydb",
-        "user": "fridtjofdamm",
-        "password": "",
-        "host": "localhost",
-        "port": "5432"
-    }
 
 def simplify(qplan):
     # handling the plan structure
@@ -147,8 +137,8 @@ def psql_tpch_profiling(query_id, write_to_file=False):
     # simplify the query plans
     simplified = []
     for i, qplan in enumerate(plans[0]):
-        s = simplify(qplan)
-        simplified.append(s)
+        qplan[0][0][0]['Plan'] = simplify(qplan[0][0][0]['Plan'])
+        simplified.append(qplan)
 
         # persist plans to file if intended
         if write_to_file:
@@ -195,6 +185,7 @@ def profile_parameterized_queries(query_id):
     # Get query nodes info
     query_info = query_nodes_info(directory)
 
+    query_nodes_info_to_csv(query_info, 'results/tpch/', f'q{query_id}.csv')
     # Print query nodes info
     print(query_info)
 
@@ -218,8 +209,8 @@ def process_queries(queries: List[str], cur, prefix: str, dir: str, process_func
             query_template = file.read()
             cur.execute(prefix + query_template)
             plan = cur.fetchall()
-            processed_plan = process_func(plan[0][0][0]['Plan'])
-            plans.append((query_id,processed_plan))
+            plan[0][0][0]['Plan'] = process_func(plan[0][0][0]['Plan'])
+            plans.append((query_id,plan))
             file.close()
     return plans
 
@@ -247,6 +238,7 @@ def job_profiling(prefix: int, process_func, output_dir: str) -> None:
     prefixes = ['EXPLAIN (FORMAT JSON) ', 'EXPLAIN (FORMAT JSON, ANALYZE) ']
     job_dir = 'resources/queries_job/'
     job_queries = fetch_queries(job_dir)
+    print(job_queries[0])
     plans = process_queries(job_queries, cur, prefixes[prefix], job_dir, process_func)
     write_plans_to_file(plans, output_dir)
 
@@ -255,7 +247,6 @@ def profiling_parameterized_job_queries(output_dir: str) -> None:
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     
-
     conn = dc.get_db_connection('job')
     cur = conn.cursor()
     # Generate the job queries
@@ -313,14 +304,14 @@ def profiling_country_example() -> None:
 ### extract scan nodes from plans for plotting #####
 ####################################################
 
-# help function to traverse the dict 
-def traverse(plan: dict, node_types: List[str], filters: List[List[Tuple[str, str]]], execution_times: List[float], cardinalities: List[Tuple[int, int]]) -> None:
+def traverse(plan: Dict, node_types: List[str], filters: List[List[Tuple[str, str]]], execution_times: List[float], cardinalities: List[Tuple[int, int]]) -> None:
     if isinstance(plan, list):
         for item in plan:
             traverse(item, node_types, filters, execution_times, cardinalities)
     elif isinstance(plan, dict):
-        if 'Node Type' in plan and plan['Node Type'] not in  ['Limit', 'Gather']:
-            node_types.append(plan['Node Type'])
+        if 'Node Type' in plan:
+            if plan['Node Type'] not in ['Limit', 'Gather']:
+                node_types.append(plan['Node Type'])
         node_filters = []
         for key in ['Filter', 'Recheck Cond', 'Index Cond', 'Seq Scan', 'Index Scan']:
             if key in plan:
@@ -335,13 +326,13 @@ def traverse(plan: dict, node_types: List[str], filters: List[List[Tuple[str, st
         if 'Plan Rows' in plan and 'Actual Rows' in plan:
             cardinalities.append((plan['Plan Rows'], plan['Actual Rows']))
         if 'Plans' in plan:
-            for subplan in plan:
-                traverse(subplan, node_types, filters,execution_times, cardinalities)
+            for subplan in plan['Plans']:
+                traverse(subplan, node_types, filters, execution_times, cardinalities)
         if 'Plan' in plan:
             traverse(plan['Plan'], node_types, filters, execution_times, cardinalities)
 
-# help funtion to collect the node types
-def extract_node_types_from_plan(plan: dict) -> Tuple[List[str], List[List[Tuple[str, str]]], List[float], List[Tuple[int, int]]]:
+# Help function to collect the node types
+def extract_node_types_from_plan(plan: Dict) -> Tuple[List[str], List[List[Tuple[str, str]]], List[float], List[Tuple[int, int]]]:
     node_types = []
     filters = []
     execution_times = []
@@ -349,27 +340,37 @@ def extract_node_types_from_plan(plan: dict) -> Tuple[List[str], List[List[Tuple
     traverse(plan, node_types, filters, execution_times, cardinalities)
     return node_types, filters, execution_times, cardinalities
 
-
 ##
 ## structure of the query info dict: node_types e.g. Index Scan , filters e.g. (country , India) , execution_time e.g. 0.1 (ms)
 ##
-def query_nodes_info(directory: str) -> dict[int, tuple[list[str], list[List[Tuple[str, str]]], list[float], list[Tuple[int, int]]]]:
+def query_nodes_info(directory: str) -> Dict[Union[int, Tuple[int, str]], Tuple[List[str], List[List[Tuple[str, str]]], List[float], List[Tuple[int, int]]]]:
     query_info = {}
-
-    for filename in sorted([f for f in os.listdir(directory) if f.endswith('.json')], key=extract_number):
-        query_id = int(filename.split('.')[0])
-        with open(os.path.join(directory, filename), 'r') as file:
-            plan = json.load(file)
-            node_types, filters, execution_times, cardinalities = extract_node_types_from_plan(plan)
-            query_info[query_id] = (node_types, filters, execution_times, cardinalities)
+    for filename in os.listdir(directory):
+        if filename.endswith('.json'):
+            # Try to extract the numeric part and suffix from the filename
+            query_id, suffix = extract_number(filename)
+            if query_id == float('inf'):
+                # Fall back to the previous method for filenames with only numbers
+                try:
+                    query_id = int(filename.split('.')[0])
+                    suffix = ''
+                except ValueError:
+                    continue  # Skip files that don't match the expected pattern
+            with open(os.path.join(directory, filename), 'r', encoding='UTF-8') as file:
+                plan = json.load(file)
+                node_types, filters, execution_times, cardinalities = extract_node_types_from_plan(plan)
+                query_info[(query_id, suffix) if suffix else query_id] = (node_types, filters, execution_times, cardinalities)
     return query_info
 
 # write the query info dict to csv 
-def query_nodes_info_to_csv(query_info: dict[int, tuple[list[str], list[List[Tuple[str, str]]], list[float], list[Tuple[int, int]]]], output_dir: str, output_file: str) -> None:
+def query_nodes_info_to_csv(query_info: Dict[Union[int, Tuple[int, str]], Tuple[List[str], List[List[Tuple[str, str]]], List[float], List[Tuple[int, int]]]], output_dir: str, output_file: str) -> None:
     data = []
-    for query_id, (node_types, filters, execution_times, cardinalities) in query_info.items():
-        combined_node_types = ', '.join(node_types)
-        combined_filters = ', '.join([f'({k},{v})' for filter_list in filters for k, v in filter_list])
+    # Sort the keys of the query_info dictionary
+    sorted_keys = sorted(query_info.keys(), key=lambda x: (x[0], x[1]) if isinstance(x, tuple) else (x, ''))
+    for query_id in sorted_keys:
+        node_types, filters, execution_times, cardinalities = query_info[query_id]
+        combined_node_types = ', '.join(sorted(node_types))
+        combined_filters = ', '.join([f'({k},{v})' for filter_list in sorted(filters) for k, v in sorted(filter_list)])
         combined_execution_time = sum(execution_times)  # Assuming you want the total execution time
         combined_cardinality = ', '.join([f'({e},{a})' for e, a in cardinalities])
         data.append([query_id, combined_node_types, combined_filters, combined_execution_time, combined_cardinality])
@@ -444,10 +445,23 @@ def main():
     ## job section ###
     #job_profiling(0, simplify, 'results/job/qplans/')
     #job_profiling(1, simplify,'results/job/qplans/')
-    output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/job/parameterized/1d'
-    profiling_parameterized_job_queries(output_dir)
-    query_info_job_1d = query_nodes_info(output_dir)
-    print(query_info_job_1d)
+    ##################
+    #output_file = 'all_job.csv'
+    #output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/job'
+    #directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/job/qplans'
+    #query_info_job = query_nodes_info(directory)
+    #print(query_info_job)
+    #query_nodes_info_to_csv(query_info_job, output_dir, output_file)
+
+    ######
+    # paeaameterized job queries
+    #profiling_parameterized_job_queries(output_dir)
+    #output_file = '1d_parameterized_job.csv'
+    #output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/job/parameterized/1d'
+    #directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/job/parameterized/1d'
+    #query_info_job_1d = query_nodes_info(directory)
+    #print(query_info_job_1d)
+    #query_nodes_info_to_csv(query_info_job_1d, output_dir, output_file)
     #################
     ############################
     ## country example #########
@@ -458,16 +472,19 @@ def main():
     ############################
     #### skew example ##########
     #profiling_skew_example()
-    # print(query_nodes_info('/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example_plans_simplified'))
+    #print(query_nodes_info('/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example_plans_simplified')[2465])
     # skew to csv 
     #directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example_plans_simplified'
     #output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example'
     #output_file = 'skew_example.csv'
-    
+
+    #query_info = query_nodes_info(directory)
+    #print(query_info)
+    #query_nodes_info_to_csv(query_info, output_dir, output_file)
+
     # Ensure the output directory exists
     #if not os.path.exists(output_dir):
     #    os.makedirs(output_dir)
-    
     #query_info = query_nodes_info(directory)
     #print(query_info)
     #query_nodes_info_to_csv(query_info, output_dir, output_file)
@@ -479,8 +496,16 @@ def main():
     ############################
     ## standard tpch section ###
     #query_ids = [2,3,7,8,12,17]
+    #query_ids = [i for i in range(1,23)]
+    #query_ids = [1]
     #for i in query_ids:
-    #    profile_parameterized_queries(i)
+    #   profile_parameterized_queries(i)
+    #directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch/qplans/q2'
+    #output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch'
+    #output_file = 'q2.csv'
+    #query_info = query_nodes_info(directory)
+    #print(query_info)
+    #query_nodes_info_to_csv(query_info, output_dir, output_file)
 
 if __name__ == '__main__':
     main()
