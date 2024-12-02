@@ -151,7 +151,7 @@ def write_qp_to_file(query_id, plan_index, plan_data):
     dir = f'results/tpch/qplans/q{query_id}'
     # creating dir if not exist already
     os.makedirs(dir, exist_ok=True)
-    filename = os.path.join(dir, f'q{query_id}_p{plan_index}.json')
+    filename = os.path.join(dir, f'{query_id}.json')
     with open(filename, mode='w', encoding='UTF-8') as file:
         file.write(json.dumps(plan_data, indent=4))
 
@@ -357,6 +357,7 @@ def query_nodes_info(directory: str) -> Dict[Union[int, Tuple[int, str]], Tuple[
                 except ValueError:
                     continue  # Skip files that don't match the expected pattern
             with open(os.path.join(directory, filename), 'r', encoding='UTF-8') as file:
+                print(f"Processing file: {filename}")
                 plan = json.load(file)
                 node_types, filters, execution_times, cardinalities = extract_node_types_from_plan(plan)
                 query_info[(query_id, suffix) if suffix else query_id] = (node_types, filters, execution_times, cardinalities)
@@ -497,9 +498,9 @@ def main():
     ## standard tpch section ###
     #query_ids = [2,3,7,8,12,17]
     #query_ids = [i for i in range(1,23)]
-    #query_ids = [1]
-    #for i in query_ids:
-    #   profile_parameterized_queries(i)
+    query_ids = [1]
+    for i in query_ids:
+       profile_parameterized_queries(i)
     #directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch/qplans/q2'
     #output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch'
     #output_file = 'q2.csv'
