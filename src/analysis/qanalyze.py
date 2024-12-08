@@ -141,28 +141,49 @@ def clean_condition(condition: str) -> str:
 
 
 def psql_tpch_profiling(query_id, write_to_file=False):
+    print(f"Profiling TPCH query {query_id}")
+
+    print("Connecting to the database...")
     conn = dc.get_db_connection('dummydb')
     cur = conn.cursor()
     prefix = 'EXPLAIN (FORMAT JSON, ANALYZE) '
     plans = []
 
+    # Load the query template from the file
+    template_path = f'/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/resources/queries_tpch/{query_id}.sql'
+    with open(template_path, 'r') as file:
+        query_template = file.read()
+        file.close()
+
+    print("Generating Queries from Template using Query Generator")
+    queries, _ = qg.generate_query(query_template, query_id)
+    print(f"Generated {len(queries)} queries for Query {query_id} Generated")
+
+    # Limit the number of instances to process
+    instance_limit = 5
+
     # run queries and get the json format query plans
-    plans_query_i = qr.run_query_psql(cur, query_id, prefix)
-    plans_query_i_json = []
-    for plan in plans_query_i:
-        json_plan = json.loads(plan)
-        plans_query_i_json.append(json_plan)
-    plans.append(plans_query_i_json)
+    for idx, query in enumerate(queries):
+        if idx >= instance_limit:
+            break
+        print(f"Executing Query {query_id} - Instance {idx + 1}")
+        cur.execute(prefix + query)
+        plans_query_i = cur.fetchall()
+        plans_query_i_json = []
+        for plan in plans_query_i:
+            plans_query_i_json.append(plan)
+        plans.append(plans_query_i_json)
 
     # simplify the query plans
     simplified = []
-    for i, qplan in enumerate(plans[0]):
+    for i, qplan in enumerate(plans):
+        print(f"Simplifying plan {plan}")
         qplan[0][0][0]['Plan'] = simplify(qplan[0][0][0]['Plan'])
         simplified.append(qplan)
-
         # persist plans to file if intended
         if write_to_file:
-            write_qp_to_file(query_id, i, s)
+            write_qp_to_file(query_id, i, qplan)
+    print(f"Finished profiling TPCH query {query_id}")
     return simplified
 
 # persist query plans to files
@@ -202,17 +223,26 @@ def compare_query_plans(query_plans):
 
 def profile_parameterized_queries(query_id):
     # Profile the parameterized queries
+    print(f"Now simplifying plan of query {query_id}")
     simplified_plans = psql_tpch_profiling(query_id, write_to_file=True)
+    print(f"Plan of query {query_id} successfully simplified")
 
     # Directory where the plans are saved
     directory = f'results/tpch/qplans/q{query_id}'
+    print(f"Directory for query plans: {directory}")
 
     # Get query nodes info
+    print(f"Now extracting nodes info of query {query_id}")
     query_info = query_nodes_info(directory)
+    print(f"Nodes info of query {query_id} successfully extracted")
 
-    query_nodes_info_to_csv(query_info, 'results/tpch/', f'q{query_id}.csv')
-    # Print query nodes info
-    print(query_info)
+    # Write query nodes info to CSV
+    output_dir = 'results/tpch/'
+    output_file = f'q{query_id}.csv'
+    print(f"Now writing nodes info of query {query_id} to CSV")
+    query_nodes_info_to_csv(query_info, output_dir, output_file)
+    print(f"Nodes info of query {query_id} successfully written to CSV")
+    print(f"Processing of query {query_id} completed")
 
 
 def profile_custom_tpch_queries():
@@ -398,6 +428,7 @@ def extract_node_types_from_plan(plan: Dict) -> Tuple[List[str], List[List[Tuple
 
 
 def query_nodes_info(directory: str) -> Dict[Union[int, Tuple[int, str]], Tuple[List[str], List[List[Tuple[str, str]]], List[float], List[Tuple[int, int]]]]:
+    print(f"Extracting query nodes info from directory: {directory}")
     query_info = {}
     for filename in os.listdir(directory):
         if filename.endswith('.json'):
@@ -417,12 +448,14 @@ def query_nodes_info(directory: str) -> Dict[Union[int, Tuple[int, str]], Tuple[
                     plan)
                 query_info[(query_id, suffix) if suffix else query_id] = (
                     node_types, filters, execution_times, cardinalities)
+    print(f"Finished extracting query nodes info from directory: {directory}")
     return query_info
 
 # write the query info dict to csv
 
 
 def query_nodes_info_to_csv(query_info: Dict[Union[int, Tuple[int, str]], Tuple[List[str], List[List[Tuple[str, str]]], List[float], List[Tuple[int, int]]]], output_dir: str, output_file: str) -> None:
+    print(f"Writing query nodes info to CSV: {output_dir}{output_file}")
     data = []
     # Sort the keys of the query_info dictionary
     sorted_keys = sorted(query_info.keys(), key=lambda x: (
@@ -447,11 +480,11 @@ def query_nodes_info_to_csv(query_info: Dict[Union[int, Tuple[int, str]], Tuple[
 
 
 # Example usage
-directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example_plans_simplified'
-output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example'
-output_file = 'skew_example.csv'
-query_info = query_nodes_info(directory)
-query_nodes_info_to_csv(query_info, output_dir, output_file)
+# directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example_plans_simplified'
+# output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example'
+# output_file = 'skew_example.csv'
+# query_info = query_nodes_info(directory)
+# query_nodes_info_to_csv(query_info, output_dir, output_file)
 
 #########################################
 ### qerror for cardinality estimation ###
@@ -533,15 +566,16 @@ def main():
     #################
     ############################
     ## country example #########
-    profiling_country_example()
+    # profiling_country_example()
     # print(query_nodes_info('/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified')[1])
     # print(query_nodes_info('/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified')[236])
     # country to csv
-    directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified'
-    output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified'
-    output_file = 'country_extended_example_update.csv'
-    query_nodes_info_to_csv(query_nodes_info(
-        directory), output_dir, output_file)
+
+    # directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified'
+    # output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified'
+    # output_file = 'country_extended_example_update.csv'
+    # query_nodes_info_to_csv(query_nodes_info(
+    #    directory), output_dir, output_file)
     ############################
     ############################
     #### skew example ##########
@@ -569,17 +603,12 @@ def main():
     ############################
     ############################
     ## standard tpch section ###
-    # query_ids = [2,3,7,8,12,17]
-    # query_ids = [i for i in range(1,23)]
-    # query_ids = [1]
-    # for i in query_ids:
-    #   profile_parameterized_queries(i)
-    # directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch/qplans/q2'
-    # output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch'
-    # output_file = 'q2.csv'
-    # query_info = query_nodes_info(directory)
-    # print(query_info)
-    # query_nodes_info_to_csv(query_info, output_dir, output_file)
+    query_ids = [2, 3, 5, 7, 8, 12, 13, 14, 17]
+    for i in query_ids:
+        print(f'calling profiling for query {i}')
+        profile_parameterized_queries(i)
+        print(f'finished profiling for query {i}')
+
     ############################
     # profile_custom_tpch_queries()
     ############################
