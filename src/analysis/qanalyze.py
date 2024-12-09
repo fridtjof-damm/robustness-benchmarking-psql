@@ -143,12 +143,6 @@ def clean_condition(condition: str) -> str:
 def psql_tpch_profiling(query_id, write_to_file=False):
     print(f"Profiling TPCH query {query_id}")
 
-    print("Connecting to the database...")
-    conn = dc.get_db_connection('dummydb')
-    cur = conn.cursor()
-    prefix = 'EXPLAIN (FORMAT JSON, ANALYZE) '
-    plans = []
-
     # Load the query template from the file
     template_path = f'/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/resources/queries_tpch/{query_id}.sql'
     with open(template_path, 'r') as file:
@@ -160,30 +154,32 @@ def psql_tpch_profiling(query_id, write_to_file=False):
     print(f"Generated {len(queries)} queries for Query {query_id} Generated")
 
     # Limit the number of instances to process
-    instance_limit = 5
+    instance_limit = 3
 
+    print("Connecting to the database...")
+    conn = dc.get_db_connection('dummydb')
+    cur = conn.cursor()
+    prefix = 'EXPLAIN (FORMAT JSON, ANALYZE) '
+    plans = []
     # run queries and get the json format query plans
-    for idx, query in enumerate(queries):
-        if idx >= instance_limit:
+    for i, query in enumerate(queries):
+        if i >= instance_limit:
             break
-        print(f"Executing Query {query_id} - Instance {idx + 1}")
+        print(f"Executing Query {query_id} - Instance {i + 1}")
         cur.execute(prefix + query)
-        plans_query_i = cur.fetchall()
-        plans_query_i_json = []
-        for plan in plans_query_i:
-            plans_query_i_json.append(plan)
-        plans.append(plans_query_i_json)
+        plan = cur.fetchall()
+        plans.append(plan)
 
     # simplify the query plans
     simplified = []
     for i, qplan in enumerate(plans):
-        print(f"Simplifying plan {plan}")
         qplan[0][0][0]['Plan'] = simplify(qplan[0][0][0]['Plan'])
         simplified.append(qplan)
         # persist plans to file if intended
         if write_to_file:
             write_qp_to_file(query_id, i, qplan)
-    print(f"Finished profiling TPCH query {query_id}")
+    print(
+        f"Finished profiling TPCH query {query_id} with {len(simplified)} instances")
     return simplified
 
 # persist query plans to files
@@ -194,9 +190,10 @@ def write_qp_to_file(query_id, plan_index, plan_data):
     dir = f'results/tpch/qplans/q{query_id}'
     # creating dir if not exist already
     os.makedirs(dir, exist_ok=True)
-    filename = os.path.join(dir, f'{query_id}.json')
+    filename = os.path.join(dir, f'{plan_index+1}.json')
     with open(filename, mode='w', encoding='UTF-8') as file:
         file.write(json.dumps(plan_data, indent=4))
+
 
 # categorizing  query plans
 
@@ -229,12 +226,14 @@ def profile_parameterized_queries(query_id):
 
     # Directory where the plans are saved
     directory = f'results/tpch/qplans/q{query_id}'
-    print(f"Directory for query plans: {directory}")
 
     # Get query nodes info
     print(f"Now extracting nodes info of query {query_id}")
     query_info = query_nodes_info(directory)
-    print(f"Nodes info of query {query_id} successfully extracted")
+    if query_info:
+        print(f"Nodes info of query {query_id} successfully extracted")
+    else:
+        print(f"Failed to extract nodes info of query {query_id}")
 
     # Write query nodes info to CSV
     output_dir = 'results/tpch/'
@@ -542,6 +541,15 @@ def profiling_skew_example() -> None:
 
 
 def main():
+    ############################
+    ############################
+    ## standard tpch section ###
+    # query_ids = [2, 3, 5, 7, 8, 12, 13, 14, 17]
+    query_ids = [2, 3]
+    for i in query_ids:
+        print(f'calling profiling for query {i}')
+        profile_parameterized_queries(i)
+        print(f'finished profiling for query {i}')
     ##################
     ## job section ###
     # job_profiling(0, simplify, 'results/job/qplans/')
@@ -600,14 +608,6 @@ def main():
     # qerrors = calc_qerror(query_info)
     # print(min(qerrors.values()))
     # print(max(qerrors.values()))
-    ############################
-    ############################
-    ## standard tpch section ###
-    query_ids = [2, 3, 5, 7, 8, 12, 13, 14, 17]
-    for i in query_ids:
-        print(f'calling profiling for query {i}')
-        profile_parameterized_queries(i)
-        print(f'finished profiling for query {i}')
 
     ############################
     # profile_custom_tpch_queries()
