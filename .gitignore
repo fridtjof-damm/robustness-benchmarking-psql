@@ -34,8 +34,8 @@ config.json
 *.csv
 *.txt
 *.json
+*.sql
 src/plot/3d_costdiagram_test.py
-
 /resources/queries_fd/skew_example/p.py
 results/job/qplans/
 /Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/job/qplans/
