@@ -141,34 +141,29 @@ def clean_condition(condition: str) -> str:
 
 
 def psql_tpch_profiling(query_id, write_to_file=False):
-    print(f"Profiling TPCH query {query_id}")
+    print(f"tpc-h query {query_id}:")
 
     # Load the query template from the file
     template_path = f'/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/resources/queries_tpch/{query_id}.sql'
     with open(template_path, 'r') as file:
         query_template = file.read()
         file.close()
-
-    print("Generating Queries from Template using Query Generator")
     queries, _ = qg.generate_query(query_template, query_id)
-    print(f"Generated {len(queries)} queries for Query {query_id} Generated")
 
-    # Limit the number of instances to process
-    instance_limit = 3
+    total_queries = len(queries)
 
-    print("Connecting to the database...")
     conn = dc.get_db_connection('dummydb')
     cur = conn.cursor()
     prefix = 'EXPLAIN (FORMAT JSON, ANALYZE) '
     plans = []
     # run queries and get the json format query plans
+    print(f"query execution starts ...")
     for i, query in enumerate(queries):
-        if i >= instance_limit:
-            break
-        print(f"Executing Query {query_id} - Instance {i + 1}")
         cur.execute(prefix + query)
         plan = cur.fetchall()
         plans.append(plan)
+        percentage = ((i + 1) / total_queries) * 100
+        print(f"{percentage:.2f}% of queries executed")
 
     # simplify the query plans
     simplified = []
@@ -179,7 +174,7 @@ def psql_tpch_profiling(query_id, write_to_file=False):
         if write_to_file:
             write_qp_to_file(query_id, i, qplan)
     print(
-        f"Finished profiling TPCH query {query_id} with {len(simplified)} instances")
+        f"execution stage done")
     return simplified
 
 # persist query plans to files
@@ -220,28 +215,18 @@ def compare_query_plans(query_plans):
 
 def profile_parameterized_queries(query_id):
     # Profile the parameterized queries
-    print(f"Now simplifying plan of query {query_id}")
     simplified_plans = psql_tpch_profiling(query_id, write_to_file=True)
-    print(f"Plan of query {query_id} successfully simplified")
-
     # Directory where the plans are saved
     directory = f'results/tpch/qplans/q{query_id}'
-
     # Get query nodes info
-    print(f"Now extracting nodes info of query {query_id}")
     query_info = query_nodes_info(directory)
-    if query_info:
-        print(f"Nodes info of query {query_id} successfully extracted")
-    else:
-        print(f"Failed to extract nodes info of query {query_id}")
+    if not query_info:
+        print(f"failed to extract nodes info of query {query_id}")
 
     # Write query nodes info to CSV
     output_dir = 'results/tpch/'
     output_file = f'q{query_id}.csv'
-    print(f"Now writing nodes info of query {query_id} to CSV")
     query_nodes_info_to_csv(query_info, output_dir, output_file)
-    print(f"Nodes info of query {query_id} successfully written to CSV")
-    print(f"Processing of query {query_id} completed")
 
 
 def profile_custom_tpch_queries():
@@ -427,7 +412,7 @@ def extract_node_types_from_plan(plan: Dict) -> Tuple[List[str], List[List[Tuple
 
 
 def query_nodes_info(directory: str) -> Dict[Union[int, Tuple[int, str]], Tuple[List[str], List[List[Tuple[str, str]]], List[float], List[Tuple[int, int]]]]:
-    print(f"Extracting query nodes info from directory: {directory}")
+    # print(f"Extracting query nodes info from directory: {directory}")
     query_info = {}
     for filename in os.listdir(directory):
         if filename.endswith('.json'):
@@ -441,20 +426,20 @@ def query_nodes_info(directory: str) -> Dict[Union[int, Tuple[int, str]], Tuple[
                 except ValueError:
                     continue  # Skip files that don't match the expected pattern
             with open(os.path.join(directory, filename), 'r', encoding='UTF-8') as file:
-                print(f"Processing file: {filename}")
+                # print(f"Processing file: {filename}")
                 plan = json.load(file)
                 node_types, filters, execution_times, cardinalities = extract_node_types_from_plan(
                     plan)
                 query_info[(query_id, suffix) if suffix else query_id] = (
                     node_types, filters, execution_times, cardinalities)
-    print(f"Finished extracting query nodes info from directory: {directory}")
+    # print(f"finished extracting query nodes info")
     return query_info
 
 # write the query info dict to csv
 
 
 def query_nodes_info_to_csv(query_info: Dict[Union[int, Tuple[int, str]], Tuple[List[str], List[List[Tuple[str, str]]], List[float], List[Tuple[int, int]]]], output_dir: str, output_file: str) -> None:
-    print(f"Writing query nodes info to CSV: {output_dir}{output_file}")
+    # print(f"Writing query nodes info to CSV: {output_dir}{output_file}")
     data = []
     # Sort the keys of the query_info dictionary
     sorted_keys = sorted(query_info.keys(), key=lambda x: (
@@ -475,7 +460,7 @@ def query_nodes_info_to_csv(query_info: Dict[Union[int, Tuple[int, str]], Tuple[
                       'Query ID', 'Node Types', 'Filters', 'Execution Time', 'Cardinality e/a'])
     output_path = os.path.join(output_dir, output_file)
     df.to_csv(output_path, index=False)
-    print(f"CSV file has been written successfully to {output_path}")
+    print(f"csv has been written successfully to {output_path}")
 
 
 # Example usage
@@ -544,12 +529,10 @@ def main():
     ############################
     ############################
     ## standard tpch section ###
-    # query_ids = [2, 3, 5, 7, 8, 12, 13, 14, 17]
-    query_ids = [2, 3]
+    query_ids = [2, 3, 5, 7, 8, 12, 13, 14, 17]
     for i in query_ids:
-        print(f'calling profiling for query {i}')
         profile_parameterized_queries(i)
-        print(f'finished profiling for query {i}')
+        # print(f'finished profiling for query {i}')
     ##################
     ## job section ###
     # job_profiling(0, simplify, 'results/job/qplans/')
