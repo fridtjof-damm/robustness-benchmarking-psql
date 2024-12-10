@@ -529,10 +529,10 @@ def main():
     ############################
     ############################
     ## standard tpch section ###
-    query_ids = [2, 3, 5, 7, 8, 12, 13, 14, 17]
-    for i in query_ids:
-        profile_parameterized_queries(i)
-        # print(f'finished profiling for query {i}')
+    # query_ids = [2, 3, 5, 7, 8, 12, 13, 14, 17]
+    # for i in query_ids:
+    #    profile_parameterized_queries(i)
+    # print(f'finished profiling for query {i}')
     ##################
     ## job section ###
     # job_profiling(0, simplify, 'results/job/qplans/')
@@ -557,16 +557,16 @@ def main():
     #################
     ############################
     ## country example #########
-    # profiling_country_example()
+    profiling_country_example()
     # print(query_nodes_info('/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified')[1])
     # print(query_nodes_info('/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified')[236])
     # country to csv
 
-    # directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified'
-    # output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified'
-    # output_file = 'country_extended_example_update.csv'
-    # query_nodes_info_to_csv(query_nodes_info(
-    #    directory), output_dir, output_file)
+    directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified'
+    output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified'
+    output_file = 'country_extended_example_index_seq.csv'
+    query_nodes_info_to_csv(query_nodes_info(
+        directory), output_dir, output_file)
     ############################
     ############################
     #### skew example ##########
