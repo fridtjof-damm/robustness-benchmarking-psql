@@ -311,7 +311,7 @@ def profiling_parameterized_job_queries(output_dir: str) -> None:
     conn = dc.get_db_connection('job')
     cur = conn.cursor()
     # Generate the job queries
-    queries = qg.generate_job_queries()
+    queries = qg.generate_job_query15a()
 
     # Execute EXPLAIN ANALYZE for each query and save the plan as a JSON file
     for i, query in enumerate(queries, start=1):
@@ -530,10 +530,10 @@ def main():
     ############################
     ## standard tpch section ###
     # query_ids = [2, 3, 5, 7, 8, 12, 13, 14, 17]
-    query_ids = [5, 7]
-    for i in query_ids:
-        profile_parameterized_queries(i)
-        print(f'finished profiling for query {i}')
+    # query_ids = [7, 8, 12, 13, 14, 17]
+    # for i in query_ids:
+    #    profile_parameterized_queries(i)
+    #    print(f'finished profiling for query {i}')
     ##################
     ## job section ###
     # job_profiling(0, simplify, 'results/job/qplans/')
@@ -556,6 +556,16 @@ def main():
     # print(query_info_job_1d)
     # query_nodes_info_to_csv(query_info_job_1d, output_dir, output_file)
     #################
+    # job 15a
+    output_file = '15a_job.csv'
+    output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/job/15a'
+    directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/job/15a'
+    profiling_parameterized_job_queries(directory)
+    query_info_job_15a = query_nodes_info(directory)
+    print(query_info_job_15a)
+    query_nodes_info_to_csv(query_info_job_15a, output_dir, output_file)
+    #################
+
     ############################
     ## country example #########
     # profiling_country_example()
