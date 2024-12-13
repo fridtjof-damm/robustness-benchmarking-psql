@@ -1,3 +1,4 @@
+import time
 import json
 import re
 import os
@@ -307,17 +308,21 @@ def profiling_parameterized_job_queries(output_dir: str) -> None:
     # Ensure the output directory exists
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-
+    print("Dir exists, now establishing db connection")
     conn = dc.get_db_connection('job')
     cur = conn.cursor()
+    print("got db connection, now generating queries")
     # Generate the job queries
     queries = qg.generate_job_query15a()
-
+    print(len(queries))
+    print("queries generated, now executing queries")
     # Execute EXPLAIN ANALYZE for each query and save the plan as a JSON file
     for i, query in enumerate(queries, start=1):
+        # print(f"executing query {i}")
         cur.execute(f"EXPLAIN (ANALYZE, FORMAT JSON) {query}")
+        # print(f"query executed, now fetching plan")
         plan = cur.fetchone()[0][0]  # Get the JSON plan
-
+        # print(f"plan fetched, now storing plan")
         # Save the plan to a JSON file
         output_path = os.path.join(output_dir, f"{i}.json")
         with open(output_path, 'w') as file:
@@ -556,62 +561,64 @@ def main():
     # print(query_info_job_1d)
     # query_nodes_info_to_csv(query_info_job_1d, output_dir, output_file)
     #################
+
     # job 15a
     output_file = '15a_job.csv'
     output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/job/15a'
     directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/job/15a'
-    profiling_parameterized_job_queries(directory)
+
+    # profiling_parameterized_job_queries(directory)
     query_info_job_15a = query_nodes_info(directory)
-    print(query_info_job_15a)
+    print(type(query_info_job_15a))
     query_nodes_info_to_csv(query_info_job_15a, output_dir, output_file)
-    #################
 
-    ############################
-    ## country example #########
-    # profiling_country_example()
-    # print(query_nodes_info('/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified')[1])
-    # print(query_nodes_info('/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified')[236])
-    # country to csv
 
-    # directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified'
-    # output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified'
-    # output_file = 'country_extended_example_index_seq.csv'
-    # query_nodes_info_to_csv(query_nodes_info(
-    #    directory), output_dir, output_file)
-    ############################
-    ############################
-    #### skew example ##########
-    # profiling_skew_example()
-    # print(query_nodes_info('/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example_plans_simplified')[2465])
-    # skew to csv
-    # directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example_plans_simplified'
-    # output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example'
-    # output_file = 'skew_example.csv'
+############################
+## country example #########
+# profiling_country_example()
+# print(query_nodes_info('/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified')[1])
+# print(query_nodes_info('/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified')[236])
+# country to csv
 
-    # query_info = query_nodes_info(directory)
-    # print(query_info)
-    # query_nodes_info_to_csv(query_info, output_dir, output_file)
+# directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified'
+# output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified'
+# output_file = 'country_extended_example_index_seq.csv'
+# query_nodes_info_to_csv(query_nodes_info(
+#    directory), output_dir, output_file)
+############################
+############################
+#### skew example ##########
+# profiling_skew_example()
+# print(query_nodes_info('/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example_plans_simplified')[2465])
+# skew to csv
+# directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example_plans_simplified'
+# output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/skew_example'
+# output_file = 'skew_example.csv'
 
-    # Ensure the output directory exists
-    # if not os.path.exists(output_dir):
-    #    os.makedirs(output_dir)
-    # query_info = query_nodes_info(directory)
-    # print(query_info)
-    # query_nodes_info_to_csv(query_info, output_dir, output_file)
-    # Calculate qerrors
-    # qerrors = calc_qerror(query_info)
-    # print(min(qerrors.values()))
-    # print(max(qerrors.values()))
+# query_info = query_nodes_info(directory)
+# print(query_info)
+# query_nodes_info_to_csv(query_info, output_dir, output_file)
 
-    ############################
-    # profile_custom_tpch_queries()
-    ############################
-    # custom tpch section to csv
-    # directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch/custom_queries'
-    # output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch'
-    # output_file = 'custom_queries.csv'
-    # query_info = query_nodes_info(directory)
-    # query_nodes_info_to_csv(query_info, output_dir, output_file)
+# Ensure the output directory exists
+# if not os.path.exists(output_dir):
+#    os.makedirs(output_dir)
+# query_info = query_nodes_info(directory)
+# print(query_info)
+# query_nodes_info_to_csv(query_info, output_dir, output_file)
+# Calculate qerrors
+# qerrors = calc_qerror(query_info)
+# print(min(qerrors.values()))
+# print(max(qerrors.values()))
+
+############################
+# profile_custom_tpch_queries()
+############################
+# custom tpch section to csv
+# directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch/custom_queries'
+# output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch'
+# output_file = 'custom_queries.csv'
+# query_info = query_nodes_info(directory)
+# query_nodes_info_to_csv(query_info, output_dir, output_file)
 
 
 if __name__ == '__main__':
