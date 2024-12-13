@@ -295,15 +295,18 @@ s_acctbal = []
 countries = ['Vatican City', 'Christmas Island (Australia)', 'Tokelau (New Zealand)', 'Niue (New Zealand)', 'Norfolk Island (Australia)', 'Falkland Islands (UK)', 'Montserrat (UK)', 'Saint Helena, Ascension and Tristan da Cunha (UK)', 'Saint Pierre and Miquelon (France)', 'Saint Barthélemy (France)', 'Tuvalu', 'Wallis and Futuna (France)', 'Nauru', 'Cook Islands', 'Anguilla (UK)', 'Palau', 'British Virgin Islands (UK)', 'Saint Martin (France)', 'San Marino', 'Gibraltar (UK)', 'Monaco', 'Liechtenstein', 'Sint Maarten (Netherlands)', 'Marshall Islands', 'Northern Mariana Islands (US)', 'Turks and Caicos Islands (UK)', 'American Samoa (US)', 'Saint Kitts and Nevis', 'Faroe Islands (Denmark)', 'South Ossetia', 'Greenland (Denmark)', 'Guernsey (UK)', 'Bermuda (UK)', 'Dominica', 'Cayman Islands (UK)', 'Isle of Man (UK)', 'Andorra', 'U.S. Virgin Islands (US)', 'Tonga', 'Jersey (UK)', 'Antigua and Barbuda', 'Micronesia', 'Aruba (Netherlands)', 'Saint Vincent and the Grenadines', 'Grenada', 'Kiribati', 'Seychelles', 'Guam (US)', 'Curaçao (Netherlands)', 'Saint Lucia', 'Samoa', 'São Tomé and Príncipe', 'Abkhazia', 'Barbados', 'New Caledonia (France)', 'French Polynesia (France)', 'Vanuatu', 'Transnistria', 'Northern Cyprus', 'Iceland', 'Bahamas', 'Belize', 'Brunei', 'Cape Verde', 'Maldives', 'Malta', 'Western Sahara', 'Suriname', 'Montenegro', 'Luxembourg', 'Macau (China)', 'Solomon Islands', 'Guyana', 'Bhutan', 'Fiji', 'Comoros', 'Cyprus', 'Djibouti', 'Eswatini', 'Mauritius', 'Trinidad and Tobago', 'East Timor', 'Estonia', 'Equatorial Guinea', 'Bahrain', 'Kosovo', 'Guinea-Bissau', 'North Macedonia', 'Latvia', 'Slovenia', 'Lesotho', 'Albania', 'Gabon', 'Botswana', 'Gambia', 'Moldova', 'Jamaica', 'Qatar',
              'Lithuania', 'Namibia', 'Armenia', 'Puerto Rico (US)', 'Bosnia and Herzegovina', 'Uruguay', 'Mongolia', 'Georgia', 'Eritrea', 'Croatia', 'Panama', 'Kuwait', 'Mauritania', 'Oman', 'Liberia', 'Costa Rica', 'New Zealand', 'Ireland', 'Slovakia', 'Palestine', 'Lebanon', 'Norway', 'Finland', 'Denmark', 'Singapore', 'Paraguay', 'Republic of the Congo', 'El Salvador', 'Bulgaria', 'Central African Republic', 'Serbia', 'Nicaragua', 'Turkmenistan', 'Kyrgyzstan', 'Libya', 'Laos', 'Hong Kong (China)', 'Togo', 'Sierra Leone', 'Switzerland', 'Belarus', 'Austria', 'Hungary', 'Honduras', 'Israel', 'Azerbaijan', 'Tajikistan', 'United Arab Emirates', 'Greece', 'Sweden', 'Portugal', 'Dominican Republic', 'Czech Republic', 'Cuba', 'Jordan', 'Papua New Guinea', 'Belgium', 'Tunisia', 'Bolivia', 'Haiti', 'Burundi', 'Benin', 'Guinea', 'Rwanda', 'Zimbabwe', 'South Sudan', 'Ecuador', 'Cambodia', 'Guatemala', 'Netherlands', 'Senegal', 'Somalia', 'Chad', 'Romania', 'Zambia', 'Chile', 'Kazakhstan', 'Malawi', 'Sri Lanka', 'Mali', 'Taiwan', 'Burkina Faso', 'Syria', 'North Korea', 'Niger', 'Australia', 'Venezuela', 'Cameroon', 'Nepal', 'Ivory Coast', 'Madagascar', 'Saudi Arabia', 'Yemen', 'Mozambique', 'Ghana', 'Malaysia', 'Peru', 'Afghanistan', 'Angola', 'Ukraine', 'Uzbekistan', 'Morocco', 'Poland', 'Canada', 'Iraq', 'Uganda', 'Algeria', 'Argentina', 'Spain', 'Sudan', 'South Korea', 'Kenya', 'Colombia', 'Myanmar', 'Italy', 'Tanzania', 'South Africa', 'Thailand', 'United Kingdom', 'France', 'Germany', 'Turkey', 'Iran', 'Vietnam', 'Democratic Republic of the Congo', 'Egypt', 'Ethiopia', 'Philippines', 'Japan', 'Mexico', 'Russia', 'Bangladesh', 'Brazil', 'Nigeria', 'Pakistan', 'Indonesia', 'United States', 'India', 'China']
 
+country_idxes = [i for i in range(1, 238)]
+
 
 def generate_country_queries() -> list[str]:
-   # template = "SELECT id, country FROM users WHERE country = '{COUNTRY}';"
-    template = "SELECT * FROM users_extended u JOIN nation n ON u.country = n.id  WHERE n.name = '{COUNTRY}';"
+    template = "SELECT country FROM users_extended WHERE country = '{COUNTRY}';"
+    # template =
+    # template = "SELECT country FROM users_extended WHERE country = '{COUNTRY}';"
     queries: list[str] = []
-    for idx, country in enumerate(countries):
-        queries.append(template.format(COUNTRY=country))
+    for idx, country_idx in enumerate(country_idxes):
+        queries.append(template.format(COUNTRY=country_idx))
     return queries
-# print(generate_country_queries()[0])
+    print(generate_country_queries()[0])
 
 # skew example
 
@@ -319,6 +322,13 @@ def generate_skew_queries() -> list[str]:
 
 ##########
 # job
+##########
+
+
+####
+# job queries gen
+####
+
 
 def generate_job_queries() -> list[str]:
     template_path = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/resources/job_parameterized/1d_qt.sql'
@@ -332,6 +342,45 @@ def generate_job_queries() -> list[str]:
     for year in range(1880, 2020):
         query = query_template.replace('{YEAR}', str(year))
         queries.append(query)
+    return queries
+
+
+def generate_job_query15a() -> list[str]:
+    country_codes = [
+        '[ad]', '[ae]', '[af]', '[ag]', '[ai]', '[al]', '[am]', '[an]', '[ao]', '[ar]', '[as]', '[at]', '[au]',
+        '[aw]', '[az]', '[ba]', '[bb]', '[bd]', '[be]', '[bf]', '[bg]', '[bh]', '[bi]', '[bj]', '[bl]', '[bm]',
+        '[bn]', '[bo]', '[br]', '[bs]', '[bt]', '[bw]', '[by]', '[bz]', '[ca]', '[cd]', '[cg]', '[ch]', '[ci]',
+        '[cl]', '[cm]', '[cn]', '[co]', '[cr]', '[cshh]', '[cu]', '[cv]', '[cy]', '[cz]', '[ddde]', '[de]',
+        '[dk]', '[dm]', '[do]', '[dz]', '[ec]', '[ee]', '[eg]', '[er]', '[es]', '[et]', '[fi]', '[fj]', '[fo]',
+        '[fr]', '[ga]', '[gb]', '[gd]', '[ge]', '[gf]', '[gg]', '[gh]', '[gi]', '[gl]', '[gn]', '[gp]', '[gr]',
+        '[gt]', '[gu]', '[gw]', '[gy]', '[hk]', '[hn]', '[hr]', '[ht]', '[hu]', '[id]', '[ie]', '[il]', '[im]',
+        '[in]', '[iq]', '[ir]', '[is]', '[it]', '[je]', '[jm]', '[jo]', '[jp]', '[ke]', '[kg]', '[kh]', '[ki]',
+        '[kn]', '[kp]', '[kr]', '[kw]', '[ky]', '[kz]', '[la]', '[lb]', '[lc]', '[li]', '[lk]', '[lr]', '[ls]',
+        '[lt]', '[lu]', '[lv]', '[ly]', '[ma]', '[mc]', '[md]', '[me]', '[mg]', '[mh]', '[mk]', '[ml]', '[mm]',
+        '[mn]', '[mo]', '[mq]', '[mr]', '[mt]', '[mu]', '[mv]', '[mx]', '[my]', '[mz]', '[na]', '[nc]', '[ne]',
+        '[ng]', '[ni]', '[nl]', '[no]', '[np]', '[nr]', '[nz]', '[om]', '[pa]', '[pe]', '[pf]', '[pg]', '[ph]',
+        '[pk]', '[pl]', '[pm]', '[pr]', '[ps]', '[pt]', '[py]', '[qa]', '[ro]', '[rs]', '[ru]', '[rw]', '[sa]',
+        '[sd]', '[se]', '[sg]', '[si]', '[sj]', '[sk]', '[sl]', '[sm]', '[sn]', '[so]', '[sr]', '[suhh]', '[sv]',
+        '[sy]', '[sz]', '[td]', '[tf]', '[tg]', '[th]', '[tj]', '[tk]', '[tl]', '[tm]', '[tn]', '[to]', '[tr]',
+        '[tt]', '[tv]', '[tw]', '[tz]', '[ua]', '[ug]', '[um]', '[us]', '[uy]', '[uz]', '[va]', '[ve]', '[vg]',
+        '[vi]', '[vn]', '[xyu]', '[ye]', '[yucs]', '[za]', '[zm]', '[zw]'
+    ]
+
+    production_years = [
+        production_year for production_year in range(1880, 2020)]
+
+    template_path = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/resources/job_parameterized/selected/15a.sql'
+    queries = []
+
+    # read the query template from the file
+    with open(template_path, 'r') as file:
+        query_template = file.read()
+
+    for country in country_codes:
+        for year in production_years:
+            query = query_template.replace('{COUNTRY_CODE}', country).replace(
+                '{YEAR}', str(year))
+            queries.append(query)
     return queries
 
 
