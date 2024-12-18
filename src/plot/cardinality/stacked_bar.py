@@ -5,9 +5,12 @@ import numpy as np
 import re
 
 # Load the CSV data
-# file_path = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified/country_extended_example_index_seq.csv'
 file_path = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/job/all_job.csv'
 df = pd.read_csv(file_path)
+
+# Convert the Query ID column to numeric values
+df['Query ID'] = df['Query ID'].apply(
+    lambda x: int(re.search(r'\d+', x).group()))
 
 # Parse the Cardinalities and calculate cumulative actual cardinalities
 
@@ -32,7 +35,7 @@ df['Node Types'] = df['Node Types'].apply(lambda x: x.split(', '))
 
 
 def extract_country_name(filters_str):
-    match = re.search(r'\(country,(\d+)\)', filters_str)
+    match = re.search(r'\(country,(\[.*?\])\)', filters_str)
     return match.group(1) if match else '<Country>'
 
 
@@ -51,24 +54,13 @@ for i, row in df.iterrows():
 # Convert the data dictionary to a DataFrame
 data_df = pd.DataFrame(data, index=query_ids)
 
-# Order the DataFrame by the sum of cardinalities
-data_df['Total'] = data_df.sum(axis=1)
-data_df = data_df.sort_values(by='Total', ascending=False)
-data_df = data_df.drop(columns=['Total'])
-
-# Group the data into 50 bins
-bins = np.linspace(0, len(data_df), 51)
-data_df['Bin'] = pd.cut(data_df.index, bins=bins,
-                        labels=False, include_lowest=True)
-binned_data = data_df.groupby('Bin').sum()
-
 # Plot the stacked bar chart
-ax = binned_data.plot(kind='bar', stacked=True, figsize=(12, 8))
+ax = data_df.plot(kind='bar', stacked=True, figsize=(12, 8))
 
 # Customize the plot
-plt.xlabel('Bins')
+plt.xlabel('Query ID')
 plt.ylabel('Cumulative Cardinalities')
-plt.title('Cumulative Cardinalities of Node Types Across Queries (50 Bins)')
+plt.title('Cumulative Cardinalities of Node Types Across Queries')
 plt.legend(title='Node Types', bbox_to_anchor=(1.05, 1), loc='upper left')
 plt.tight_layout()
 

@@ -4,67 +4,17 @@ import pandas as pd
 import re
 import numpy as np
 import os
-import glob
-
-
-def extract_cardinalities(cardinality_str):
-    matches = re.findall(r'\([\d,]+,\s*(\d+)\)', cardinality_str)
-    return [int(x) for x in matches]
-
-
-def process_node_types(node_types_str):
-    node_types = node_types_str.split(',')
-    processed_types = []
-    type_counts = {}
-    for node_type in node_types:
-        node_type = node_type.strip()
-        if node_type in type_counts:
-            type_counts[node_type] += 1
-            processed_types.append(f"{node_type}_{type_counts[node_type]}")
-        else:
-            type_counts[node_type] = 1
-            processed_types.append(f"{node_type}_1")
-    return processed_types
-
-
-def sample_data(data, method='none', target_size=150):
-    if len(data) <= 100:  # Don't sample if less than 100 rows
-        return data
-
-    if method == 'none':
-        return data
-    elif method == 'stratified':
-        param_groups = data.groupby(['param1', 'param2'])
-        sampling_rate = target_size / len(param_groups)
-        sampled_data = param_groups.apply(
-            lambda x: x.sample(max(1, int(len(x) * sampling_rate))),
-            include_groups=False
-        )
-        return sampled_data.reset_index(drop=True)
-    elif method == 'systematic':
-        n = max(1, len(data) // target_size)
-        return data.iloc[::n].reset_index(drop=True)
-    else:
-        raise ValueError(
-            "Invalid sampling method. Use 'none', 'stratified', or 'systematic'")
+from src.utils.utils import extract_params, extract_relevant_filters, sample_data, extract_cardinalities, process_csv_and_discard_equals, process_node_types
 
 
 def create_stacked_bar_chart(data, param1_name, param2_name, query_id, sampling_method='none',
                              target_sample_size=150, output_dir='results/plots/'):
     try:
-        # Extract parameters from filters
-        def extract_params(filter_str):
-            pattern = r'\(([\w_]+),\s*([^)]+)\)'
-            matches = re.findall(pattern, filter_str)
-            date_values = [value.strip() for name, value in matches
-                           if name in [param1_name, param2_name]]
-            return date_values[0], date_values[1]
-
         # Process the data
         data['param1'], data['param2'] = zip(
-            *data['Filters'].apply(extract_params))
+            *[extract_relevant_filters(x, param1_name, param2_name) for x in data['Filters']])
 
-        # Apply sampling if needed
+        # Apply sampling if needed, function in utils.py
         data = sample_data(data, sampling_method, target_sample_size)
 
         # Process node types and cardinalities
@@ -92,20 +42,25 @@ def create_stacked_bar_chart(data, param1_name, param2_name, query_id, sampling_
         x = np.arange(len(param_combinations))
         bottom = np.zeros(len(param_combinations))
 
-        # Plot each node type's cardinalities
+        # Plot each node type's cardinalities in order
         for node_type in all_node_types:
-            values = []
-            for idx, row in data.iterrows():
-                if node_type in row['Processed_Node_Types']:
-                    node_idx = row['Processed_Node_Types'].index(node_type)
-                    values.append(row['cardinalities'][node_idx])
-                else:
-                    values.append(0)
+            values = np.zeros(len(param_combinations))
+            for i, (_, row) in enumerate(param_combinations.iterrows()):
+                matching_rows = data[
+                    (data['param1'] == row['param1']) &
+                    (data['param2'] == row['param2'])
+                ]
+                if not matching_rows.empty:
+                    first_match = matching_rows.iloc[0]
+                    if node_type in first_match['Processed_Node_Types']:
+                        node_idx = first_match['Processed_Node_Types'].index(
+                            node_type)
+                        values[i] = first_match['cardinalities'][node_idx]
 
             plt.bar(x, values, bottom=bottom,
                     color=color_map[node_type],
                     label=node_type)
-            bottom += np.array(values)
+            bottom += values
 
         # Customize the plot
         sampling_text = f" ({sampling_method} sampling)" if len(
@@ -120,12 +75,12 @@ def create_stacked_bar_chart(data, param1_name, param2_name, query_id, sampling_
         step = max(1, len(param_combinations) // num_labels)
         plt.xticks(x[::step],
                    [f'{p1}\n{p2}' for p1, p2 in
-                   zip(param_combinations['param1'][::step],
-                       param_combinations['param2'][::step])],
+                   zip(param_combinations['param1'].iloc[::step],
+                       param_combinations['param2'].iloc[::step])],
                    rotation=45, ha='right')
 
         # Add grid and legend
-        plt.grid(True, axis='y', linestyle='--', alpha=0.7)
+        # plt.grid(True, axis='y', linestyle='--', alpha=0.7)
         plt.legend(title='Operators', bbox_to_anchor=(1.05, 1),
                    loc='upper left', borderaxespad=0.)
 
@@ -146,42 +101,3 @@ def create_stacked_bar_chart(data, param1_name, param2_name, query_id, sampling_
 
     except Exception as e:
         print(f"Error creating plot for {query_id}: {str(e)}")
-
-
-if __name__ == "__main__":
-    try:
-        # Directory containing CSV files
-        csv_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch/'
-        output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots/cardinality/stack_bar/tpch'
-
-        # Process all CSV files
-        for csv_file in glob.glob(os.path.join(csv_dir, '*.csv')):
-            # Extract query ID from filename
-            query_id = os.path.basename(csv_file).split('.')[0]
-
-            # Read data
-            data = pd.read_csv(csv_file)
-
-            # Create plots with different sampling methods
-            create_stacked_bar_chart(
-                data.copy(),
-                'l_shipdate',
-                'o_orderdate',
-                query_id,
-                sampling_method='none',
-                output_dir=output_dir
-            )
-
-            if len(data) > 100:
-                create_stacked_bar_chart(
-                    data.copy(),
-                    'l_shipdate',
-                    'o_orderdate',
-                    query_id,
-                    sampling_method='systematic',
-                    target_sample_size=100,
-                    output_dir=output_dir
-                )
-
-    except Exception as e:
-        print(f"Error processing files: {str(e)}")

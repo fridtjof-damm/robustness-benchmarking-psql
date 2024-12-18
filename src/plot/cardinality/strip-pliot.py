@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Read the CSV data
+# df_raw = pd.read_csv('/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified/country_extended_example_update.csv')
 df_raw = pd.read_csv(
-    '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified/country_extended_example_update.csv')
-
+    '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified/country_extended_example_index_seq.csv')
 # Function to calculate q-error
 
 
@@ -50,8 +50,8 @@ ax.set_yscale('log')
 # Customize the plot
 plt.xticks(rotation=45, ha='right')
 plt.xlabel('Node Type')
-plt.ylabel('Cardinality Error')
-plt.title('Cardinality Distribution by Node Type')
+plt.ylabel('Q-Error (log scale)')
+plt.title('Q-Error Distribution by Node Type')
 
 # Adjust layout to prevent label cutoff
 plt.tight_layout()
