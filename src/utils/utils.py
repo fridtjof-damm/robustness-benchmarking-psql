@@ -1,6 +1,8 @@
 import csv
 import math
 import re
+import pandas as pd
+import os
 
 
 def format_tuple(t: tuple) -> str:
@@ -136,3 +138,55 @@ def extract_params(filter_str):
     param_dict = dict((name.strip(), value.strip())
                       for name, value in matches)
     return param_dict.get(param1_name, ''), param_dict.get(param2_name, '')
+
+
+def extract_cardinalities(cardinality_str):
+    matches = re.findall(r'\([\d,]+,\s*(\d+)\)', cardinality_str)
+    return [int(x) for x in matches]
+
+
+def process_csv_and_discard_equals(input_file, output_file, query_parameters):
+    # Read the CSV file
+    df = pd.read_csv(input_file)
+
+    # Function to filter out parameters with '='
+    def filter_out_equals(filters):
+        return ', '.join([f for f in filters.split('), (') if '=' not in f])
+
+    # Discard filters that are not relevant to the plot
+    # extract query id
+    query_id = os.path.basename(input_file).split('.')[0]
+    param1_name, param2_name = query_parameters[query_id]
+    df['param1'], df['param2'] = zip(
+        *[extract_relevant_filters(x, param1_name, param2_name) for x in df['Filters']])
+
+    # Apply the filter function to the 'Filters' column
+    df['Filters'] = df['Filters'].apply(filter_out_equals)
+
+    # Check if output file exists and prompt for overwrite
+    if os.path.exists(output_file) and input_file != output_file:
+        overwrite = input(
+            f"The file {output_file} already exists. Do you want to overwrite it? (y/n): ")
+        if overwrite.lower() != 'y':
+            print("Operation cancelled.")
+            return 
+
+    # Save the modified DataFrame to the output CSV file
+    df.to_csv(output_file, index=False)
+
+    print(f"Processed CSV saved to {output_file}")
+
+
+def process_node_types(node_types_str):
+    node_types = node_types_str.split(',')
+    processed_types = []
+    type_counts = {}
+    for node_type in node_types:
+        node_type = node_type.strip()
+        if node_type in type_counts:
+            type_counts[node_type] += 1
+            processed_types.append(f"{node_type}_{type_counts[node_type]}")
+        else:
+            type_counts[node_type] = 1
+            processed_types.append(f"{node_type}_1")
+    return processed_types
