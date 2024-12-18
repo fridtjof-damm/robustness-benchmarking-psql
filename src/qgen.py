@@ -22,10 +22,10 @@ def generate_query(template: str, query_id: int) -> tuple[list[str], list[tuple]
                             SIZE=s, TYPE=t, REGION=region[1]))
                         parameters.append((s, t, region[1]))
         case 3:
-            for seg in segments:
-                for d3 in dates_03:
-                    queries.append(template.format(SEGMENT=seg, DATE=d3))
-                    parameters.append((seg, str(d3)))
+            for d1, d2 in it.product(dates_03, repeat=2):
+                queries.append(template.format(
+                    DATE1=d1, DATE2=d2, SEGMENT='HOUSEHOLD'))
+                parameters.append((d1, d2))
         case 4:
             for param4 in dates_04:
                 queries.append(template.format(DATE=param4))
@@ -346,6 +346,24 @@ def generate_job_queries() -> list[str]:
 
 
 def generate_job_query15a() -> list[str]:
+    template_path = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/resources/job_parameterized/selected/15a.sql'
+    queries = []
+
+    # read the query template from the file
+    with open(template_path, 'r') as file:
+        query_template = file.read()
+
+    for country in country_codes:
+        for year in production_years:
+            query = query_template.replace('{COUNTRY_CODE}', country).replace(
+                '{YEAR}', str(year))
+            queries.append(query)
+    return queries
+
+###
+# join order benchmark parameters
+###
+
     country_codes = [
         '[ad]', '[ae]', '[af]', '[ag]', '[ai]', '[al]', '[am]', '[an]', '[ao]', '[ar]', '[as]', '[at]', '[au]',
         '[aw]', '[az]', '[ba]', '[bb]', '[bd]', '[be]', '[bf]', '[bg]', '[bh]', '[bi]', '[bj]', '[bl]', '[bm]',
@@ -364,24 +382,15 @@ def generate_job_query15a() -> list[str]:
         '[sy]', '[sz]', '[td]', '[tf]', '[tg]', '[th]', '[tj]', '[tk]', '[tl]', '[tm]', '[tn]', '[to]', '[tr]',
         '[tt]', '[tv]', '[tw]', '[tz]', '[ua]', '[ug]', '[um]', '[us]', '[uy]', '[uz]', '[va]', '[ve]', '[vg]',
         '[vi]', '[vn]', '[xyu]', '[ye]', '[yucs]', '[za]', '[zm]', '[zw]'
-    ]
+    ]  # {COUNTRY_CODE}
 
     production_years = [
-        production_year for production_year in range(1880, 2020)]
+        production_year for production_year in range(1880, 2020)]  # {YEAR}
 
-    template_path = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/resources/job_parameterized/selected/15a.sql'
-    queries = []
 
-    # read the query template from the file
-    with open(template_path, 'r') as file:
-        query_template = file.read()
-
-    for country in country_codes:
-        for year in production_years:
-            query = query_template.replace('{COUNTRY_CODE}', country).replace(
-                '{YEAR}', str(year))
-            queries.append(query)
-    return queries
+###
+# custom tpch based query generation
+##
 
 
 def gen_custom_queries_aggregated() -> list[str]:
@@ -408,3 +417,23 @@ def gen_custom_queries_aggregated() -> list[str]:
             queries.append(query)
 
     return queries
+
+
+###
+# relevant query parameter section
+###
+
+# tpch
+    # Define parameter dimensions for each query
+tpch_query_parameters = {
+    'q2': ('p_type', 'r_name'),
+    'q3': ('l_orderdate', 'l_shipdate'),
+    'q5': ('r_name', 'o_orderdate'),
+    'q7': ('n_name', 'n_name'),
+    'q8': ('r_name', 'p_type'),
+    'q11': ('n_name', 'n_name'),
+    'q12': ('l_shipmode', 'l_receiptdate'),
+    'q13': ('o_comment', 'o_comment'),
+    'q14': ('l_shipdate', 'l_shipdate'),
+    'q17': ('p_brand', 'p_container')
+}
