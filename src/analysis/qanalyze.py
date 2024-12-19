@@ -216,7 +216,7 @@ def compare_query_plans(query_plans):
 
 def profile_parameterized_queries(query_id):
     # Profile the parameterized queries
-    simplified_plans = psql_tpch_profiling(query_id, write_to_file=True)
+    # simplified_plans = psql_tpch_profiling(query_id, write_to_file=True)
     # Directory where the plans are saved
     directory = f'results/tpch/qplans/q{query_id}'
     # Get query nodes info
