@@ -100,7 +100,7 @@ def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='no
             bottom += values
 
         # Customize the plot
-        plt.title('Query Plan Cardinalities', fontsize=16, pad=20)
+        plt.title('Query Plan Cardinalities', fontsize=16, pad=22)
         plt.xlabel(f'Parameters ({param1_name}, {param2_name})', fontsize=12)
         plt.ylabel('Cardinality', fontsize=12)
 
@@ -112,6 +112,10 @@ def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='no
                    zip(param_combinations['param1'][::step],
                        param_combinations['param2'][::step])],
                    rotation=45, ha='right')
+
+        # Set the x-axis limit to zoom in on the left
+        x_max = x.max() / 3.5
+        plt.xlim(-0.5, x_max)
 
         # Add grid and legend
         plt.grid(True, axis='y', linestyle='--', alpha=0.7)
