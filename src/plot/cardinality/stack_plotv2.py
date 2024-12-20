@@ -76,7 +76,7 @@ def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='no
 
         # Setup the plot
         plt.figure(figsize=(15, 10))
-
+        plt.subplots_adjust(bottom=0.2)
         # Get unique node types for coloring
         all_node_types = [node for sublist in data['Processed_Node_Types']
                           for node in sublist]
@@ -100,18 +100,30 @@ def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='no
             bottom += values
 
         # Customize the plot
-        plt.title('Query Plan Cardinalities', fontsize=16, pad=22)
+        plt.title('Cardinalities per Query Node Type', fontsize=16, pad=22)
         plt.xlabel(f'Parameters ({param1_name}, {param2_name})', fontsize=12)
         plt.ylabel('Cardinality', fontsize=12)
 
-        # Set x-axis labels with reduced frequency
-        num_labels = min(8, len(param_combinations))
-        step = max(1, len(param_combinations) // num_labels)
-        plt.xticks(x[::step],
-                   [f'{p1}\n{p2}' for p1, p2 in
-                   zip(param_combinations['param1'][::step],
-                       param_combinations['param2'][::step])],
-                   rotation=45, ha='right')
+        # Identify the indices of the first and last occurrences of each unique param1 value
+        unique_param2 = param_combinations['param2'].unique()
+        label_indices = []
+        for param2 in unique_param2:
+            indices = param_combinations.index[param_combinations['param2'] == param2].tolist(
+            )
+            if indices:
+                label_indices.append(indices[0])  # First occurrence
+                label_indices.append(indices[-1])  # Last occurrence
+
+        """        # Set x-axis labels at the identified indices
+                plt.xticks(x[label_indices],
+                        [f'{param_combinations["param2"][i]}\n{param_combinations["param1"][i]}' for i in label_indices],
+                        rotation=45, ha='right', fontsize=14)"""
+
+        # Set x-axis labels at the identified indices
+        plt.xticks(x[label_indices],
+                   [f'{param_combinations["param2"][i]}\n{param_combinations["param1"][i]}' for i in label_indices],
+                   rotation=45, ha='right', va='top', fontsize=14)
+        plt.gcf().autofmt_xdate()
 
         # Set the x-axis limit to zoom in on the left
         x_max = x.max() / 3.5
@@ -119,13 +131,15 @@ def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='no
 
         # Add grid and legend
         plt.grid(True, axis='y', linestyle='--', alpha=0.7)
-        plt.legend(title='Operators', bbox_to_anchor=(1.05, 1),
-                   loc='upper left', borderaxespad=0.)
+
+        # Remove underscores from legend labels
+        handles, labels = plt.gca().get_legend_handles_labels()
+        labels = [label.replace('_', ' ') for label in labels]
+        plt.legend(handles, labels, title='Operators', bbox_to_anchor=(
+            1.05, 1), loc='upper left', borderaxespad=0.)
 
         # Format y-axis with scientific notation
-        plt.gca().yaxis.set_major_formatter(
-            ticker.ScalarFormatter(useMathText=True)
-        )
+        plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=True))
         plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
 
         # Adjust layout
