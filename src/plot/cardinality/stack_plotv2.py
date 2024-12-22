@@ -47,7 +47,7 @@ def sample_data(data, method='none', target_size=150):
 
 
 def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='none',
-                             target_sample_size=150, output_file=None):
+                             target_sample_size=150, output_file=None, whitespace_width=1):
     try:
         # Extract parameters from filters
         def extract_params(filter_str):
@@ -74,8 +74,22 @@ def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='no
         # Get unique parameter combinations
         param_combinations = data[['param1', 'param2']].drop_duplicates()
 
+        # Add whitespace between groups
+        param_combinations_with_whitespace = []
+        for i, row in param_combinations.iterrows():
+            param_combinations_with_whitespace.append(row)
+            if i < len(param_combinations) - 1:
+                next_row = param_combinations.iloc[i + 1]
+                if row['param2'] != next_row['param2']:
+                    for _ in range(whitespace_width):
+                        param_combinations_with_whitespace.append(
+                            pd.Series({'param1': '', 'param2': ''}))
+
+        param_combinations_with_whitespace = pd.DataFrame(
+            param_combinations_with_whitespace)
+
         # Setup the plot
-        plt.figure(figsize=(15, 10))
+        plt.figure(figsize=(18, 10))
         plt.subplots_adjust(bottom=0.2)
         # Get unique node types for coloring
         all_node_types = [node for sublist in data['Processed_Node_Types']
@@ -85,24 +99,26 @@ def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='no
         color_map = dict(zip(unique_node_types, colors))
 
         # Create bars
-        x = np.arange(len(param_combinations))
-        bottom = np.zeros(len(param_combinations))
+        x = np.arange(len(param_combinations_with_whitespace))
+        bottom = np.zeros(len(param_combinations_with_whitespace))
 
         # Plot each node type's cardinalities
         first_query_nodes = data['Processed_Node_Types'].iloc[0]
         for node_type in first_query_nodes:
-            values = [row[i] for row, nodes in zip(data['cardinalities'],
-                                                   data['Processed_Node_Types'])
+            values = [row[i] for row, nodes in zip(data['cardinalities'], data['Processed_Node_Types'])
                       for i, n in enumerate(nodes) if n == node_type]
-            plt.bar(x, values, bottom=bottom,
-                    color=color_map[node_type],
-                    label=node_type)
-            bottom += values
+            values_with_whitespace = np.zeros(
+                len(param_combinations_with_whitespace))
+            values_with_whitespace[:len(values)] = values
+            plt.bar(x, values_with_whitespace, bottom=bottom,
+                    color=color_map[node_type], label=node_type)
+            bottom += values_with_whitespace
 
         # Customize the plot
-        plt.title('Cardinalities per Query Node Type', fontsize=16, pad=22)
-        plt.xlabel(f'Parameters ({param1_name}, {param2_name})', fontsize=12)
-        plt.ylabel('Cardinality', fontsize=12)
+        plt.xlabel(
+            f'Parameters 1 {param1_name}, 2 {param2_name}', fontsize=20)
+        plt.ylabel('Cardinality', fontsize=20)
+        plt.yticks(fontsize=16)
 
         # Identify the indices of the first and last occurrences of each unique param1 value
         unique_param2 = param_combinations['param2'].unique()
@@ -114,19 +130,27 @@ def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='no
                 label_indices.append(indices[0])  # First occurrence
                 label_indices.append(indices[-1])  # Last occurrence
 
-        """        # Set x-axis labels at the identified indices
-                plt.xticks(x[label_indices],
-                        [f'{param_combinations["param2"][i]}\n{param_combinations["param1"][i]}' for i in label_indices],
-                        rotation=45, ha='right', fontsize=14)"""
-
         # Set x-axis labels at the identified indices
         plt.xticks(x[label_indices],
-                   [f'{param_combinations["param2"][i]}\n{param_combinations["param1"][i]}' for i in label_indices],
-                   rotation=45, ha='right', va='top', fontsize=14)
-        plt.gcf().autofmt_xdate()
+                   [f'2 {param_combinations["param1"][i]}' for i in label_indices],
+                   rotation=45, ha='right', fontsize=14)
+
+        """        # Adjust alignment for the first and last labels in each group
+                xticks = plt.gca().get_xticklabels()
+                for i, label in zip(label_indices, xticks):
+                    if i == label_indices[0] or i == label_indices[-1]:
+                        ha = 'left' if i == label_indices[0] else 'right'
+                    elif i == 0:
+                        ha = 'left'
+                    else:
+                        ha = 'center'
+                    label.set_ha(ha)"""
+
+        # Use autofmt_xdate to improve the alignment of x-tick labels
+        # plt.gcf().autofmt_xdate()
 
         # Set the x-axis limit to zoom in on the left
-        x_max = x.max() / 3.5
+        x_max = x.max() / 4.55
         plt.xlim(-0.5, x_max)
 
         # Add grid and legend
@@ -136,12 +160,12 @@ def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='no
         handles, labels = plt.gca().get_legend_handles_labels()
         labels = [label.replace('_', ' ') for label in labels]
         plt.legend(handles, labels, title='Operators', bbox_to_anchor=(
-            1.05, 1), loc='upper left', borderaxespad=0.)
+            1.05, 1), loc='upper left', borderaxespad=0., fontsize=18)
 
         # Format y-axis with scientific notation
         plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=True))
         plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
-
+        plt.gca().yaxis.get_offset_text().set_fontsize(14)
         # Adjust layout
         plt.tight_layout()
 
@@ -170,7 +194,8 @@ if __name__ == "__main__":
             'l_shipdate',
             'o_orderdate',
             sampling_method='none',
-            output_file=f'/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots/cardinality/stack_bar/tpch/pdf/cardinalities_{qid}.pdf'
+            output_file=f'/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots/cardinality/stack_bar/tpch/pdf/cardinalities_{qid}.pdf',
+            whitespace_width=1  # Adjust the whitespace width as needed
         )
 
         create_stacked_bar_chart(
@@ -179,7 +204,8 @@ if __name__ == "__main__":
             'o_orderdate',
             sampling_method='stratified',
             target_sample_size=150,
-            output_file=f'/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots/cardinality/stack_bar/tpch/pdf/cardinalities_stratified_{qid}.pdf'
+            output_file=f'/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots/cardinality/stack_bar/tpch/pdf/cardinalities_stratified_{qid}.pdf',
+            whitespace_width=1  # Adjust the whitespace width as needed
         )
 
         create_stacked_bar_chart(
@@ -188,7 +214,8 @@ if __name__ == "__main__":
             'o_orderdate',
             sampling_method='systematic',
             target_sample_size=150,
-            output_file=f'/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots/cardinality/stack_bar/tpch/pdf/cardinalities_systematic_{qid}.pdf'
+            output_file=f'/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots/cardinality/stack_bar/tpch/pdf/cardinalities_systematic_{qid}.pdf',
+            whitespace_width=1  # Adjust the whitespace width as needed
         )
     except Exception as e:
         print(f"Error loading data: {str(e)}")
