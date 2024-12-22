@@ -133,7 +133,7 @@ def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='no
         # Set x-axis labels at the identified indices
         plt.xticks(x[label_indices],
                    [f'2 {param_combinations["param1"][i]}' for i in label_indices],
-                   rotation=45, ha='right', fontsize=14)
+                   rotation=45, ha='right', fontsize=16)
 
         """        # Adjust alignment for the first and last labels in each group
                 xticks = plt.gca().get_xticklabels()
