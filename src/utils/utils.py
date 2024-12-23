@@ -157,11 +157,21 @@ def process_csv_and_discard_equals(input_file, output_file, query_parameters):
     # extract query id
     query_id = os.path.basename(input_file).split('.')[0]
     param1_name, param2_name = query_parameters[query_id]
+    print(query_id, param1_name, param2_name)
+
+    # Ensure Filters column contains string values
+    df['Filters'] = df['Filters'].astype(str)
+
+    # Extract relevant filters
     df['param1'], df['param2'] = zip(
         *[extract_relevant_filters(x, param1_name, param2_name) for x in df['Filters']])
 
     # Apply the filter function to the 'Filters' column
     df['Filters'] = df['Filters'].apply(filter_out_equals)
+
+    # Debug print statements
+    print(f"Filtered DataFrame columns: {df.columns}")
+    print(f"Filtered DataFrame head:\n{df.head()}")
 
     # Check if output file exists and prompt for overwrite
     if os.path.exists(output_file) and input_file != output_file:
@@ -169,12 +179,15 @@ def process_csv_and_discard_equals(input_file, output_file, query_parameters):
             f"The file {output_file} already exists. Do you want to overwrite it? (y/n): ")
         if overwrite.lower() != 'y':
             print("Operation cancelled.")
-            return 
+            return None
 
     # Save the modified DataFrame to the output CSV file
     df.to_csv(output_file, index=False)
 
     print(f"Processed CSV saved to {output_file}")
+
+    # Return the processed DataFrame
+    return df
 
 
 def process_node_types(node_types_str):
