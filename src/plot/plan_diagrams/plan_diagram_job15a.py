@@ -2,9 +2,10 @@ import os
 import json
 import re
 import matplotlib.pyplot as plt
-import seaborn as sns
 import numpy as np
 from typing import Dict, Union, Tuple, List
+from matplotlib.colors import ListedColormap
+from matplotlib.patches import Polygon
 
 
 def extract_number(filename) -> Tuple[int, str]:
@@ -89,64 +90,97 @@ def categorize_plans(query_info: Dict[Union[int, Tuple[int, str]], Tuple[List[st
     return categories
 
 
-def extract_filters(plan: Dict) -> Tuple[str, int]:
-    country_code = None
-    production_year = None
+def extract_filters(plan: Dict) -> Tuple[str, str]:
+    param1 = None
+    param2 = None
     if 'Filters' in plan:
         filters = plan['Filters']
         for filter_str in filters:
-            if 'production_year' in filter_str:
-                match = re.search(r'production_year,(\d+)', filter_str)
+            if 'param1' in filter_str:
+                match = re.search(r'param1,(\w+)', filter_str)
                 if match:
-                    production_year = int(match.group(1))
-            if 'country' in filter_str:
-                match = re.search(r'country,\[(.*?)\]', filter_str)
+                    param1 = match.group(1)
+            if 'param2' in filter_str:
+                match = re.search(r'param2,(\w+)', filter_str)
                 if match:
-                    country_code = match.group(1)
-    return country_code, production_year
+                    param2 = match.group(1)
+    return param1, param2
 
 
 def plot_heatmap(query_info: Dict[Union[int, Tuple[int, str]], Tuple[List[str], int]], plan_categories: List[List[Union[int, Tuple[int, str]]]], directory: str) -> None:
-    # Extract country codes and production years
-    country_codes = set()
-    production_years = set()
+    # Extract parameters and categories
+    param1_values = set()
+    param2_values = set()
     query_filters = {}
 
     for query_id in query_info.keys():
         with open(os.path.join(directory, f"{query_id}.json"), 'r', encoding='UTF-8') as file:
             plan = json.load(file)
-            country_code, production_year = extract_filters(plan)
-            if country_code and production_year:
-                country_codes.add(country_code)
-                production_years.add(production_year)
-                query_filters[query_id] = (country_code, production_year)
+            param1, param2 = extract_filters(plan)
+            if param1 is not None and param2 is not None:
+                param1_values.add(param1)
+                param2_values.add(param2)
+                query_filters[query_id] = (param1, param2)
             else:
                 # Debug print statement
                 print(f"Filters not found for query ID {query_id}: {plan}")
 
-    # Sort country codes and production years
-    country_codes = sorted(country_codes)
-    production_years = sorted(production_years)
+    # Sort parameter values
+    param1_values = sorted(param1_values)
+    param2_values = sorted(param2_values)
+
+    # Debug print statements
+    print(f"Param1 values: {param1_values}")
+    print(f"Param2 values: {param2_values}")
+    print(f"Query filters: {query_filters}")
 
     # Create a matrix for the heatmap
-    heatmap_data = np.zeros((len(production_years), len(country_codes)))
+    heatmap_data = np.zeros((len(param2_values), len(param1_values)))
 
-    # Fill the matrix with the number of queries in each category
+    # Fill the matrix with the category index
     for category_index, category in enumerate(plan_categories):
         for query_id in category:
             if query_id in query_filters:
-                country_code, production_year = query_filters[query_id]
-                row = production_years.index(production_year)
-                col = country_codes.index(country_code)
-                heatmap_data[row, col] += 1
+                param1, param2 = query_filters[query_id]
+                row = param2_values.index(param2)
+                col = param1_values.index(param1)
+                heatmap_data[row, col] = category_index + \
+                    1  # Use category index + 1 for coloring
 
-    # Plot the heatmap
-    plt.figure(figsize=(12, 8))
-    sns.heatmap(heatmap_data, annot=True, fmt="d", xticklabels=country_codes,
-                yticklabels=production_years, cmap="YlGnBu")
-    plt.xlabel('Country Code')
-    plt.ylabel('Production Year')
-    plt.title('Query Plan Categories Heatmap')
+    # Debug print statement
+    print(f"Heatmap data:\n{heatmap_data}")
+
+    # Create a custom colormap
+    num_categories = len(plan_categories)
+    colors = plt.colormaps['tab20'](np.linspace(0, 1, num_categories))
+    cmap = ListedColormap(colors)
+
+    # Plot the heatmap with polygons
+    fig, ax = plt.subplots(figsize=(12, 8))
+    for row in range(len(param2_values)):
+        for col in range(len(param1_values)):
+            category_index = int(heatmap_data[row, col]) - 1
+            if category_index >= 0:
+                color = colors[category_index]
+                polygon = Polygon([(col, row), (col + 1, row), (col + 1,
+                                  row + 1), (col, row + 1)], closed=True, color=color)
+                ax.add_patch(polygon)
+
+    ax.set_xlim(0, len(param1_values))
+    ax.set_ylim(0, len(param2_values))
+    ax.set_xticks(np.arange(len(param1_values)) + 0.5)
+    ax.set_xticklabels(param1_values, rotation=45, ha='right')
+    ax.set_yticks(np.arange(len(param2_values)) + 0.5)
+    ax.set_yticklabels(param2_values)
+    ax.set_xlabel('Param1')
+    ax.set_ylabel('Param2')
+    ax.set_title('Query Plan Categories Heatmap')
+
+    # Create a colorbar
+    cbar = plt.colorbar(plt.cm.ScalarMappable(cmap=cmap),
+                        ax=ax, ticks=range(1, num_categories + 1))
+    cbar.set_label('Category')
+
     plt.show()
 
 
@@ -156,8 +190,14 @@ directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/result
 # Collect the node types and depth of the plans
 query_info = info_qplan(directory)
 
+# Debug print statements
+print(f"Collected query info: {query_info}")
+
 # Categorize the plans
 plan_categories = categorize_plans(query_info)
+
+# Debug print statements
+print(f"Categorized plans: {plan_categories}")
 
 # Plot the heatmap
 plot_heatmap(query_info, plan_categories, directory)
