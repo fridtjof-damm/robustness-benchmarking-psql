@@ -13,7 +13,9 @@ from typing import List, Tuple, Dict, Union
 import pandas as pd
 
 
-def simplify(qplan):
+def simplify(qplan, benchmark):
+    plan_old = qplan.copy()
+    print("Simplifying plan ")
     # handling the plan structure
     # check if node exists, then delete
 
@@ -30,65 +32,133 @@ def simplify(qplan):
 
     # EXPLAIN ANALYZE prefix
     if 'Filter' in qplan:
-        qplan['Filter'] = re.sub(
-            r'\(\(([^)]+?)\)::text\s*=\s*\'([^\']+)\'::text\)', r'\1 = \'\2\'', qplan['Filter'])
-        qplan['Filter'] = re.sub(
-            r'\(\(([^)]+?)\)::text\s*~~\s*\'([^\']+)\'::text\)', r'\1 LIKE \'\2\'', qplan['Filter'])
-        # Remove unnecessary escape characters
-        qplan['Filter'] = re.sub(r'\\', '', qplan['Filter'])
-        # qplan['Filter'] = re.sub(r'\(\(([^)]+?)\)::text[^)]+\)', r'(\1)', qplan['Filter']) # q2 TIN NICKEL etc.
-        # qplan['Filter'] = re.sub(r'\(([^<>=!]+)\s*[<>=!]+\s*[^)]+\)', r'(\1)', qplan['Filter']) # q3 shipdate filter simplification
-        # qplan['Filter'] = re.sub(r'\(*([^()]+)\)*(?:%\'::text)?(?:\s*(?:AND|OR)\s*\(*\1\)*(?:%\'::text)?)*', r'\1', qplan['Filter'])
-        # qplan['Filter'] = re.sub(r'(?:^|\s*(?:AND|OR)\s*)(?:\(*)([^()]+?)(?:\)*(?:%\'::text)?)(?=\s*(?:AND|OR|$))', r'\1', qplan['Filter'])
-        # qplan['Filter'] = ''.join(sorted(set(re.sub(r'[^a-zA-Z]', '', re.sub(r'(?:^|\s*(?:AND|OR)\s*)(?:\(*)([^()]+?)(?:\)*(?:%\'::text)?)(?=\s*(?:AND|OR|$))', r'\1', qplan['Filter']))), key=lambda x: re.sub(r'[^a-zA-Z]', '', qplan['Filter']).index(x)))
-        # match = re.search(r'\(([^=]+)\s*=\s*[^)]+\)', qplan['Filter'])
-        # if match:
-        #    attr = match.group(1).strip()
-        #    val = f'({attr})'
-        #    qplan['Filter'] = val
-    # further selection from index scan queries
-    # if '' in qplan:
+        if benchmark == 'tpch':
+            print("Original Filter:", qplan['Filter'])  # Debug print
+            # Simplify the filter using the simplify_filter function
+            qplan['Filter'] = simplify_filter(qplan['Filter'], benchmark)
+            print("Simplified Filter:", qplan['Filter'])  # Debug print
+        elif benchmark == 'job':
+            qplan['Filter'] = re.sub(
+                r'\(\(([^)]+?)\)::text\s*~~\s*\'([^\']+)\'::text\)', r'\1 LIKE \'\2\'', qplan['Filter'])
+
     if 'Index Cond' in qplan:
-        qplan['Index Cond'] = re.sub(
-            r'\(\(([^)]+?)\)::text\s*=\s*\'([^\']+)\'::text\)', r'\1 = \'\2\'', qplan['Index Cond'])
-        qplan['Index Cond'] = re.sub(
-            r'\(\(([^)]+?)\)::text\s*~~\s*\'([^\']+)\'::text\)', r'\1 LIKE \'\2\'', qplan['Index Cond'])
-        # Remove unnecessary escape characters
-        qplan['Index Cond'] = re.sub(r'\\', '', qplan['Index Cond'])
-   # match = re.search(r'\(([^=]+)\s*=\s*[^)]+\)', qplan['Index Cond'])
-   #     if match:
-   #         attr = match.group(1).strip()
-   #         val = f'{attr}'
-   #         qplan['Index Cond'] = val
+        if benchmark == 'tpch':
+            qplan['Index Cond'] = re.sub(
+                r'\(([^=]+)\s*=\s*\'([^\']+)\'\)', r'(\1,\'\2\')', qplan['Index Cond'])
+        elif benchmark == 'job':
+            qplan['Index Cond'] = re.sub(
+                r'\(\(([^)]+?)\)::text\s*=\s*\'([^\']+)\'::text\)', r'\1 = \'\2\'', qplan['Index Cond'])
+            qplan['Index Cond'] = re.sub(
+                r'\(\(([^)]+?)\)::text\s*~~\s*\'([^\']+)\'::text\)', r'\1 LIKE \'\2\'', qplan['Index Cond'])
+            # Remove unnecessary escape characters
+        qplan['Index Cond'] = re.sub(r'\\\\', '', qplan['Index Cond'])
 
     if 'Join Filter' in qplan:
-        qplan['Join Filter'] = re.sub(
-            r'\(([^=]+)\s*=\s*\'[^\']+\'::bpchar\)', r'(\1)', qplan['Join Filter'])
-        qplan['Join Filter'] = re.sub(
-            r'\(([^=]+)\s*=\s*\'[^\']+\'::[^\)]+\)', r'(\1)', qplan['Join Filter'])
-        qplan['Join Filter'] = re.sub(
-            r'\(([^=]+)\s*=\s*ANY\s*\(\{[^\}]+\}::[^\)]+\)\)', r'(\1)', qplan['Join Filter'])
-        qplan['Join Filter'] = re.sub(
-            r'\(([^<>=!]+)\s*[<>=!]+\s*\'[^\']+\'::[^\)]+\)', r'(\1)', qplan['Join Filter'])
-        qplan['Join Filter'] = re.sub(
-            r'\(([^.]+)\.([^)=\s]+)[^)]*\)', r'\2', qplan['Join Filter'])
-    if 'Hash Cond' in qplan:
-        qplan['Hash Cond'] = re.search(r'\b(\w+)\.(\w+)', qplan['Hash Cond']).group(
-            2) if re.search(r'\b(\w+)\.(\w+)', qplan['Hash Cond']) else qplan['Hash Cond']
-    if 'Recheck Cond' in qplan:  # Remove unnecessary escape characters
-        qplan['Recheck Cond'] = re.sub(
-            r'\(\(([^)]+?)\)::text\s*=\s*\'([^\']+)\'::text\)', r'\1 = \2', qplan['Recheck Cond'])
-        qplan['Recheck Cond'] = re.sub(r'\\', '', qplan['Recheck Cond'])
-    if 'Cache Key' in qplan:
-        qplan['Cache Key'] = re.search(r'\.(\w+)$', qplan['Cache Key']).group(
-            1) if re.search(r'\.(\w+)$', qplan['Cache Key']) else qplan['Cache Key']
+        if benchmark == 'tpch':
+            qplan['Join Filter'] = re.sub(
+                r'\(([^=]+)\s*=\s*\'[^\']+\'::bpchar\)', r'(\1)', qplan['Join Filter'])
+            qplan['Join Filter'] = re.sub(
+                r'\(([^=]+)\s*=\s*\'[^\']+\'::[^\)]+\)', r'(\1)', qplan['Join Filter'])
+            qplan['Join Filter'] = re.sub(
+                r'\(([^=]+)\s*=\s*ANY\s*\(\{[^\}]+\}::[^\)]+\)\)', r'(\1)', qplan['Join Filter'])
+            qplan['Join Filter'] = re.sub(
+                r'\(([^<>=!]+)\s*[<>=!]+\s*\'[^\']+\'::[^\)]+\)', r'(\1)', qplan['Join Filter'])
+            qplan['Join Filter'] = re.sub(
+                r'\(([^.]+)\.([^)=\s]+)[^)]*\)', r'\2', qplan['Join Filter'])
+        if 'Hash Cond' in qplan:
+            qplan['Hash Cond'] = re.search(r'\b(\w+)\.(\w+)', qplan['Hash Cond']).group(
+                2) if re.search(r'\b(\w+)\.(\w+)', qplan['Hash Cond']) else qplan['Hash Cond']
+        if 'Recheck Cond' in qplan:  # Remove unnecessary escape characters
+            qplan['Recheck Cond'] = re.sub(
+                r'\(\(([^)]+?)\)::text\s*=\s*\'([^\']+)\'::text\)', r'\1 = \2', qplan['Recheck Cond'])
+            qplan['Recheck Cond'] = re.sub(r'\\\\', '', qplan['Recheck Cond'])
+        if 'Cache Key' in qplan:
+            qplan['Cache Key'] = re.search(r'\.(\w+)$', qplan['Cache Key']).group(
+                1) if re.search(r'\.(\w+)$', qplan['Cache Key']) else qplan['Cache Key']
 
     if 'Plans' in qplan:
         for child in qplan['Plans']:
-            simplify(child)
+            simplify(child, benchmark)
+
+    if qplan != plan_old:
+        print("simplified plan successfully")
+    else:
+        print("no simplification done")
+
     return qplan
 
 # only keep the filter condition (e.g. Index Scan, Seq Scan)
+
+
+def simplify_filter(filter_str, benchmark):
+    # Custom transformations for specific cases
+    if benchmark == 'tpch':
+        print("Original Filter:", filter_str)  # Debug print
+        # Remove unnecessary escape characters
+        filter_str = re.sub(r'\\\\', '', filter_str)
+        print("After removing escape characters:", filter_str)  # Debug print
+
+        # Split the filter string at 'AND' and 'OR' to handle each condition separately
+        conditions = re.split(r' AND | OR ', filter_str)
+        transformed_conditions = []
+
+        for condition in conditions:
+            # Remove type casts
+            condition = re.sub(r'::[a-zA-Z\s]+', '', condition)
+            print("After removing type casts:", condition)  # Debug print
+
+            # Custom transformations for specific cases
+            # Transform (p_type LIKE '%TIN') to (p_type,'TIN')
+            condition = re.sub(
+                r'p_type LIKE \'%([^%]+)\'', r'(p_type,\'\1\')', condition)
+            # Transform (p_size = 1) to (p_size,1)
+            condition = re.sub(r'p_size = (\d+)', r'(p_size,\1)', condition)
+            # Transform (l_shipdate > '1995-03-27') to (l_shipdate ,'1995-03-27')
+            condition = re.sub(
+                r'l_shipdate > \'([^\']+)\'', r'(l_shipdate,\'\1\')', condition)
+            # Transform (c_mktsegment = 'HOUSEHOLD') to (c_mktsegment,'HOUSEHOLD')
+            condition = re.sub(
+                r'c_mktsegment = \'([^\']+)\'', r'(c_mktsegment,\'\1\')', condition)
+            # Transform (r_name = 'AFRICA') to (r_name,'AFRICA')
+            condition = re.sub(
+                r'r_name = \'([^\']+)\'', r'(r_name,\'\1\')', condition)
+            # Transform (o_orderdate >= '1993-01-01') to (o_orderdate,'1993-01-01')
+            condition = re.sub(
+                r'o_orderdate >= \'([^\']+)\'', r'(o_orderdate,\'\1\')', condition)
+            # Transform (o_orderdate <= '1996-12-31') to (o_orderdate,'1996-12-31')
+            condition = re.sub(
+                r'o_orderdate <= \'([^\']+)\'', r'(o_orderdate,\'\1\')', condition)
+            # Transform (o_orderdate < '1994-01-01 00:00:00') to (o_orderdate,'1994-01-01')
+            condition = re.sub(
+                r'o_orderdate < \'([^\']+)\s[^\']+\'', r'(o_orderdate,\'\1\')', condition)
+            # Transform (l_shipdate >= '1995-01-01') to (l_shipdate,'1995-01-01')
+            condition = re.sub(
+                r'l_shipdate >= \'([^\']+)\'', r'(l_shipdate,\'\1\')', condition)
+            # Transform (l_shipdate <= '1996-12-31') to (l_shipdate,'1996-12-31')
+            condition = re.sub(
+                r'l_shipdate <= \'([^\']+)\'', r'(l_shipdate,\'\1\')', condition)
+            # Transform (l_shipdate < '1993-02-01 00:00:00') to (l_shipdate,'1993-02-01')
+            condition = re.sub(
+                r'l_shipdate < \'([^\']+)\s[^\']+\'', r'(l_shipdate,\'\1\')', condition)
+            # Transform (n_name = 'ALGERIA') to (n_name,'ALGERIA')
+            condition = re.sub(
+                r'n_name = \'([^\']+)\'', r'(n_name,\'\1\')', condition)
+            # Transform (p_type = 'TIN') to (p_type,'TIN')
+            condition = re.sub(
+                r'p_type = \'([^\']+)\'', r'(p_type,\'\1\')', condition)
+            # Transform (p_brand = 'BRAND#11') to (p_brand,'BRAND#11')
+            condition = re.sub(
+                r'p_brand = \'([^\']+)\'', r'(p_brand,\'\1\')', condition)
+            # Transform (p_container = 'SM CASE') to (p_container,'SM CASE')
+            condition = re.sub(
+                r'p_container = \'([^\']+)\'', r'(p_container,\'\1\')', condition)
+
+            transformed_conditions.append(condition)
+
+        # Recombine the transformed conditions with commas
+        filter_str = ','.join(transformed_conditions)
+
+    return filter_str
 
 
 def analyze_filter(qplan) -> str:
@@ -121,7 +191,10 @@ def analyze_filter(qplan) -> str:
         filtered_plans = [plan for plan in filtered_plans if plan]
         if filtered_plans:
             reduced_plan['Plans'] = filtered_plans
-
+    if qplan != reduced_plan:
+        print("simplyfied plan successfully")
+    else:
+        print("no simplification done")
     return reduced_plan
 
 
@@ -157,57 +230,44 @@ def psql_tpch_profiling(query_id, write_to_file=False):
     cur = conn.cursor()
     prefix = 'EXPLAIN (FORMAT JSON, ANALYZE) '
     plans = []
+    simplified_plans = []
     # run queries and get the json format query plans
     print(f"query execution starts ...")
+    imax = 3
     for i, query in enumerate(queries):
+        if i == imax:
+            break
         cur.execute(prefix + query)
         plan = cur.fetchall()
         plans.append(plan)
+        plan[0][0][0]['Plan'] = simplify(plan[0][0][0]['Plan'], 'tpch')
+        simplified_plans.append(plan)
         percentage = ((i + 1) / total_queries) * 100
         print(f"{percentage:.2f}% of queries executed")
 
-    # simplify the query plans
-    simplified = []
-    for i, qplan in enumerate(plans):
-        qplan[0][0][0]['Plan'] = simplify(qplan[0][0][0]['Plan'])
-        simplified.append(qplan)
-        # persist plans to file if intended
-        if write_to_file:
-            write_qp_to_file(query_id, i, qplan)
-    print(
-        f"execution stage done")
-    return simplified
+    # persist plans to file if intended
+    if write_to_file:
+        for i, qplan in enumerate(plans):
+            write_qp_to_file(query_id, i, qplan, simplified=False)
+        for i, qplan in enumerate(simplified_plans):
+            write_qp_to_file(query_id, i, qplan, simplified=True)
+    print(f"execution stage done")
+    return simplified_plans
 
 # persist query plans to files
 
 
-def write_qp_to_file(query_id, plan_index, plan_data):
+def write_qp_to_file(query_id, plan_index, plan_data, simplified=False):
     # defining directory path
     dir = f'results/tpch/qplans/q{query_id}'
+    if simplified:
+        dir = os.path.join(dir, 'simplified')
     # creating dir if not exist already
     os.makedirs(dir, exist_ok=True)
     filename = os.path.join(dir, f'{plan_index+1}.json')
     with open(filename, mode='w', encoding='UTF-8') as file:
         file.write(json.dumps(plan_data, indent=4))
 
-
-# categorizing  query plans
-
-
-def compare_query_plans(query_plans):
-    # categories of query plans
-    categories = []
-
-    for plan in query_plans:
-        category_found = False
-        for category in categories:
-
-            if plan == category[0]:
-                category.append(plan)
-                category_found = True
-        if not category_found:
-            categories.append([plan])
-    return categories
 
 ###############################################################
 ###### new function to profile parameterized queries ##########
@@ -216,16 +276,19 @@ def compare_query_plans(query_plans):
 
 def profile_parameterized_queries(query_id):
     # Profile the parameterized queries
-    # simplified_plans = psql_tpch_profiling(query_id, write_to_file=True)
+    simplified_plans = psql_tpch_profiling(
+        query_id, write_to_file=True)
     # Directory where the plans are saved
     directory = f'results/tpch/qplans/q{query_id}'
+    # Get the correct query parameters for the given query_id
+    query_parameters = set(qg.tpch_query_parameters.get(f'q{query_id}', []))
     # Get query nodes info
-    query_info = query_nodes_info(directory)
+    query_info = query_nodes_info(directory, query_parameters)
     if not query_info:
         print(f"failed to extract nodes info of query {query_id}")
 
     # Write query nodes info to CSV
-    output_dir = 'results/tpch/'
+    output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch/new_csvs'
     output_file = f'q{query_id}.csv'
     query_nodes_info_to_csv(query_info, output_dir, output_file)
 
@@ -370,10 +433,11 @@ def profiling_country_example() -> None:
 ####################################################
 
 
-def traverse(plan: Dict, node_types: List[str], filters: List[List[Tuple[str, str]]], execution_times: List[float], cardinalities: List[Tuple[int, int]]) -> None:
+def traverse(plan: Dict, node_types: List[str], filters: List[List[Tuple[str, str]]], execution_times: List[float], cardinalities: List[Tuple[int, int]], query_parameters: set) -> None:
     if isinstance(plan, list):
         for item in plan:
-            traverse(item, node_types, filters, execution_times, cardinalities)
+            traverse(item, node_types, filters, execution_times,
+                     cardinalities, query_parameters)
     elif isinstance(plan, dict):
         if 'Node Type' in plan:
             if plan['Node Type'] not in ['Limit', 'Gather']:
@@ -383,9 +447,15 @@ def traverse(plan: Dict, node_types: List[str], filters: List[List[Tuple[str, st
             if key in plan:
                 matches = re.findall(
                     r'(\w+)\s*(=|LIKE|<|>|<=|>=)\s*\'?([^\'\)]+)\'?', plan[key])
+                # print(f"Matches found in {key}: {matches}")
                 for match in matches:
-                    if len(match) == 3:
-                        node_filters.append((match[0], match[2]))
+                    if len(match) == 3 and match[0] in query_parameters:
+                        if match[1] != '=':
+                            node_filters.append((match[0], match[2]))
+                            print(f'Appending filter: {match[0]} = {match[2]}')
+                        else:
+                            print(
+                                f'Skipping filter: {match[0]} = {match[2]} (operator is "=")')
         if node_filters:
             filters.append(node_filters)
         if 'Execution Time' in plan:
@@ -394,21 +464,21 @@ def traverse(plan: Dict, node_types: List[str], filters: List[List[Tuple[str, st
             cardinalities.append((plan['Plan Rows'], plan['Actual Rows']))
         if 'Plans' in plan:
             for subplan in plan['Plans']:
-                traverse(subplan, node_types, filters,
-                         execution_times, cardinalities)
+                traverse(subplan, node_types, filters, execution_times,
+                         cardinalities, query_parameters)
         if 'Plan' in plan:
             traverse(plan['Plan'], node_types, filters,
-                     execution_times, cardinalities)
-
-# Help function to collect the node types
+                     execution_times, cardinalities, query_parameters)
 
 
-def extract_node_types_from_plan(plan: Dict) -> Tuple[List[str], List[List[Tuple[str, str]]], List[float], List[Tuple[int, int]]]:
+def extract_node_types_from_plan(plan: Dict, query_parameters: set) -> Tuple[List[str], List[List[Tuple[str, str]]], List[float], List[Tuple[int, int]]]:
+    # print(f"Extracting node types with query parameters: {query_parameters}")
     node_types = []
     filters = []
     execution_times = []
     cardinalities = []
-    traverse(plan, node_types, filters, execution_times, cardinalities)
+    traverse(plan, node_types, filters, execution_times,
+             cardinalities, query_parameters)
     return node_types, filters, execution_times, cardinalities
 
 ##
@@ -416,7 +486,7 @@ def extract_node_types_from_plan(plan: Dict) -> Tuple[List[str], List[List[Tuple
 ##
 
 
-def query_nodes_info(directory: str) -> Dict[Union[int, Tuple[int, str]], Tuple[List[str], List[List[Tuple[str, str]]], List[float], List[Tuple[int, int]]]]:
+def query_nodes_info(directory: str, query_parameters: set) -> Dict[Union[int, Tuple[int, str]], Tuple[List[str], List[List[Tuple[str, str]]], List[float], List[Tuple[int, int]]]]:
     # print(f"Extracting query nodes info from directory: {directory}")
     query_info = {}
     for filename in os.listdir(directory):
@@ -434,7 +504,7 @@ def query_nodes_info(directory: str) -> Dict[Union[int, Tuple[int, str]], Tuple[
                 # print(f"Processing file: {filename}")
                 plan = json.load(file)
                 node_types, filters, execution_times, cardinalities = extract_node_types_from_plan(
-                    plan)
+                    plan, query_parameters)
                 query_info[(query_id, suffix) if suffix else query_id] = (
                     node_types, filters, execution_times, cardinalities)
     # print(f"finished extracting query nodes info")
@@ -462,7 +532,7 @@ def query_nodes_info_to_csv(query_info: Dict[Union[int, Tuple[int, str]], Tuple[
                     combined_execution_time, combined_cardinality])
 
     df = pd.DataFrame(data, columns=[
-                      'Query ID', 'Node Types', 'Filters', 'Execution Time', 'Cardinality e/a'])
+        'Query ID', 'Node Types', 'Filters', 'Execution Time', 'Cardinality e/a'])
     output_path = os.path.join(output_dir, output_file)
     df.to_csv(output_path, index=False)
     print(f"csv has been written successfully to {output_path}")
@@ -534,8 +604,8 @@ def main():
     ############################
     ############################
     ## standard tpch section ###
-    query_ids = [2, 3, 5, 7, 8, 12, 13, 14, 17]
-    # query_ids = [3]
+    # query_ids = [2, 3, 5, 7, 8, 14, 17]
+    query_ids = [3, 5, 7, 8, 14, 17]
     for i in query_ids:
         profile_parameterized_queries(i)
         print(f'finished profiling for query {i}')
