@@ -122,6 +122,10 @@ query_plan_info_to_csv(sorted_query_info, directory, csv_filename)
 # Categorize the plans
 categories = categorize_plans(sorted_query_info)
 
+# write categories to csv
+
+csv_filename = 'categories.csv'
+
 # print(query_info)
 for i, category in enumerate(categories):
     print(f"Category {i + 1}: {category}")
