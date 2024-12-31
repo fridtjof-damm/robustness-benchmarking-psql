@@ -15,9 +15,6 @@ import pandas as pd
 
 def simplify(qplan, benchmark):
     plan_old = qplan.copy()
-    print("Simplifying plan ")
-    # handling the plan structure
-    # check if node exists, then delete
 
     # add/remove nodes to be removed here
     keys_to_remove = [
@@ -26,17 +23,17 @@ def simplify(qplan, benchmark):
         'Rows Removed by Index Recheck', 'Exact Heap Blocks', 'Lossy Heap Blocks'
     ]
     # Remove the keys from qplan
-    for key in keys_to_remove:
-        if key in qplan:
-            del qplan[key]
+    """   for key in keys_to_remove:
+            if key in qplan:
+                del qplan[key]"""
 
     # EXPLAIN ANALYZE prefix
     if 'Filter' in qplan:
         if benchmark == 'tpch':
-            print("Original Filter:", qplan['Filter'])  # Debug print
+            # print("Original Filter:", qplan['Filter'])  # Debug print
             # Simplify the filter using the simplify_filter function
             qplan['Filter'] = simplify_filter(qplan['Filter'], benchmark)
-            print("Simplified Filter:", qplan['Filter'])  # Debug print
+            # print("Simplified Filter:", qplan['Filter'])  # Debug print
         elif benchmark == 'job':
             qplan['Filter'] = re.sub(
                 r'\(\(([^)]+?)\)::text\s*~~\s*\'([^\']+)\'::text\)', r'\1 LIKE \'\2\'', qplan['Filter'])
@@ -80,11 +77,6 @@ def simplify(qplan, benchmark):
         for child in qplan['Plans']:
             simplify(child, benchmark)
 
-    if qplan != plan_old:
-        print("simplified plan successfully")
-    else:
-        print("no simplification done")
-
     return qplan
 
 # only keep the filter condition (e.g. Index Scan, Seq Scan)
@@ -93,10 +85,10 @@ def simplify(qplan, benchmark):
 def simplify_filter(filter_str, benchmark):
     # Custom transformations for specific cases
     if benchmark == 'tpch':
-        print("Original Filter:", filter_str)  # Debug print
+        # print("Original Filter:", filter_str)  # Debug print
         # Remove unnecessary escape characters
         filter_str = re.sub(r'\\\\', '', filter_str)
-        print("After removing escape characters:", filter_str)  # Debug print
+        # print("After removing escape characters:", filter_str)  # Debug print
 
         # Split the filter string at 'AND' and 'OR' to handle each condition separately
         conditions = re.split(r' AND | OR ', filter_str)
@@ -105,53 +97,81 @@ def simplify_filter(filter_str, benchmark):
         for condition in conditions:
             # Remove type casts
             condition = re.sub(r'::[a-zA-Z\s]+', '', condition)
-            print("After removing type casts:", condition)  # Debug print
+            # print("After removing type casts:", condition)  # Debug print
 
-            # Custom transformations for specific cases
-            # Transform (p_type LIKE '%TIN') to (p_type,'TIN')
-            condition = re.sub(
-                r'p_type LIKE \'%([^%]+)\'', r'(p_type,\'\1\')', condition)
-            # Transform (p_size = 1) to (p_size,1)
-            condition = re.sub(r'p_size = (\d+)', r'(p_size,\1)', condition)
-            # Transform (l_shipdate > '1995-03-27') to (l_shipdate ,'1995-03-27')
-            condition = re.sub(
-                r'l_shipdate > \'([^\']+)\'', r'(l_shipdate,\'\1\')', condition)
-            # Transform (c_mktsegment = 'HOUSEHOLD') to (c_mktsegment,'HOUSEHOLD')
-            condition = re.sub(
-                r'c_mktsegment = \'([^\']+)\'', r'(c_mktsegment,\'\1\')', condition)
-            # Transform (r_name = 'AFRICA') to (r_name,'AFRICA')
-            condition = re.sub(
-                r'r_name = \'([^\']+)\'', r'(r_name,\'\1\')', condition)
-            # Transform (o_orderdate >= '1993-01-01') to (o_orderdate,'1993-01-01')
-            condition = re.sub(
-                r'o_orderdate >= \'([^\']+)\'', r'(o_orderdate,\'\1\')', condition)
-            # Transform (o_orderdate <= '1996-12-31') to (o_orderdate,'1996-12-31')
-            condition = re.sub(
-                r'o_orderdate <= \'([^\']+)\'', r'(o_orderdate,\'\1\')', condition)
-            # Transform (o_orderdate < '1994-01-01 00:00:00') to (o_orderdate,'1994-01-01')
-            condition = re.sub(
-                r'o_orderdate < \'([^\']+)\s[^\']+\'', r'(o_orderdate,\'\1\')', condition)
-            # Transform (l_shipdate >= '1995-01-01') to (l_shipdate,'1995-01-01')
-            condition = re.sub(
-                r'l_shipdate >= \'([^\']+)\'', r'(l_shipdate,\'\1\')', condition)
-            # Transform (l_shipdate <= '1996-12-31') to (l_shipdate,'1996-12-31')
-            condition = re.sub(
-                r'l_shipdate <= \'([^\']+)\'', r'(l_shipdate,\'\1\')', condition)
-            # Transform (l_shipdate < '1993-02-01 00:00:00') to (l_shipdate,'1993-02-01')
-            condition = re.sub(
-                r'l_shipdate < \'([^\']+)\s[^\']+\'', r'(l_shipdate,\'\1\')', condition)
-            # Transform (n_name = 'ALGERIA') to (n_name,'ALGERIA')
-            condition = re.sub(
-                r'n_name = \'([^\']+)\'', r'(n_name,\'\1\')', condition)
-            # Transform (p_type = 'TIN') to (p_type,'TIN')
-            condition = re.sub(
-                r'p_type = \'([^\']+)\'', r'(p_type,\'\1\')', condition)
-            # Transform (p_brand = 'BRAND#11') to (p_brand,'BRAND#11')
-            condition = re.sub(
-                r'p_brand = \'([^\']+)\'', r'(p_brand,\'\1\')', condition)
-            # Transform (p_container = 'SM CASE') to (p_container,'SM CASE')
-            condition = re.sub(
-                r'p_container = \'([^\']+)\'', r'(p_container,\'\1\')', condition)
+            # Apply transformations based on specific patterns
+            match condition:
+                case _ if re.search(r'p_type LIKE', condition):
+                    # Transform (p_type LIKE '%TIN') to (p_type,'TIN')
+                    condition = re.sub(
+                        r'p_type LIKE \'%([^%]+)\'', r'(p_type,\'\1\')', condition)
+                case _ if re.search(r'p_size =', condition):
+                    # Transform (p_size = 1) to (p_size,1)
+                    condition = re.sub(r'p_size = (\d+)',
+                                       r'(p_size,\1)', condition)
+                case _ if re.search(r'l_shipdate >', condition):
+                    # Transform (l_shipdate > '1995-03-27') to (l_shipdate ,'1995-03-27')
+                    condition = re.sub(
+                        r'l_shipdate > \'([^\']+)\'', r'(l_shipdate,\'\1\')', condition)
+                case _ if re.search(r'c_mktsegment =', condition):
+                    # Transform (c_mktsegment = 'HOUSEHOLD') to (c_mktsegment,'HOUSEHOLD')
+                    condition = re.sub(
+                        r'c_mktsegment = \'([^\']+)\'', r'(c_mktsegment,\'\1\')', condition)
+                case _ if re.search(r'r_name =', condition):
+                    # Transform (r_name = 'AFRICA') to (r_name,'AFRICA')
+                    condition = re.sub(
+                        r'r_name = \'([^\']+)\'', r'(r_name,\'\1\')', condition)
+                case _ if re.search(r'o_orderdate >=', condition):
+                    # Transform (o_orderdate >= '1993-01-01') to (o_orderdate,'1993-01-01')
+                    condition = re.sub(
+                        r'o_orderdate >= \'([^\']+)\'', r'(o_orderdate,\'\1\')', condition)
+                case _ if re.search(r'o_orderdate <=', condition):
+                    # Transform (o_orderdate <= '1996-12-31') to (o_orderdate,'1996-12-31')
+                    condition = re.sub(
+                        r'o_orderdate <= \'([^\']+)\'', r'(o_orderdate,\'\1\')', condition)
+                case _ if re.search(r'o_orderdate <', condition):
+                    # Transform (o_orderdate < '1994-01-01 00:00:00') to (o_orderdate,'1994-01-01')
+                    condition = re.sub(
+                        r'o_orderdate < \'([^\']+)\s[^\']+\'', r'(o_orderdate,\'\1\')', condition)
+                case _ if re.search(r'l_shipdate >=', condition):
+                    # Transform (l_shipdate >= '1995-01-01') to (l_shipdate,'1995-01-01')
+                    condition = re.sub(
+                        r'l_shipdate >= \'([^\']+)\'', r'(l_shipdate,\'\1\')', condition)
+                case _ if re.search(r'l_shipdate <=', condition):
+                    # Transform (l_shipdate <= '1996-12-31') to (l_shipdate,'1996-12-31')
+                    condition = re.sub(
+                        r'l_shipdate <= \'([^\']+)\'', r'(l_shipdate,\'\1\')', condition)
+                case _ if re.search(r'l_shipdate <', condition):
+                    # Transform (l_shipdate < '1993-02-01 00:00:00') to (l_shipdate,'1993-02-01')
+                    condition = re.sub(
+                        r'l_shipdate < \'([^\']+)\s[^\']+\'', r'(l_shipdate,\'\1\')', condition)
+                case _ if re.search(r'n_name =', condition):
+                    # Transform (n_name = 'ALGERIA') to (n_name,'ALGERIA')
+                    condition = re.sub(
+                        r'n_name = \'([^\']+)\'', r'(n_name,\'\1\')', condition)
+                case _ if re.search(r'p_type =', condition):
+                    # Transform (p_type = 'TIN') to (p_type,'TIN')
+                    condition = re.sub(
+                        r'p_type = \'([^\']+)\'', r'(p_type,\'\1\')', condition)
+                case _ if re.search(r'p_brand =', condition):
+                    # Transform (p_brand = 'BRAND#11') to (p_brand,'BRAND#11')
+                    condition = re.sub(
+                        r'p_brand = \'([^\']+)\'', r'(p_brand,\'\1\')', condition)
+                case _ if re.search(r'p_container =', condition):
+                    # Transform (p_container = 'SM CASE') to (p_container,'SM CASE')
+                    condition = re.sub(
+                        r'p_container = \'([^\']+)\'', r'(p_container,\'\1\')', condition)
+                case _ if re.search(r'\(\(p_type\): : text ~~', condition):
+                    # Transform ((p_type): : text ~~ '%TIN': : text) to (p_type),'%TIN'
+                    condition = re.sub(
+                        r'\(\(p_type\): : text ~~ \'%([^%]+)\'', r'(p_type),\'\1\'', condition)
+                case _ if re.search(r'\(p_type\),\'[^\']+\': : text', condition):
+                    # Transform (p_type),'TIN': : text) to (p_type,'TIN')
+                    condition = re.sub(
+                        r'\(p_type\),\'([^\']+)\': : text\)', r'(p_type,\'\1\')', condition)
+
+            # Remove unnecessary escape characters from the transformed condition
+            condition = condition.replace("\\'", "'")
 
             transformed_conditions.append(condition)
 
@@ -191,10 +211,6 @@ def analyze_filter(qplan) -> str:
         filtered_plans = [plan for plan in filtered_plans if plan]
         if filtered_plans:
             reduced_plan['Plans'] = filtered_plans
-    if qplan != reduced_plan:
-        print("simplyfied plan successfully")
-    else:
-        print("no simplification done")
     return reduced_plan
 
 
@@ -233,7 +249,7 @@ def psql_tpch_profiling(query_id, write_to_file=False):
     simplified_plans = []
     # run queries and get the json format query plans
     print(f"query execution starts ...")
-    imax = 3
+    imax = 1
     for i, query in enumerate(queries):
         if i == imax:
             break
@@ -276,7 +292,7 @@ def write_qp_to_file(query_id, plan_index, plan_data, simplified=False):
 
 def profile_parameterized_queries(query_id):
     # Profile the parameterized queries
-    simplified_plans = psql_tpch_profiling(
+    simplified_plans, inserted_query_params = psql_tpch_profiling(
         query_id, write_to_file=True)
     # Directory where the plans are saved
     directory = f'results/tpch/qplans/q{query_id}'
@@ -286,6 +302,10 @@ def profile_parameterized_queries(query_id):
     query_info = query_nodes_info(directory, query_parameters)
     if not query_info:
         print(f"failed to extract nodes info of query {query_id}")
+        return
+
+    # Debug statements to understand the structure
+    print(f"Query Info: {query_info}")
 
     # Write query nodes info to CSV
     output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch/new_csvs'
@@ -450,12 +470,7 @@ def traverse(plan: Dict, node_types: List[str], filters: List[List[Tuple[str, st
                 # print(f"Matches found in {key}: {matches}")
                 for match in matches:
                     if len(match) == 3 and match[0] in query_parameters:
-                        if match[1] != '=':
-                            node_filters.append((match[0], match[2]))
-                            print(f'Appending filter: {match[0]} = {match[2]}')
-                        else:
-                            print(
-                                f'Skipping filter: {match[0]} = {match[2]} (operator is "=")')
+                        node_filters.append((match[0], match[2]))
         if node_filters:
             filters.append(node_filters)
         if 'Execution Time' in plan:
@@ -513,8 +528,7 @@ def query_nodes_info(directory: str, query_parameters: set) -> Dict[Union[int, T
 # write the query info dict to csv
 
 
-def query_nodes_info_to_csv(query_info: Dict[Union[int, Tuple[int, str]], Tuple[List[str], List[List[Tuple[str, str]]], List[float], List[Tuple[int, int]]]], output_dir: str, output_file: str) -> None:
-    # print(f"Writing query nodes info to CSV: {output_dir}{output_file}")
+def query_nodes_info_to_csv(query_info, output_dir: str, output_file: str) -> None:
     data = []
     # Sort the keys of the query_info dictionary
     sorted_keys = sorted(query_info.keys(), key=lambda x: (
@@ -524,6 +538,8 @@ def query_nodes_info_to_csv(query_info: Dict[Union[int, Tuple[int, str]], Tuple[
         combined_node_types = ', '.join(sorted(node_types))
         combined_filters = ', '.join([f'({k},{v})' for filter_list in sorted(
             filters) for k, v in sorted(filter_list)])
+        # Debug statement
+        print(f"Writing filters for query {query_id}: {combined_filters}")
         # Assuming you want the total execution time
         combined_execution_time = sum(execution_times)
         combined_cardinality = ', '.join(
@@ -604,8 +620,7 @@ def main():
     ############################
     ############################
     ## standard tpch section ###
-    # query_ids = [2, 3, 5, 7, 8, 14, 17]
-    query_ids = [3, 5, 7, 8, 14, 17]
+    query_ids = [2, 3, 5, 7, 8, 12, 13, 14, 17]
     for i in query_ids:
         profile_parameterized_queries(i)
         print(f'finished profiling for query {i}')
