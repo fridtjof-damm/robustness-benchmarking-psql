@@ -172,6 +172,7 @@ def simplify_filter(filter_str, benchmark):
 
             # Remove unnecessary escape characters from the transformed condition
             condition = condition.replace("\\'", "'")
+            condition = clean_condition(condition)
 
             transformed_conditions.append(condition)
 
@@ -249,10 +250,7 @@ def psql_tpch_profiling(query_id, write_to_file=False):
     simplified_plans = []
     # run queries and get the json format query plans
     print(f"query execution starts ...")
-    imax = 1
     for i, query in enumerate(queries):
-        if i == imax:
-            break
         cur.execute(prefix + query)
         plan = cur.fetchall()
         plans.append(plan)
@@ -292,20 +290,18 @@ def write_qp_to_file(query_id, plan_index, plan_data, simplified=False):
 
 def profile_parameterized_queries(query_id):
     # Profile the parameterized queries
-    simplified_plans, inserted_query_params = psql_tpch_profiling(
-        query_id, write_to_file=True)
+    simplified_plans = psql_tpch_profiling(query_id, write_to_file=True)
     # Directory where the plans are saved
     directory = f'results/tpch/qplans/q{query_id}'
     # Get the correct query parameters for the given query_id
     query_parameters = set(qg.tpch_query_parameters.get(f'q{query_id}', []))
+    # Debug print to check query parameters
+    # print(f"Query parameters for q{query_id}: {query_parameters}")
     # Get query nodes info
     query_info = query_nodes_info(directory, query_parameters)
     if not query_info:
-        print(f"failed to extract nodes info of query {query_id}")
+        # print(f"failed to extract nodes info of query {query_id}")
         return
-
-    # Debug statements to understand the structure
-    print(f"Query Info: {query_info}")
 
     # Write query nodes info to CSV
     output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch/new_csvs'
@@ -463,16 +459,27 @@ def traverse(plan: Dict, node_types: List[str], filters: List[List[Tuple[str, st
             if plan['Node Type'] not in ['Limit', 'Gather']:
                 node_types.append(plan['Node Type'])
         node_filters = []
+        appended_parameters = set()  # Track appended parameters for the current plan
         for key in ['Filter', 'Recheck Cond', 'Index Cond', 'Seq Scan', 'Index Scan']:
             if key in plan:
+                # Updated regular expression to handle parentheses around parameter names
                 matches = re.findall(
-                    r'(\w+)\s*(=|LIKE|<|>|<=|>=)\s*\'?([^\'\)]+)\'?', plan[key])
-                # print(f"Matches found in {key}: {matches}")
+                    r'\(?(\w+)\)?\s*(=|LIKE|<|>|<=|>=|~~)\s*\'?([^\'\)]+)\'?', plan[key])
+                # Debug print to check matches
+                print(f"Matches found in {key}: {matches}")
                 for match in matches:
-                    if len(match) == 3 and match[0] in query_parameters:
-                        node_filters.append((match[0], match[2]))
+                    condition = (match[0], match[2])
+                    if len(match) == 3 and match[0] in query_parameters and condition not in appended_parameters:
+                        node_filters.append(condition)
+                        # Mark parameter as appended
+                        appended_parameters.add(condition)
         if node_filters:
             filters.append(node_filters)
+            # Debug print to check appended filters
+            print(f"Appended filters: {node_filters}")
+        else:
+            # Debug print to check when no filters are appended
+            print(f"No filters appended for plan.")
         if 'Execution Time' in plan:
             execution_times.append(plan['Execution Time'])
         if 'Plan Rows' in plan and 'Actual Rows' in plan:
@@ -502,27 +509,26 @@ def extract_node_types_from_plan(plan: Dict, query_parameters: set) -> Tuple[Lis
 
 
 def query_nodes_info(directory: str, query_parameters: set) -> Dict[Union[int, Tuple[int, str]], Tuple[List[str], List[List[Tuple[str, str]]], List[float], List[Tuple[int, int]]]]:
-    # print(f"Extracting query nodes info from directory: {directory}")
     query_info = {}
     for filename in os.listdir(directory):
         if filename.endswith('.json'):
-            # Try to extract the numeric part and suffix from the filename
             query_id, suffix = extract_number(filename)
             if query_id == float('inf'):
-                # Fall back to the previous method for filenames with only numbers
                 try:
                     query_id = int(filename.split('.')[0])
                     suffix = ''
                 except ValueError:
-                    continue  # Skip files that don't match the expected pattern
+                    continue
             with open(os.path.join(directory, filename), 'r', encoding='UTF-8') as file:
-                # print(f"Processing file: {filename}")
                 plan = json.load(file)
                 node_types, filters, execution_times, cardinalities = extract_node_types_from_plan(
                     plan, query_parameters)
+                # Debug print to check extracted filters
+                # print(f"Extracted filters for {filename}: {filters}")
                 query_info[(query_id, suffix) if suffix else query_id] = (
                     node_types, filters, execution_times, cardinalities)
-    # print(f"finished extracting query nodes info")
+    # Debug print to check final query_info
+    # print(f"Final query_info: {query_info}")
     return query_info
 
 # write the query info dict to csv
@@ -539,7 +545,7 @@ def query_nodes_info_to_csv(query_info, output_dir: str, output_file: str) -> No
         combined_filters = ', '.join([f'({k},{v})' for filter_list in sorted(
             filters) for k, v in sorted(filter_list)])
         # Debug statement
-        print(f"Writing filters for query {query_id}: {combined_filters}")
+        # print(f"Writing filters for query {query_id}: {combined_filters}")
         # Assuming you want the total execution time
         combined_execution_time = sum(execution_times)
         combined_cardinality = ', '.join(
