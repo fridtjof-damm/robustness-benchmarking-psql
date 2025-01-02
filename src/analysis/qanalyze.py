@@ -231,7 +231,7 @@ def clean_condition(condition: str) -> str:
 ###############################################################
 
 
-def psql_tpch_profiling(query_id, write_to_file=False):
+def tpch_profiling(query_id, write_to_file=False):
     print(f"tpc-h query {query_id}:")
 
     # Load the query template from the file
@@ -271,6 +271,46 @@ def psql_tpch_profiling(query_id, write_to_file=False):
 # persist query plans to files
 
 
+def job_profiling(query_id, write_to_file=False):
+    print(f"job query {query_id}:")
+
+    # Load the query template from the file
+    template_path = f'/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/resources/job_parameterized/selected/{query_id}.sql'
+    with open(template_path, 'r') as file:
+        query_template = file.read()
+        file.close()
+    queries, _ = qg.generate_job_query(query_template, query_id)
+
+    total_queries = len(queries)
+
+    conn = dc.get_db_connection('job')
+    cur = conn.cursor()
+    prefix = 'EXPLAIN (FORMAT JSON, ANALYZE) '
+    plans = []
+    simplified_plans = []
+    # run queries and get the json format query plans
+    print(f"query execution starts ...")
+    for i, query in enumerate(queries):
+        cur.execute(prefix + query)
+        plan = cur.fetchall()
+        plans.append(plan)
+        plan[0][0][0]['Plan'] = simplify(plan[0][0][0]['Plan'], 'job')
+        simplified_plans.append(plan)
+        percentage = ((i + 1) / total_queries) * 100
+        print(f"{percentage:.2f}% of queries executed")
+
+    # persist plans to file if intended
+    if write_to_file:
+        for i, qplan in enumerate(plans):
+            write_qp_to_file(query_id, i, qplan, simplified=False)
+        for i, qplan in enumerate(simplified_plans):
+            write_qp_to_file(query_id, i, qplan, simplified=True)
+    print(f"execution stage done")
+    return simplified_plans
+
+# persist query plans to files
+
+
 def write_qp_to_file(query_id, plan_index, plan_data, simplified=False):
     # defining directory path
     dir = f'results/tpch/qplans/q{query_id}'
@@ -288,23 +328,38 @@ def write_qp_to_file(query_id, plan_index, plan_data, simplified=False):
 ###############################################################
 
 
-def profile_parameterized_queries(query_id):
+def profile_parameterized_queries(query_id, benchmark):
     # Profile the parameterized queries
-    simplified_plans = psql_tpch_profiling(query_id, write_to_file=True)
-    # Directory where the plans are saved
-    directory = f'results/tpch/qplans/q{query_id}'
-    # Get the correct query parameters for the given query_id
-    query_parameters = set(qg.tpch_query_parameters.get(f'q{query_id}', []))
+    if benchmark == 'tpch':
+        simplified_plans = tpch_profiling(query_id, write_to_file=True)
+        # Directory where the plans are saved
+        # Get the correct query parameters for the given query_id
+        query_parameters = set(
+            qg.tpch_query_parameters.get(f'q{query_id}', []))
+    elif benchmark == 'job':
+        simplified_plans = job_profiling(
+            query_id, write_to_file=True)
+        # Directory where the plans are saved
+        # Get the correct query parameters for the given query_id
+        query_parameters = set(qg.job_query_parameters.get(f'q{query_id}', []))
+    elif benchmark == 'countries':
+        # TODO implement profiling for countries example
+        pass
+    else:
+        print(f"Invalid benchmark: {benchmark}")
+        return
+
     # Debug print to check query parameters
     # print(f"Query parameters for q{query_id}: {query_parameters}")
     # Get query nodes info
+    directory = f'results/{benchmark}/qplans/q{query_id}'
     query_info = query_nodes_info(directory, query_parameters)
     if not query_info:
         # print(f"failed to extract nodes info of query {query_id}")
         return
 
     # Write query nodes info to CSV
-    output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch/new_csvs'
+    output_dir = f'/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/{benchmark}/new_csvs'
     output_file = f'q{query_id}.csv'
     query_nodes_info_to_csv(query_info, output_dir, output_file)
 
@@ -372,7 +427,7 @@ def db_cursor(db) -> cursor:
 # 0 for EXPLAIN (FORMAT JSON), 1 for EXPLAIN (ANALYZE, FORMAT JSON)
 
 
-def job_profiling(prefix: int, process_func, output_dir: str) -> None:
+"""def job_profiling(prefix: int, process_func, output_dir: str) -> None:
     cur = db_cursor('job')
     prefixes = ['EXPLAIN (FORMAT JSON) ', 'EXPLAIN (FORMAT JSON, ANALYZE) ']
     job_dir = 'resources/queries_job/'
@@ -380,7 +435,7 @@ def job_profiling(prefix: int, process_func, output_dir: str) -> None:
     print(job_queries[0])
     plans = process_queries(
         job_queries, cur, prefixes[prefix], job_dir, process_func)
-    write_plans_to_file(plans, output_dir)
+    write_plans_to_file(plans, output_dir)"""
 
 
 def profiling_parameterized_job_queries(output_dir: str) -> None:
@@ -626,10 +681,17 @@ def main():
     ############################
     ############################
     ## standard tpch section ###
-    query_ids = [2, 3, 5, 7, 8, 12, 13, 14, 17]
+    """    query_ids = [2, 3, 5, 7, 8, 12, 13, 14, 17]
+        for i in query_ids:
+            profile_parameterized_queries(i, 'tpch')
+            print(f'finished profiling for query {i}')
+    """
+    # job se
+    query_ids = ['12c', '14b', '15a']
     for i in query_ids:
-        profile_parameterized_queries(i)
+        profile_parameterized_queries(i, 'job')
         print(f'finished profiling for query {i}')
+
         ##################
         ## job section ###
         # job_profiling(0, simplify, 'results/job/qplans/')

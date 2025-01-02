@@ -15,12 +15,10 @@ def generate_query(template: str, query_id: int) -> tuple[list[str], list[tuple]
                 queries.append(template.format(DELTA=param1))
                 parameters.append((param1,))
         case 2:
-            for s in range(1, 51):
-                for t in type_syllables_3:
-                    for region in regions:
-                        queries.append(template.format(
-                            SIZE=s, TYPE=t, REGION=region[1]))
-                        parameters.append((s, t, region[1]))
+            for t in type_syllables_3:
+                for region in regions:
+                    queries.append(template.format(TYPE=t, REGION=region[1]))
+                    parameters.append((t, region[1]))
         case 3:
             for d1, d2 in it.product(dates_03, repeat=2):
                 queries.append(template.format(
@@ -169,6 +167,107 @@ container_syllables_2 = ['CASE', 'BOX', 'BAG',
                          'JAR', 'PKG', 'PACK', 'CAN', 'DRUM']
 brand = ['BRAND#11', 'BRAND#22', 'BRAND#33']
 
+
+# countries for the country example
+countries = ['Vatican City', 'Christmas Island (Australia)', 'Tokelau (New Zealand)', 'Niue (New Zealand)', 'Norfolk Island (Australia)', 'Falkland Islands (UK)', 'Montserrat (UK)', 'Saint Helena, Ascension and Tristan da Cunha (UK)', 'Saint Pierre and Miquelon (France)', 'Saint Barthélemy (France)', 'Tuvalu', 'Wallis and Futuna (France)', 'Nauru', 'Cook Islands', 'Anguilla (UK)', 'Palau', 'British Virgin Islands (UK)', 'Saint Martin (France)', 'San Marino', 'Gibraltar (UK)', 'Monaco', 'Liechtenstein', 'Sint Maarten (Netherlands)', 'Marshall Islands', 'Northern Mariana Islands (US)', 'Turks and Caicos Islands (UK)', 'American Samoa (US)', 'Saint Kitts and Nevis', 'Faroe Islands (Denmark)', 'South Ossetia', 'Greenland (Denmark)', 'Guernsey (UK)', 'Bermuda (UK)', 'Dominica', 'Cayman Islands (UK)', 'Isle of Man (UK)', 'Andorra', 'U.S. Virgin Islands (US)', 'Tonga', 'Jersey (UK)', 'Antigua and Barbuda', 'Micronesia', 'Aruba (Netherlands)', 'Saint Vincent and the Grenadines', 'Grenada', 'Kiribati', 'Seychelles', 'Guam (US)', 'Curaçao (Netherlands)', 'Saint Lucia', 'Samoa', 'São Tomé and Príncipe', 'Abkhazia', 'Barbados', 'New Caledonia (France)', 'French Polynesia (France)', 'Vanuatu', 'Transnistria', 'Northern Cyprus', 'Iceland', 'Bahamas', 'Belize', 'Brunei', 'Cape Verde', 'Maldives', 'Malta', 'Western Sahara', 'Suriname', 'Montenegro', 'Luxembourg', 'Macau (China)', 'Solomon Islands', 'Guyana', 'Bhutan', 'Fiji', 'Comoros', 'Cyprus', 'Djibouti', 'Eswatini', 'Mauritius', 'Trinidad and Tobago', 'East Timor', 'Estonia', 'Equatorial Guinea', 'Bahrain', 'Kosovo', 'Guinea-Bissau', 'North Macedonia', 'Latvia', 'Slovenia', 'Lesotho', 'Albania', 'Gabon', 'Botswana', 'Gambia', 'Moldova', 'Jamaica', 'Qatar',
+             'Lithuania', 'Namibia', 'Armenia', 'Puerto Rico (US)', 'Bosnia and Herzegovina', 'Uruguay', 'Mongolia', 'Georgia', 'Eritrea', 'Croatia', 'Panama', 'Kuwait', 'Mauritania', 'Oman', 'Liberia', 'Costa Rica', 'New Zealand', 'Ireland', 'Slovakia', 'Palestine', 'Lebanon', 'Norway', 'Finland', 'Denmark', 'Singapore', 'Paraguay', 'Republic of the Congo', 'El Salvador', 'Bulgaria', 'Central African Republic', 'Serbia', 'Nicaragua', 'Turkmenistan', 'Kyrgyzstan', 'Libya', 'Laos', 'Hong Kong (China)', 'Togo', 'Sierra Leone', 'Switzerland', 'Belarus', 'Austria', 'Hungary', 'Honduras', 'Israel', 'Azerbaijan', 'Tajikistan', 'United Arab Emirates', 'Greece', 'Sweden', 'Portugal', 'Dominican Republic', 'Czech Republic', 'Cuba', 'Jordan', 'Papua New Guinea', 'Belgium', 'Tunisia', 'Bolivia', 'Haiti', 'Burundi', 'Benin', 'Guinea', 'Rwanda', 'Zimbabwe', 'South Sudan', 'Ecuador', 'Cambodia', 'Guatemala', 'Netherlands', 'Senegal', 'Somalia', 'Chad', 'Romania', 'Zambia', 'Chile', 'Kazakhstan', 'Malawi', 'Sri Lanka', 'Mali', 'Taiwan', 'Burkina Faso', 'Syria', 'North Korea', 'Niger', 'Australia', 'Venezuela', 'Cameroon', 'Nepal', 'Ivory Coast', 'Madagascar', 'Saudi Arabia', 'Yemen', 'Mozambique', 'Ghana', 'Malaysia', 'Peru', 'Afghanistan', 'Angola', 'Ukraine', 'Uzbekistan', 'Morocco', 'Poland', 'Canada', 'Iraq', 'Uganda', 'Algeria', 'Argentina', 'Spain', 'Sudan', 'South Korea', 'Kenya', 'Colombia', 'Myanmar', 'Italy', 'Tanzania', 'South Africa', 'Thailand', 'United Kingdom', 'France', 'Germany', 'Turkey', 'Iran', 'Vietnam', 'Democratic Republic of the Congo', 'Egypt', 'Ethiopia', 'Philippines', 'Japan', 'Mexico', 'Russia', 'Bangladesh', 'Brazil', 'Nigeria', 'Pakistan', 'Indonesia', 'United States', 'India', 'China']
+
+country_idxes = [i for i in range(1, 238)]
+
+
+def generate_country_queries() -> list[str]:
+    template = "SELECT country FROM users_extended WHERE country = '{COUNTRY}';"
+    # template =
+    # template = "SELECT country FROM users_extended WHERE country = '{COUNTRY}';"
+    queries: list[str] = []
+    for idx, country_idx in enumerate(country_idxes):
+        queries.append(template.format(COUNTRY=country_idx))
+    return queries
+    print(generate_country_queries()[0])
+
+
+####
+# job queries gen
+####
+
+def generate_job_query(template: str, query_id: str) -> tuple[list[str], list[tuple]]:
+    queries: List[str] = []
+    parameters: List[Tuple] = []
+
+    match query_id:
+        case '12c':
+            for year, rating in it.product(production_years, ratings):
+                queries.append(template.format(YEAR=year, RATING=rating))
+                parameters.append((year, rating))
+        case '15a':
+            for year, country in it.product(production_years, country_codes):
+                queries.append(template.format(
+                    YEAR=year, COUNTRY_CODE=country))
+                parameters.append((year, country))
+        case '14b':
+            for year, rating in it.product(production_years, ratings):
+                queries.append(template.format(YEAR=year, RATING=rating))
+                parameters.append((year, rating))
+
+    return queries, parameters
+
+###
+# join order benchmark parameters
+###
+
+
+country_codes = [
+    '[ad]', '[ae]', '[af]', '[ag]', '[ai]', '[al]', '[am]', '[an]', '[ao]', '[ar]', '[as]', '[at]', '[au]',
+    '[aw]', '[az]', '[ba]', '[bb]', '[bd]', '[be]', '[bf]', '[bg]', '[bh]', '[bi]', '[bj]', '[bl]', '[bm]',
+    '[bn]', '[bo]', '[br]', '[bs]', '[bt]', '[bw]', '[by]', '[bz]', '[ca]', '[cd]', '[cg]', '[ch]', '[ci]',
+    '[cl]', '[cm]', '[cn]', '[co]', '[cr]', '[cshh]', '[cu]', '[cv]', '[cy]', '[cz]', '[ddde]', '[de]',
+    '[dk]', '[dm]', '[do]', '[dz]', '[ec]', '[ee]', '[eg]', '[er]', '[es]', '[et]', '[fi]', '[fj]', '[fo]',
+    '[fr]', '[ga]', '[gb]', '[gd]', '[ge]', '[gf]', '[gg]', '[gh]', '[gi]', '[gl]', '[gn]', '[gp]', '[gr]',
+    '[gt]', '[gu]', '[gw]', '[gy]', '[hk]', '[hn]', '[hr]', '[ht]', '[hu]', '[id]', '[ie]', '[il]', '[im]',
+    '[in]', '[iq]', '[ir]', '[is]', '[it]', '[je]', '[jm]', '[jo]', '[jp]', '[ke]', '[kg]', '[kh]', '[ki]',
+    '[kn]', '[kp]', '[kr]', '[kw]', '[ky]', '[kz]', '[la]', '[lb]', '[lc]', '[li]', '[lk]', '[lr]', '[ls]',
+    '[lt]', '[lu]', '[lv]', '[ly]', '[ma]', '[mc]', '[md]', '[me]', '[mg]', '[mh]', '[mk]', '[ml]', '[mm]',
+    '[mn]', '[mo]', '[mq]', '[mr]', '[mt]', '[mu]', '[mv]', '[mx]', '[my]', '[mz]', '[na]', '[nc]', '[ne]',
+    '[ng]', '[ni]', '[nl]', '[no]', '[np]', '[nr]', '[nz]', '[om]', '[pa]', '[pe]', '[pf]', '[pg]', '[ph]',
+    '[pk]', '[pl]', '[pm]', '[pr]', '[ps]', '[pt]', '[py]', '[qa]', '[ro]', '[rs]', '[ru]', '[rw]', '[sa]',
+    '[sd]', '[se]', '[sg]', '[si]', '[sj]', '[sk]', '[sl]', '[sm]', '[sn]', '[so]', '[sr]', '[suhh]', '[sv]',
+    '[sy]', '[sz]', '[td]', '[tf]', '[tg]', '[th]', '[tj]', '[tk]', '[tl]', '[tm]', '[tn]', '[to]', '[tr]',
+    '[tt]', '[tv]', '[tw]', '[tz]', '[ua]', '[ug]', '[um]', '[us]', '[uy]', '[uz]', '[va]', '[ve]', '[vg]',
+    '[vi]', '[vn]', '[xyu]', '[ye]', '[yucs]', '[za]', '[zm]', '[zw]'
+]  # {COUNTRY_CODE}
+production_years = [
+    production_year for production_year in range(1880, 2020)]  # {YEAR}
+ratings = [f'{rating}.0' for rating in range(
+    1, 11)] + [f'{rating}.5' for rating in range(1, 11)]
+
+
+###
+# relevant query parameter section
+###
+
+# tpch
+# Define parameter dimensions for each query
+tpch_query_parameters = {
+    'q2': ('p_type', 'r_name'),
+    'q3': ('l_orderdate', 'l_shipdate'),
+    'q5': ('r_name', 'o_orderdate'),
+    'q7': ('n_name', 'n_name'),
+    'q8': ('r_name', 'p_type'),
+    'q11': ('n_name', 'n_name'),
+    'q12': ('l_shipmode', 'l_receiptdate'),
+    'q13': ('o_comment', 'o_comment'),
+    'q14': ('l_shipdate', 'l_shipdate'),
+    'q17': ('p_brand', 'p_container')
+}
+
+
+job_query_parameters = {
+    '12c': ('t.production_year', 'mi_idx.info'),
+    '15a': ('t.production_year', 'cn.country_code'),
+    '14b': ('t.production_year', 'mi_idx.info')
+}
+
+
 # picasso queries
 
 
@@ -291,102 +390,6 @@ c_acctbal = []
 
 s_acctbal = []
 
-# countries for the country example
-countries = ['Vatican City', 'Christmas Island (Australia)', 'Tokelau (New Zealand)', 'Niue (New Zealand)', 'Norfolk Island (Australia)', 'Falkland Islands (UK)', 'Montserrat (UK)', 'Saint Helena, Ascension and Tristan da Cunha (UK)', 'Saint Pierre and Miquelon (France)', 'Saint Barthélemy (France)', 'Tuvalu', 'Wallis and Futuna (France)', 'Nauru', 'Cook Islands', 'Anguilla (UK)', 'Palau', 'British Virgin Islands (UK)', 'Saint Martin (France)', 'San Marino', 'Gibraltar (UK)', 'Monaco', 'Liechtenstein', 'Sint Maarten (Netherlands)', 'Marshall Islands', 'Northern Mariana Islands (US)', 'Turks and Caicos Islands (UK)', 'American Samoa (US)', 'Saint Kitts and Nevis', 'Faroe Islands (Denmark)', 'South Ossetia', 'Greenland (Denmark)', 'Guernsey (UK)', 'Bermuda (UK)', 'Dominica', 'Cayman Islands (UK)', 'Isle of Man (UK)', 'Andorra', 'U.S. Virgin Islands (US)', 'Tonga', 'Jersey (UK)', 'Antigua and Barbuda', 'Micronesia', 'Aruba (Netherlands)', 'Saint Vincent and the Grenadines', 'Grenada', 'Kiribati', 'Seychelles', 'Guam (US)', 'Curaçao (Netherlands)', 'Saint Lucia', 'Samoa', 'São Tomé and Príncipe', 'Abkhazia', 'Barbados', 'New Caledonia (France)', 'French Polynesia (France)', 'Vanuatu', 'Transnistria', 'Northern Cyprus', 'Iceland', 'Bahamas', 'Belize', 'Brunei', 'Cape Verde', 'Maldives', 'Malta', 'Western Sahara', 'Suriname', 'Montenegro', 'Luxembourg', 'Macau (China)', 'Solomon Islands', 'Guyana', 'Bhutan', 'Fiji', 'Comoros', 'Cyprus', 'Djibouti', 'Eswatini', 'Mauritius', 'Trinidad and Tobago', 'East Timor', 'Estonia', 'Equatorial Guinea', 'Bahrain', 'Kosovo', 'Guinea-Bissau', 'North Macedonia', 'Latvia', 'Slovenia', 'Lesotho', 'Albania', 'Gabon', 'Botswana', 'Gambia', 'Moldova', 'Jamaica', 'Qatar',
-             'Lithuania', 'Namibia', 'Armenia', 'Puerto Rico (US)', 'Bosnia and Herzegovina', 'Uruguay', 'Mongolia', 'Georgia', 'Eritrea', 'Croatia', 'Panama', 'Kuwait', 'Mauritania', 'Oman', 'Liberia', 'Costa Rica', 'New Zealand', 'Ireland', 'Slovakia', 'Palestine', 'Lebanon', 'Norway', 'Finland', 'Denmark', 'Singapore', 'Paraguay', 'Republic of the Congo', 'El Salvador', 'Bulgaria', 'Central African Republic', 'Serbia', 'Nicaragua', 'Turkmenistan', 'Kyrgyzstan', 'Libya', 'Laos', 'Hong Kong (China)', 'Togo', 'Sierra Leone', 'Switzerland', 'Belarus', 'Austria', 'Hungary', 'Honduras', 'Israel', 'Azerbaijan', 'Tajikistan', 'United Arab Emirates', 'Greece', 'Sweden', 'Portugal', 'Dominican Republic', 'Czech Republic', 'Cuba', 'Jordan', 'Papua New Guinea', 'Belgium', 'Tunisia', 'Bolivia', 'Haiti', 'Burundi', 'Benin', 'Guinea', 'Rwanda', 'Zimbabwe', 'South Sudan', 'Ecuador', 'Cambodia', 'Guatemala', 'Netherlands', 'Senegal', 'Somalia', 'Chad', 'Romania', 'Zambia', 'Chile', 'Kazakhstan', 'Malawi', 'Sri Lanka', 'Mali', 'Taiwan', 'Burkina Faso', 'Syria', 'North Korea', 'Niger', 'Australia', 'Venezuela', 'Cameroon', 'Nepal', 'Ivory Coast', 'Madagascar', 'Saudi Arabia', 'Yemen', 'Mozambique', 'Ghana', 'Malaysia', 'Peru', 'Afghanistan', 'Angola', 'Ukraine', 'Uzbekistan', 'Morocco', 'Poland', 'Canada', 'Iraq', 'Uganda', 'Algeria', 'Argentina', 'Spain', 'Sudan', 'South Korea', 'Kenya', 'Colombia', 'Myanmar', 'Italy', 'Tanzania', 'South Africa', 'Thailand', 'United Kingdom', 'France', 'Germany', 'Turkey', 'Iran', 'Vietnam', 'Democratic Republic of the Congo', 'Egypt', 'Ethiopia', 'Philippines', 'Japan', 'Mexico', 'Russia', 'Bangladesh', 'Brazil', 'Nigeria', 'Pakistan', 'Indonesia', 'United States', 'India', 'China']
-
-country_idxes = [i for i in range(1, 238)]
-
-
-def generate_country_queries() -> list[str]:
-    template = "SELECT country FROM users_extended WHERE country = '{COUNTRY}';"
-    # template =
-    # template = "SELECT country FROM users_extended WHERE country = '{COUNTRY}';"
-    queries: list[str] = []
-    for idx, country_idx in enumerate(country_idxes):
-        queries.append(template.format(COUNTRY=country_idx))
-    return queries
-    print(generate_country_queries()[0])
-
-# skew example
-
-
-def generate_skew_queries() -> list[str]:
-    template = "SELECT a,b FROM data WHERE a = '{A}' AND b = '{B}';"
-    queries: list[str] = []
-    for i in range(1, 20):
-        for j in range(100, 14600, 100):
-            queries.append(template.format(A=i, B=j))
-    return queries
-
-
-##########
-# job
-##########
-
-
-####
-# job queries gen
-####
-
-
-def generate_job_queries() -> list[str]:
-    template_path = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/resources/job_parameterized/1d_qt.sql'
-    queries = []
-
-    # read the query template from the file
-    with open(template_path, 'r') as file:
-        query_template = file.read()
-
-    # generate queries for each year in the range from 1880 to 2019
-    for year in range(1880, 2020):
-        query = query_template.replace('{YEAR}', str(year))
-        queries.append(query)
-    return queries
-
-
-def generate_job_query15a() -> list[str]:
-    template_path = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/resources/job_parameterized/selected/15a.sql'
-    queries = []
-
-    # read the query template from the file
-    with open(template_path, 'r') as file:
-        query_template = file.read()
-
-    for country in country_codes:
-        for year in production_years:
-            query = query_template.replace('{COUNTRY_CODE}', country).replace(
-                '{YEAR}', str(year))
-            queries.append(query)
-    return queries
-
-###
-# join order benchmark parameters
-###
-
-    country_codes = [
-        '[ad]', '[ae]', '[af]', '[ag]', '[ai]', '[al]', '[am]', '[an]', '[ao]', '[ar]', '[as]', '[at]', '[au]',
-        '[aw]', '[az]', '[ba]', '[bb]', '[bd]', '[be]', '[bf]', '[bg]', '[bh]', '[bi]', '[bj]', '[bl]', '[bm]',
-        '[bn]', '[bo]', '[br]', '[bs]', '[bt]', '[bw]', '[by]', '[bz]', '[ca]', '[cd]', '[cg]', '[ch]', '[ci]',
-        '[cl]', '[cm]', '[cn]', '[co]', '[cr]', '[cshh]', '[cu]', '[cv]', '[cy]', '[cz]', '[ddde]', '[de]',
-        '[dk]', '[dm]', '[do]', '[dz]', '[ec]', '[ee]', '[eg]', '[er]', '[es]', '[et]', '[fi]', '[fj]', '[fo]',
-        '[fr]', '[ga]', '[gb]', '[gd]', '[ge]', '[gf]', '[gg]', '[gh]', '[gi]', '[gl]', '[gn]', '[gp]', '[gr]',
-        '[gt]', '[gu]', '[gw]', '[gy]', '[hk]', '[hn]', '[hr]', '[ht]', '[hu]', '[id]', '[ie]', '[il]', '[im]',
-        '[in]', '[iq]', '[ir]', '[is]', '[it]', '[je]', '[jm]', '[jo]', '[jp]', '[ke]', '[kg]', '[kh]', '[ki]',
-        '[kn]', '[kp]', '[kr]', '[kw]', '[ky]', '[kz]', '[la]', '[lb]', '[lc]', '[li]', '[lk]', '[lr]', '[ls]',
-        '[lt]', '[lu]', '[lv]', '[ly]', '[ma]', '[mc]', '[md]', '[me]', '[mg]', '[mh]', '[mk]', '[ml]', '[mm]',
-        '[mn]', '[mo]', '[mq]', '[mr]', '[mt]', '[mu]', '[mv]', '[mx]', '[my]', '[mz]', '[na]', '[nc]', '[ne]',
-        '[ng]', '[ni]', '[nl]', '[no]', '[np]', '[nr]', '[nz]', '[om]', '[pa]', '[pe]', '[pf]', '[pg]', '[ph]',
-        '[pk]', '[pl]', '[pm]', '[pr]', '[ps]', '[pt]', '[py]', '[qa]', '[ro]', '[rs]', '[ru]', '[rw]', '[sa]',
-        '[sd]', '[se]', '[sg]', '[si]', '[sj]', '[sk]', '[sl]', '[sm]', '[sn]', '[so]', '[sr]', '[suhh]', '[sv]',
-        '[sy]', '[sz]', '[td]', '[tf]', '[tg]', '[th]', '[tj]', '[tk]', '[tl]', '[tm]', '[tn]', '[to]', '[tr]',
-        '[tt]', '[tv]', '[tw]', '[tz]', '[ua]', '[ug]', '[um]', '[us]', '[uy]', '[uz]', '[va]', '[ve]', '[vg]',
-        '[vi]', '[vn]', '[xyu]', '[ye]', '[yucs]', '[za]', '[zm]', '[zw]'
-    ]  # {COUNTRY_CODE}
-
-    production_years = [
-        production_year for production_year in range(1880, 2020)]  # {YEAR}
-
 
 ###
 # custom tpch based query generation
@@ -419,21 +422,13 @@ def gen_custom_queries_aggregated() -> list[str]:
     return queries
 
 
-###
-# relevant query parameter section
-###
+# skew example
 
-# tpch
-    # Define parameter dimensions for each query
-tpch_query_parameters = {
-    'q2': ('p_type', 'r_name'),
-    'q3': ('l_orderdate', 'l_shipdate'),
-    'q5': ('r_name', 'o_orderdate'),
-    'q7': ('n_name', 'n_name'),
-    'q8': ('r_name', 'p_type'),
-    'q11': ('n_name', 'n_name'),
-    'q12': ('l_shipmode', 'l_receiptdate'),
-    'q13': ('o_comment', 'o_comment'),
-    'q14': ('l_shipdate', 'l_shipdate'),
-    'q17': ('p_brand', 'p_container')
-}
+
+def generate_skew_queries() -> list[str]:
+    template = "SELECT a,b FROM data WHERE a = '{A}' AND b = '{B}';"
+    queries: list[str] = []
+    for i in range(1, 20):
+        for j in range(100, 14600, 100):
+            queries.append(template.format(A=i, B=j))
+    return queries
