@@ -42,3 +42,5 @@ results/job/qplans/
 *.ipynb
 /Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/resources/query_examples/countries.ipynb
 resources/query_examples/countries.ipynb
+/src/src_archive/
+/results/archive
