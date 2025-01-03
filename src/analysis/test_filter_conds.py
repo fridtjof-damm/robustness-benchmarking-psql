@@ -105,17 +105,7 @@ def simplify_filter(filter_str, benchmark):
 
 # Test cases
 test_filters = [
-    "(p_type LIKE '%TIN' AND p_size = 1)",
-    "(l_shipdate > '1995-03-27'::date)",
-    "(c_mktsegment = 'HOUSEHOLD'::bpchar)",
-    "(r_name = 'AFRICA'::bpchar)",
-    "((o_orderdate >= '1993-01-01'::date) AND (o_orderdate <= '1996-12-31'::date))",
-    "((l_shipdate >= '1995-01-01'::date) AND (l_shipdate <= '1996-12-31'::date))",
-    "((n_name = 'ALGERIA'::bpchar) OR (n_name = 'ARGENTINA'::bpchar))",
-    "p_type = 'TIN'",
-    "((o_orderdate >= '1995-01-01'::date) AND (o_orderdate <= '1996-12-31'::date))",
-    "((l_shipdate >= '1993-01-01'::date) AND (l_shipdate < '1993-02-01 00:00:00'::timestamp without time zone))",
-    "(((p_type): : text ~~ '%TIN': : text) AND (p_size = 1))"
+    "((info)::text > '1.0'::text)"
 ]
 
 benchmark = 'tpch'
