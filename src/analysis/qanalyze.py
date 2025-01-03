@@ -222,9 +222,9 @@ def tpch_profiling(query_id, write_to_file=False):
     # persist plans to file if intended
     if write_to_file:
         for i, qplan in enumerate(plans):
-            write_qp_to_file(query_id, i, qplan, simplified=False)
+            write_qp_to_file(query_id, i, qplan, 'tpch', simplified=False)
         for i, qplan in enumerate(simplified_plans):
-            write_qp_to_file(query_id, i, qplan, simplified=True)
+            write_qp_to_file(query_id, i, qplan, 'tpch', simplified=True)
     print(f"execution stage done")
     return simplified_plans
 
@@ -458,29 +458,32 @@ def main():
     ############################
     ############################
     ## standard tpch section ###
-    """    query_ids = [2, 3, 5, 7, 8, 12, 13, 14, 17]
-        for i in query_ids:
-            profile_parameterized_queries(i, 'tpch')
-            print(f'finished profiling for query {i}')
-    """
-    # job se
+
+    # query_ids = [2, 3, 5, 7, 8, 12, 13, 14, 17]
+    query_ids = [2]
+    for i in query_ids:
+        profile_parameterized_queries(i, 'tpch')
+        print(f'finished profiling for query {i}')
+
+
+"""    # job se
     query_ids = ['12c', '14b', '15a']
     for i in query_ids:
         profile_parameterized_queries(i, 'job')
-        print(f'finished profiling for query {i}')
+        print(f'finished profiling for query {i}')"""
 
-        ############################
-        ## countries #########
-        # profiling_country_example()
-        # print(query_nodes_info('/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified')[1])
-        # print(query_nodes_info('/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified')[236])
-        # country to csv
+############################
+## countries #########
+# profiling_country_example()
+# print(query_nodes_info('/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified')[1])
+# print(query_nodes_info('/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified')[236])
+# country to csv
 
-        # directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified'
-        # output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified'
-        # output_file = 'country_extended_example_index_seq.csv'
-        # query_nodes_info_to_csv(query_nodes_info(
-        #    directory), output_dir, output_file)
+# directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified'
+# output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified'
+# output_file = 'country_extended_example_index_seq.csv'
+# query_nodes_info_to_csv(query_nodes_info(
+#    directory), output_dir, output_file)
 
 
 if __name__ == '__main__':
