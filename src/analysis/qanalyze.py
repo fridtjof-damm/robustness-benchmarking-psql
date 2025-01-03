@@ -458,9 +458,9 @@ def main():
     ############################
     ############################
     ## standard tpch section ###
-
     # query_ids = [2, 3, 5, 7, 8, 12, 13, 14, 17]
-    query_ids = [2]
+    query_ids = [3, 5, 7, 8, 12, 13, 14, 17]
+    # query_ids = [2]
     for i in query_ids:
         profile_parameterized_queries(i, 'tpch')
         print(f'finished profiling for query {i}')
