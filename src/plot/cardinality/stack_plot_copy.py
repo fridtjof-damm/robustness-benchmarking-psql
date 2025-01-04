@@ -3,6 +3,8 @@ import matplotlib.ticker as ticker
 import pandas as pd
 import re
 import numpy as np
+import os
+from src.qgen import tpch_query_parameters
 
 
 def extract_cardinalities(cardinality_str):
@@ -116,7 +118,7 @@ def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='no
             param_combinations_with_whitespace)
 
         # Setup the plot
-        plt.figure(figsize=(20, 12))
+        plt.figure(figsize=(18, 10))
         plt.subplots_adjust(bottom=0.2)
         # Get unique node types for coloring
         all_node_types = [node for sublist in data['Processed_Node_Types']
@@ -130,8 +132,7 @@ def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='no
         bottom = np.zeros(len(param_combinations_with_whitespace))
 
         # Plot each node type's cardinalities
-        first_query_nodes = data['Processed_Node_Types'].iloc[0]
-        for node_type in first_query_nodes:
+        for node_type in unique_node_types:
             values = [row[i] for row, nodes in zip(data['cardinalities'], data['Processed_Node_Types'])
                       for i, n in enumerate(nodes) if n == node_type]
             values_with_whitespace = np.zeros(
@@ -142,7 +143,8 @@ def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='no
             bottom += values_with_whitespace
 
         # Customize the plot
-        # plt.xlabel(f'Parameters 1 {param1_name}, 2 {param2_name}', fontsize=20)
+        plt.xlabel(
+            f'Parameters 1 {param1_name}, 2 {param2_name}', fontsize=20)
         plt.ylabel('Cardinality', fontsize=20)
         plt.yticks(fontsize=16)
 
@@ -193,33 +195,47 @@ def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='no
 
 if __name__ == "__main__":
     try:
-        # Update with your path
-        csv_path = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch/csvs/plottable/q3.csv'
-        data = pd.read_csv(csv_path)
-        qid = 'q3'
+        # Directory containing the CSV files
+        csv_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch/csvs/plottable'
 
-        # Print the number of rows in the CSV
-        print(f"Number of rows in the CSV: {len(data)}")
+        # Mapping of query IDs to parameter names
+        query_params = tpch_query_parameters
 
-        # Create plots with different sampling methods
-        create_stacked_bar_chart(
-            data,
-            'l_shipdate',
-            'o_orderdate',
-            sampling_method='none',
-            target_sample_size=150,
-            output_file=f'/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots/cardinality/stack_bar/tpch/pdf/new/{qid}.pdf',
-            whitespace_width=1  # Adjust the whitespace width as needed
-        )
+        # Iterate over each CSV file in the directory
+        for filename in os.listdir(csv_dir):
+            if filename.endswith('.csv'):
+                csv_path = os.path.join(csv_dir, filename)
+                data = pd.read_csv(csv_path)
+                qid = filename.split('.')[0]  # Extract query ID from filename
 
-        create_stacked_bar_chart(
-            data,
-            'l_shipdate',
-            'o_orderdate',
-            sampling_method='systematic',
-            target_sample_size=150,
-            output_file=f'/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots/cardinality/stack_bar/tpch/pdf/new/{qid}_sampled.pdf',
-            whitespace_width=1  # Adjust the whitespace width as needed
-        )
+                # Print the number of rows in the CSV
+                print(f"Number of rows in the CSV ({filename}): {len(data)}")
+
+                # Get the parameter names for the current query ID
+                param1_name, param2_name = query_params.get(qid, (None, None))
+                if param1_name is None or param2_name is None:
+                    print(f"Query ID {qid} not found in query_params mapping.")
+                    continue
+
+                # Create plots with different sampling methods
+                create_stacked_bar_chart(
+                    data,
+                    param1_name,
+                    param2_name,
+                    sampling_method='none',
+                    target_sample_size=150,
+                    output_file=f'/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots/cardinality/stack_bar/tpch/pdf/new/{qid}.pdf',
+                    whitespace_width=1  # Adjust the whitespace width as needed
+                )
+
+                create_stacked_bar_chart(
+                    data,
+                    param1_name,
+                    param2_name,
+                    sampling_method='systematic',
+                    target_sample_size=150,
+                    output_file=f'/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots/cardinality/stack_bar/tpch/pdf/new/{qid}_sampled.pdf',
+                    whitespace_width=1  # Adjust the whitespace width as needed
+                )
     except Exception as e:
         print(f"Error loading data: {str(e)}")
