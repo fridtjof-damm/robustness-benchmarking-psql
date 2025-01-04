@@ -24,9 +24,8 @@ config.json
 /results/postgres
 /results/queryresults_sf10
 /results/queryresults_sf100
-/results/job
 /results/job/qplans
-/results/
+/results/job/
 *.bib
 *.tex
 *.png
@@ -45,3 +44,6 @@ resources/query_examples/countries.ipynb
 /src/src_archive/
 /results/archive
 /thesis
+
+# Except this path
+!/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/job/csvs/plottable
