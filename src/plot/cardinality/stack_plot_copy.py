@@ -4,7 +4,7 @@ import pandas as pd
 import re
 import numpy as np
 import os
-from src.qgen import tpch_query_parameters
+from src.qgen import tpch_query_parameters, job_query_parameters
 
 
 def extract_cardinalities(cardinality_str):
@@ -48,23 +48,23 @@ def sample_data(data, method='none', target_size=150):
             "Invalid sampling method. Use 'none', 'stratified', or 'systematic'")
 
 
+def extract_params(filter_str, param1_name, param2_name):
+    pattern = r'\(([\w_]+),\s*([^)]+)\)'
+    matches = re.findall(pattern, filter_str)
+    date_values = {name: value.strip() for name, value in matches}
+    return date_values[param1_name], date_values[param2_name]
+
+
 def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='none',
                              target_sample_size=150, output_file=None, whitespace_width=1):
     try:
-        # Extract parameters from filters
-        def extract_params(filter_str):
-            pattern = r'\(([\w_]+),\s*([^)]+)\)'
-            matches = re.findall(pattern, filter_str)
-            date_values = {name: value.strip() for name, value in matches}
-            return date_values[param1_name], date_values[param2_name]
-
         # Debug print statement
         print("Filters column before extraction:")
         print(data['Filters'].head())
 
         # Process the data
         data[['param1', 'param2']] = data['Filters'].apply(
-            lambda x: pd.Series(extract_params(x))
+            lambda x: pd.Series(extract_params(x, param1_name, param2_name))
         )
 
         # Debug print statement
@@ -117,6 +117,10 @@ def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='no
         param_combinations_with_whitespace = pd.DataFrame(
             param_combinations_with_whitespace)
 
+        # Debug print statement
+        print("Parameter combinations with whitespace added:")
+        print(param_combinations_with_whitespace.head())
+
         # Setup the plot
         plt.figure(figsize=(18, 10))
         plt.subplots_adjust(bottom=0.2)
@@ -131,8 +135,13 @@ def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='no
         x = np.arange(len(param_combinations_with_whitespace))
         bottom = np.zeros(len(param_combinations_with_whitespace))
 
+        # Debug print statement
+        print("Starting to plot each node type's cardinalities...")
+
         # Plot each node type's cardinalities
-        for node_type in unique_node_types:
+        for idx, node_type in enumerate(unique_node_types):
+            print(
+                f"Plotting node type {idx + 1}/{len(unique_node_types)}: {node_type}")
             values = [row[i] for row, nodes in zip(data['cardinalities'], data['Processed_Node_Types'])
                       for i, n in enumerate(nodes) if n == node_type]
             values_with_whitespace = np.zeros(
@@ -141,6 +150,9 @@ def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='no
             plt.bar(x, values_with_whitespace, bottom=bottom,
                     color=color_map[node_type], label=node_type)
             bottom += values_with_whitespace
+
+        # Debug print statement
+        print("Finished plotting node type's cardinalities.")
 
         # Customize the plot
         plt.xlabel(
@@ -163,7 +175,7 @@ def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='no
                    [f'2 {param_combinations["param1"][i]}' for i in label_indices],
                    rotation=45, ha='right', fontsize=16)
         # Set the x-axis limit to zoom in on the left
-        x_max = x.max() / 4.55
+        x_max = x.max() / 7.55
         plt.xlim(-0.5, x_max)
 
         # Add grid and legend
@@ -193,30 +205,64 @@ def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='no
         print(f"Error creating plot: {str(e)}")
 
 
-if __name__ == "__main__":
-    try:
-        # Directory containing the CSV files
+def process_benchmark(benchmark):
+    if benchmark == "tpch":
         csv_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch/csvs/plottable'
-
-        # Mapping of query IDs to parameter names
+        output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots/cardinality/stack_bar/tpch/pdf/new'
         query_params = tpch_query_parameters
+    elif benchmark == "job":
+        csv_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/job/csvs/plottable'
+        output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots/cardinality/stack_bar/job/pdf'
+        query_params = job_query_parameters
+    else:
+        print("Error: Invalid benchmark type. Please use 'tpch' or 'job'.")
+        return
 
-        # Iterate over each CSV file in the directory
-        for filename in os.listdir(csv_dir):
-            if filename.endswith('.csv'):
-                csv_path = os.path.join(csv_dir, filename)
-                data = pd.read_csv(csv_path)
-                qid = filename.split('.')[0]  # Extract query ID from filename
+    # Iterate over each CSV file in the directory
+    for filename in os.listdir(csv_dir):
+        if filename.endswith('.csv'):
+            csv_path = os.path.join(csv_dir, filename)
+            data = pd.read_csv(csv_path)
+            qid = filename.split('.')[0]  # Extract query ID from filename
 
-                # Print the number of rows in the CSV
-                print(f"Number of rows in the CSV ({filename}): {len(data)}")
+            # Print the number of rows in the CSV
+            print(f"Number of rows in the CSV ({filename}): {len(data)}")
 
-                # Get the parameter names for the current query ID
-                param1_name, param2_name = query_params.get(qid, (None, None))
-                if param1_name is None or param2_name is None:
-                    print(f"Query ID {qid} not found in query_params mapping.")
-                    continue
+            # Get the parameter names for the current query ID
+            param1_name, param2_name = query_params.get(qid, (None, None))
+            if param1_name is None or param2_name is None:
+                print(f"Query ID {qid} not found in query_params mapping.")
+                continue
 
+            # Extract parameters from filters
+            print("Extracting parameters from filters...")
+            data[['param1', 'param2']] = data['Filters'].apply(
+                lambda x: pd.Series(extract_params(
+                    x, param1_name, param2_name))
+            )
+
+            # Debug print statement
+            print("Extracted param1 and param2 values:")
+            print(data[['param1', 'param2']].head())
+
+            # Get unique parameter combinations
+            param_combinations = data[['param1', 'param2']].drop_duplicates()
+            num_stacks = len(param_combinations)
+
+            # Only create the systematic sampled plot if there are more than 1000 stacks/bars
+            if num_stacks > 1000:
+                print(
+                    f"Number of stacks ({num_stacks}) exceeds 1000, creating only the systematic sampled plot.")
+                create_stacked_bar_chart(
+                    data,
+                    param1_name,
+                    param2_name,
+                    sampling_method='systematic',
+                    target_sample_size=150,
+                    output_file=f'{output_dir}/{qid}_sampled.pdf',
+                    whitespace_width=1  # Adjust the whitespace width as needed
+                )
+            else:
                 # Create plots with different sampling methods
                 create_stacked_bar_chart(
                     data,
@@ -224,7 +270,7 @@ if __name__ == "__main__":
                     param2_name,
                     sampling_method='none',
                     target_sample_size=150,
-                    output_file=f'/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots/cardinality/stack_bar/tpch/pdf/new/{qid}.pdf',
+                    output_file=f'{output_dir}/{qid}.pdf',
                     whitespace_width=1  # Adjust the whitespace width as needed
                 )
 
@@ -234,8 +280,11 @@ if __name__ == "__main__":
                     param2_name,
                     sampling_method='systematic',
                     target_sample_size=150,
-                    output_file=f'/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots/cardinality/stack_bar/tpch/pdf/new/{qid}_sampled.pdf',
+                    output_file=f'{output_dir}/{qid}_sampled.pdf',
                     whitespace_width=1  # Adjust the whitespace width as needed
                 )
-    except Exception as e:
-        print(f"Error loading data: {str(e)}")
+
+
+if __name__ == "__main__":
+    benchmark = input("Enter the benchmark type (tpch/job): ").strip().lower()
+    process_benchmark(benchmark)
