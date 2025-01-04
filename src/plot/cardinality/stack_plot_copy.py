@@ -174,9 +174,11 @@ def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='no
         plt.xticks(x[label_indices],
                    [f'2 {param_combinations["param1"][i]}' for i in label_indices],
                    rotation=45, ha='right', fontsize=16)
-        # Set the x-axis limit to zoom in on the left
-        x_max = x.max() / 7.55
-        plt.xlim(-0.5, x_max)
+
+        # Set the x-axis limit to zoom in on the left if stack bar count is over 30
+        if len(param_combinations) > 30:
+            x_max = x.max() / 7.55
+            plt.xlim(-0.5, x_max)
 
         # Add grid and legend
         plt.grid(True, axis='y', linestyle='--', alpha=0.7)
@@ -209,7 +211,18 @@ def process_benchmark(benchmark):
     if benchmark == "tpch":
         csv_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch/csvs/plottable'
         output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots/cardinality/stack_bar/tpch/pdf/new'
-        query_params = tpch_query_parameters
+        query_params = {
+            'q2': ('r_name', 'p_type'),  # Switched values
+            'q3': ('o_orderdate', 'l_shipdate'),
+            'q5': ('o_orderdate', 'r_name'),  # Switched values
+            'q7': ('n_name', 'n_name'),
+            'q8': ('r_name', 'p_type'),
+            'q11': ('n_name', 'n_name'),
+            'q12': ('l_shipmode', 'l_receiptdate'),
+            'q13': ('o_comment', 'o_comment'),
+            'q14': ('l_shipdate', 'l_shipdate'),
+            'q17': ('p_container', 'p_brand')  # Switched values
+        }
     elif benchmark == "job":
         csv_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/job/csvs/plottable'
         output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots/cardinality/stack_bar/job/pdf'
