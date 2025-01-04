@@ -1,7 +1,7 @@
 import os
 import glob
 import pandas as pd
-import src.plot.cardinality.stack_plot as sp
+import src.plot.cardinality.stack_plotv2 as sp
 from src.qgen import tpch_query_parameters
 from src.utils.utils import process_csv_and_discard_equals
 # module to manage the plotting
@@ -14,7 +14,7 @@ if __name__ == "__main__":
     try:
         # Directory containing CSV files
         csv_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch/'
-        output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots/cardinality/stack_bar/tpch'
+        output_dir = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots/cardinality/stack_bar/tpch/pdf/new'
         # Process all CSV files
         for csv_file in glob.glob(os.path.join(csv_dir, '*.csv')):
             query_id = os.path.basename(csv_file).split('.')[0]
