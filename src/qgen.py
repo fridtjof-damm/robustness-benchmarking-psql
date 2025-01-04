@@ -262,9 +262,9 @@ tpch_query_parameters = {
 
 
 job_query_parameters = {
-    '12c': ('production_year', 'mi_idx.info'),
-    '15a': ('production_year', 'cn.country_code'),
-    '14b': ('production_year', 'mi_idx.info')
+    '12c': ('production_year', 'rating'),
+    '15a': ('production_year', 'country_code'),
+    '14b': ('production_year', 'rating')
 }
 
 
