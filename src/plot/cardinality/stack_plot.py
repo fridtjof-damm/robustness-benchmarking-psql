@@ -3,18 +3,66 @@ import matplotlib.ticker as ticker
 import pandas as pd
 import re
 import numpy as np
-import os
-from src.utils.utils import extract_params, extract_relevant_filters, sample_data, extract_cardinalities, process_csv_and_discard_equals, process_node_types
 
 
-def create_stacked_bar_chart(data, param1_name, param2_name, query_id, sampling_method='none',
-                             target_sample_size=150, output_dir='results/plots/'):
+def extract_cardinalities(cardinality_str):
+    matches = re.findall(r'\([\d,]+,\s*(\d+)\)', cardinality_str)
+    return [int(x) for x in matches]
+
+
+def process_node_types(node_types_str):
+    node_types = node_types_str.split(',')
+    processed_types = []
+    type_counts = {}
+    for node_type in node_types:
+        node_type = node_type.strip()
+        if node_type in type_counts:
+            type_counts[node_type] += 1
+            processed_types.append(f"{node_type}_{type_counts[node_type]}")
+        else:
+            type_counts[node_type] = 1
+            processed_types.append(f"{node_type}_1")
+    return processed_types
+
+
+def sample_data(data, method='none', target_size=150):
+    if method == 'none':
+        return data
+    elif method == 'stratified':
+        # Group by parameter combinations and sample proportionally
+        param_groups = data.groupby(['param1', 'param2'])
+        sampling_rate = target_size / len(param_groups)
+        sampled_data = param_groups.apply(
+            lambda x: x.sample(max(1, int(len(x) * sampling_rate))),
+            include_groups=False
+        )
+        return sampled_data.reset_index(drop=True)
+    elif method == 'systematic':
+        # Systematic sampling with fixed interval
+        n = max(1, len(data) // target_size)
+        return data.iloc[::n].reset_index(drop=True)
+    else:
+        raise ValueError(
+            "Invalid sampling method. Use 'none', 'stratified', or 'systematic'")
+
+
+def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='none',
+                             target_sample_size=150, output_file=None, whitespace_width=1):
     try:
-        # Process the data
-        data['param1'], data['param2'] = zip(
-            *[extract_relevant_filters(x, param1_name, param2_name) for x in data['Filters']])
+        # Extract parameters from filters
+        def extract_params(filter_str):
+            pattern = r'\(([\w_]+),\s*([^)]+)\)'
+            matches = re.findall(pattern, filter_str)
+            date_values = [value.strip() for name, value in matches
+                           if name in [param1_name, param2_name]]
+            return date_values[0], date_values[1]
 
-        # Apply sampling if needed, function in utils.py
+        # Process the data
+        data[['param1', 'param2']] = data['Filters'].apply(
+            lambda x: pd.Series(extract_params(x))
+        )
+
+        # Apply sampling if requested
         data = sample_data(data, sampling_method, target_sample_size)
 
         # Process node types and cardinalities
@@ -23,81 +71,151 @@ def create_stacked_bar_chart(data, param1_name, param2_name, query_id, sampling_
         data['cardinalities'] = data['Cardinality e/a'].apply(
             extract_cardinalities)
 
+        # Get unique parameter combinations
+        param_combinations = data[['param1', 'param2']].drop_duplicates()
+
+        # Add whitespace between groups
+        param_combinations_with_whitespace = []
+        for i, row in param_combinations.iterrows():
+            param_combinations_with_whitespace.append(row)
+            if i < len(param_combinations) - 1:
+                next_row = param_combinations.iloc[i + 1]
+                if row['param2'] != next_row['param2']:
+                    for _ in range(whitespace_width):
+                        param_combinations_with_whitespace.append(
+                            pd.Series({'param1': '', 'param2': ''}))
+
+        param_combinations_with_whitespace = pd.DataFrame(
+            param_combinations_with_whitespace)
+
         # Setup the plot
-        plt.figure(figsize=(15, 10))
-
-        # Get all node types while preserving order
-        all_node_types = []
-        for nodes in data['Processed_Node_Types']:
-            for node in nodes:
-                if node not in all_node_types:
-                    all_node_types.append(node)
-
-        # Create color map
-        colors = plt.cm.tab20(np.linspace(0, 1, len(all_node_types)))
-        color_map = dict(zip(all_node_types, colors))
+        plt.figure(figsize=(18, 10))
+        plt.subplots_adjust(bottom=0.2)
+        # Get unique node types for coloring
+        all_node_types = [node for sublist in data['Processed_Node_Types']
+                          for node in sublist]
+        unique_node_types = list(dict.fromkeys(all_node_types))
+        colors = plt.cm.tab20(np.linspace(0, 1, len(unique_node_types)))
+        color_map = dict(zip(unique_node_types, colors))
 
         # Create bars
-        param_combinations = data[['param1', 'param2']].drop_duplicates()
-        x = np.arange(len(param_combinations))
-        bottom = np.zeros(len(param_combinations))
+        x = np.arange(len(param_combinations_with_whitespace))
+        bottom = np.zeros(len(param_combinations_with_whitespace))
 
-        # Plot each node type's cardinalities in order
-        for node_type in all_node_types:
-            values = np.zeros(len(param_combinations))
-            for i, (_, row) in enumerate(param_combinations.iterrows()):
-                matching_rows = data[
-                    (data['param1'] == row['param1']) &
-                    (data['param2'] == row['param2'])
-                ]
-                if not matching_rows.empty:
-                    first_match = matching_rows.iloc[0]
-                    if node_type in first_match['Processed_Node_Types']:
-                        node_idx = first_match['Processed_Node_Types'].index(
-                            node_type)
-                        values[i] = first_match['cardinalities'][node_idx]
-
-            plt.bar(x, values, bottom=bottom,
-                    color=color_map[node_type],
-                    label=node_type)
-            bottom += values
+        # Plot each node type's cardinalities
+        first_query_nodes = data['Processed_Node_Types'].iloc[0]
+        for node_type in first_query_nodes:
+            values = [row[i] for row, nodes in zip(data['cardinalities'], data['Processed_Node_Types'])
+                      for i, n in enumerate(nodes) if n == node_type]
+            values_with_whitespace = np.zeros(
+                len(param_combinations_with_whitespace))
+            values_with_whitespace[:len(values)] = values
+            plt.bar(x, values_with_whitespace, bottom=bottom,
+                    color=color_map[node_type], label=node_type)
+            bottom += values_with_whitespace
 
         # Customize the plot
-        sampling_text = f" ({sampling_method} sampling)" if len(
-            data) > 100 else ""
-        plt.title(f'Query {query_id} Plan Cardinalities{sampling_text}',
-                  fontsize=16, pad=20)
-        plt.xlabel(f'Parameters ({param1_name}, {param2_name})', fontsize=12)
-        plt.ylabel('Cardinality', fontsize=12)
+        plt.xlabel(
+            f'Parameters 1 {param1_name}, 2 {param2_name}', fontsize=20)
+        plt.ylabel('Cardinality', fontsize=20)
+        plt.yticks(fontsize=16)
 
-        # Set x-axis labels
-        num_labels = min(8, len(param_combinations))
-        step = max(1, len(param_combinations) // num_labels)
-        plt.xticks(x[::step],
-                   [f'{p1}\n{p2}' for p1, p2 in
-                   zip(param_combinations['param1'].iloc[::step],
-                       param_combinations['param2'].iloc[::step])],
-                   rotation=45, ha='right')
+        # Identify the indices of the first and last occurrences of each unique param1 value
+        unique_param2 = param_combinations['param2'].unique()
+        label_indices = []
+        for param2 in unique_param2:
+            indices = param_combinations.index[param_combinations['param2'] == param2].tolist(
+            )
+            if indices:
+                label_indices.append(indices[0])  # First occurrence
+                label_indices.append(indices[-1])  # Last occurrence
+
+        # Set x-axis labels at the identified indices
+        plt.xticks(x[label_indices],
+                   [f'2 {param_combinations["param1"][i]}' for i in label_indices],
+                   rotation=45, ha='right', fontsize=16)
+
+        """        # Adjust alignment for the first and last labels in each group
+                xticks = plt.gca().get_xticklabels()
+                for i, label in zip(label_indices, xticks):
+                    if i == label_indices[0] or i == label_indices[-1]:
+                        ha = 'left' if i == label_indices[0] else 'right'
+                    elif i == 0:
+                        ha = 'left'
+                    else:
+                        ha = 'center'
+                    label.set_ha(ha)"""
+
+        # Use autofmt_xdate to improve the alignment of x-tick labels
+        # plt.gcf().autofmt_xdate()
+
+        # Set the x-axis limit to zoom in on the left
+        x_max = x.max() / 4.55
+        plt.xlim(-0.5, x_max)
 
         # Add grid and legend
-        # plt.grid(True, axis='y', linestyle='--', alpha=0.7)
-        plt.legend(title='Operators', bbox_to_anchor=(1.05, 1),
-                   loc='upper left', borderaxespad=0.)
+        plt.grid(True, axis='y', linestyle='--', alpha=0.7)
 
-        # Format y-axis
-        plt.gca().yaxis.set_major_formatter(
-            ticker.ScalarFormatter(useMathText=True)
-        )
+        # Remove underscores from legend labels
+        handles, labels = plt.gca().get_legend_handles_labels()
+        labels = [label.replace('_', ' ') for label in labels]
+        plt.legend(handles, labels, title='Operators', bbox_to_anchor=(
+            1.05, 1), loc='upper left', borderaxespad=0., fontsize=18)
+
+        # Format y-axis with scientific notation
+        plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=True))
         plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+        plt.gca().yaxis.get_offset_text().set_fontsize(14)
+        # Adjust layout
+        plt.tight_layout()
 
-        # Create output directory if it doesn't exist
-        os.makedirs(output_dir, exist_ok=True)
-
-        # Save the plot
-        output_file = os.path.join(
-            output_dir, f'{query_id}_cardinalities_{sampling_method}.png')
-        plt.savefig(output_file, dpi=300, bbox_inches='tight')
-        plt.close()
+        # Save or show the plot
+        if output_file:
+            plt.savefig(output_file, dpi=300, bbox_inches='tight')
+            plt.close()
+        else:
+            plt.show()
 
     except Exception as e:
-        print(f"Error creating plot for {query_id}: {str(e)}")
+        print(f"Error creating plot: {str(e)}")
+
+
+# Example usage
+if __name__ == "__main__":
+    try:
+        # Update with your path
+        csv_path = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch/q3.csv'
+        data = pd.read_csv(csv_path)
+        qid = 'q3'
+
+        # Create plots with different sampling methods
+        create_stacked_bar_chart(
+            data,
+            'l_shipdate',
+            'o_orderdate',
+            sampling_method='none',
+            output_file=f'/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots/cardinality/stack_bar/tpch/pdf/cardinalities_{qid}.pdf',
+            whitespace_width=1  # Adjust the whitespace width as needed
+        )
+
+        create_stacked_bar_chart(
+            data,
+            'l_shipdate',
+            'o_orderdate',
+            sampling_method='stratified',
+            target_sample_size=150,
+            output_file=f'/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots/cardinality/stack_bar/tpch/pdf/cardinalities_stratified_{qid}.pdf',
+            whitespace_width=1  # Adjust the whitespace width as needed
+        )
+
+        create_stacked_bar_chart(
+            data,
+            'l_shipdate',
+            'o_orderdate',
+            sampling_method='systematic',
+            target_sample_size=150,
+            output_file=f'/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots/cardinality/stack_bar/tpch/pdf/cardinalities_systematic_{qid}.pdf',
+            whitespace_width=1  # Adjust the whitespace width as needed
+        )
+    except Exception as e:
+        print(f"Error loading data: {str(e)}")
