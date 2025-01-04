@@ -35,8 +35,8 @@ def sample_data(data, method='none', target_size=150):
         sampled_data = param_groups.apply(
             lambda x: x.sample(max(1, int(len(x) * sampling_rate))),
             include_groups=False
-        )
-        return sampled_data.reset_index(drop=True)
+        ).reset_index(drop=True)
+        return sampled_data
     elif method == 'systematic':
         # Systematic sampling with fixed interval
         n = max(1, len(data) // target_size)
@@ -53,17 +53,36 @@ def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='no
         def extract_params(filter_str):
             pattern = r'\(([\w_]+),\s*([^)]+)\)'
             matches = re.findall(pattern, filter_str)
-            date_values = [value.strip() for name, value in matches
-                           if name in [param1_name, param2_name]]
-            return date_values[0], date_values[1]
+            date_values = {name: value.strip() for name, value in matches}
+            return date_values[param1_name], date_values[param2_name]
+
+        # Debug print statement
+        print("Filters column before extraction:")
+        print(data['Filters'].head())
 
         # Process the data
         data[['param1', 'param2']] = data['Filters'].apply(
             lambda x: pd.Series(extract_params(x))
         )
 
+        # Debug print statement
+        print("Extracted param1 and param2 values:")
+        print(data[['param1', 'param2']].head())
+
+        # Debug print statement
+        print("DataFrame columns before sampling:")
+        print(data.columns)
+
         # Apply sampling if requested
         data = sample_data(data, sampling_method, target_sample_size)
+
+        # Ensure param1 and param2 columns are retained
+        data = data[['Query ID', 'Node Types', 'Filters', 'Execution Time',
+                     'Cardinality e/a', 'param1', 'param2']]
+
+        # Debug print statement
+        print("DataFrame columns after sampling:")
+        print(data.columns)
 
         # Process node types and cardinalities
         data['Processed_Node_Types'] = data['Node Types'].apply(
@@ -73,6 +92,14 @@ def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='no
 
         # Get unique parameter combinations
         param_combinations = data[['param1', 'param2']].drop_duplicates()
+
+        # Debug print statement
+        print("Unique parameter combinations:")
+        print(param_combinations.head())
+
+        # Print the number of stacks
+        print(
+            f"Number of stacks for {sampling_method} sampling: {len(param_combinations)}")
 
         # Add whitespace between groups
         param_combinations_with_whitespace = []
@@ -89,7 +116,7 @@ def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='no
             param_combinations_with_whitespace)
 
         # Setup the plot
-        plt.figure(figsize=(18, 10))
+        plt.figure(figsize=(20, 12))
         plt.subplots_adjust(bottom=0.2)
         # Get unique node types for coloring
         all_node_types = [node for sublist in data['Processed_Node_Types']
@@ -115,8 +142,7 @@ def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='no
             bottom += values_with_whitespace
 
         # Customize the plot
-        plt.xlabel(
-            f'Parameters 1 {param1_name}, 2 {param2_name}', fontsize=20)
+        # plt.xlabel(f'Parameters 1 {param1_name}, 2 {param2_name}', fontsize=20)
         plt.ylabel('Cardinality', fontsize=20)
         plt.yticks(fontsize=16)
 
@@ -134,21 +160,6 @@ def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='no
         plt.xticks(x[label_indices],
                    [f'2 {param_combinations["param1"][i]}' for i in label_indices],
                    rotation=45, ha='right', fontsize=16)
-
-        """        # Adjust alignment for the first and last labels in each group
-                xticks = plt.gca().get_xticklabels()
-                for i, label in zip(label_indices, xticks):
-                    if i == label_indices[0] or i == label_indices[-1]:
-                        ha = 'left' if i == label_indices[0] else 'right'
-                    elif i == 0:
-                        ha = 'left'
-                    else:
-                        ha = 'center'
-                    label.set_ha(ha)"""
-
-        # Use autofmt_xdate to improve the alignment of x-tick labels
-        # plt.gcf().autofmt_xdate()
-
         # Set the x-axis limit to zoom in on the left
         x_max = x.max() / 4.55
         plt.xlim(-0.5, x_max)
@@ -180,13 +191,15 @@ def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='no
         print(f"Error creating plot: {str(e)}")
 
 
-# Example usage
 if __name__ == "__main__":
     try:
         # Update with your path
-        csv_path = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch/q3.csv'
+        csv_path = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch/csvs/plottable/q3.csv'
         data = pd.read_csv(csv_path)
         qid = 'q3'
+
+        # Print the number of rows in the CSV
+        print(f"Number of rows in the CSV: {len(data)}")
 
         # Create plots with different sampling methods
         create_stacked_bar_chart(
@@ -194,17 +207,8 @@ if __name__ == "__main__":
             'l_shipdate',
             'o_orderdate',
             sampling_method='none',
-            output_file=f'/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots/cardinality/stack_bar/tpch/pdf/cardinalities_{qid}.pdf',
-            whitespace_width=1  # Adjust the whitespace width as needed
-        )
-
-        create_stacked_bar_chart(
-            data,
-            'l_shipdate',
-            'o_orderdate',
-            sampling_method='stratified',
             target_sample_size=150,
-            output_file=f'/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots/cardinality/stack_bar/tpch/pdf/cardinalities_stratified_{qid}.pdf',
+            output_file=f'/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots/cardinality/stack_bar/tpch/pdf/new/{qid}.pdf',
             whitespace_width=1  # Adjust the whitespace width as needed
         )
 
@@ -214,7 +218,7 @@ if __name__ == "__main__":
             'o_orderdate',
             sampling_method='systematic',
             target_sample_size=150,
-            output_file=f'/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots/cardinality/stack_bar/tpch/pdf/cardinalities_systematic_{qid}.pdf',
+            output_file=f'/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/plots/cardinality/stack_bar/tpch/pdf/new/{qid}_sampled.pdf',
             whitespace_width=1  # Adjust the whitespace width as needed
         )
     except Exception as e:
