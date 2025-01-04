@@ -249,7 +249,7 @@ ratings = [f'{rating}.0' for rating in range(
 # Define parameter dimensions for each query
 tpch_query_parameters = {
     'q2': ('p_type', 'r_name'),
-    'q3': ('l_orderdate', 'l_shipdate'),
+    'q3': ('o_orderdate', 'l_shipdate'),
     'q5': ('r_name', 'o_orderdate'),
     'q7': ('n_name', 'n_name'),
     'q8': ('r_name', 'p_type'),
