@@ -1,45 +1,45 @@
+import csv
 import os
 import json
-from typing import Dict, Union, Tuple, List
-import re
-import csv
+from typing import Union, Dict, List, Tuple
+
+node_types = []
+max_depth = [0]
 
 
-def extract_number(filename) -> Tuple[int, str]:
-    match = re.match(r'(\d+)([a-zA-Z]*)', filename)
-    if match:
-        number = int(match.group(1))
-        suffix = match.group(2)
-        return (number, suffix)
-    return (float('inf'), '')
+def traverse(plan: Union[Dict, List], depth: int) -> None:
+    if isinstance(plan, list):
+        for item in plan:
+            traverse(item, depth)
+    elif isinstance(plan, dict):
+        if 'Node Type' in plan:
+            node_types.append(plan['Node Type'])
+            max_depth[0] = max(max_depth[0], depth)
+        if 'Plans' in plan:
+            for subplan in plan['Plans']:
+                traverse(subplan, depth + 1)
+        if 'Plan' in plan:
+            traverse(plan['Plan'], depth + 1)
+        if 'Triggers' in plan or 'Execution Time' in plan or 'Planning Time' in plan:
+            return
 
 
 def extract_node_types_and_depth_from_plan(plan: Union[Dict, List]) -> Tuple[List[str], int]:
-    node_types = []
-    # Use a list to allow modification within the traverse function
-    max_depth = [0]
-
-    def traverse(plan: Union[Dict, List], depth: int) -> None:
-        if isinstance(plan, list):
-            for item in plan:
-                traverse(item, depth)
-        elif isinstance(plan, dict):
-            if 'Node Type' in plan:
-                node_types.append(plan['Node Type'])
-                max_depth[0] = max(max_depth[0], depth)
-            if 'Plans' in plan:
-                for subplan in plan['Plans']:
-                    traverse(subplan, depth + 1)
-            # Only traverse the 'Plan' key if it exists and ignore other keys
-            if 'Plan' in plan:
-                traverse(plan['Plan'], depth + 1)
-            # Skip increasing depth for certain keys
-            if 'Triggers' in plan or 'Execution Time' in plan or 'Planning Time' in plan:
-                return
-
-    # Start traversal from the top level of the plan
+    node_types.clear()
+    max_depth[0] = 0
     traverse(plan, 1)
-    return node_types, max_depth[0]-1
+    return node_types.copy(), max_depth[0] - 1
+
+
+def extract_number(filename: str) -> Tuple[int, str]:
+    parts = filename.split('_')
+    try:
+        query_id = int(parts[0])
+        suffix = parts[1] if len(parts) > 1 else ''
+    except ValueError:
+        query_id = float('inf')
+        suffix = ''
+    return query_id, suffix
 
 
 def info_qplan(directory: str) -> Dict[Union[int, Tuple[int, str]], Tuple[List[str], int]]:
@@ -62,70 +62,103 @@ def info_qplan(directory: str) -> Dict[Union[int, Tuple[int, str]], Tuple[List[s
     return query_info
 
 
-def query_plan_info_to_csv(data: Dict[Union[int, Tuple[int, str]], Tuple[List[str], int]], directory: str, filename: str) -> None:
-    filepath = os.path.join(directory, filename)
-    with open(filepath, 'w', newline='') as csvfile:
-        fieldnames = ['query id', 'node types', 'plan depth']
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-
-        writer.writeheader()
-        for query_id, (node_types, depth) in data.items():
-            writer.writerow({
-                'query id': query_id,
-                'node types': ', '.join(node_types),
-                'plan depth': depth
-            })
-
-
 def categorize_plans(query_info: Dict[Union[int, Tuple[int, str]], Tuple[List[str], int]]) -> List[List[Union[int, Tuple[int, str]]]]:
     categories = []
-
     for query_id, (node_types, depth) in query_info.items():
         found = False
         for category in categories:
-            # Compare with the first plan in the category
             if query_info[category[0]] == (node_types, depth):
                 category.append(query_id)
                 found = True
                 break
         if not found:
             categories.append([query_id])
-
     return categories
 
 
-# Directory containing the query plans
-# directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/fd/country_example_plans_simplified'
-# directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch/qplans/q2'
-# directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch/qplans/q3'
-# directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch/qplans/q5'
-# directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch/qplans/q7'
-# directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch/qplans/q8'
-# directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch/qplans/q12'
-# directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch/qplans/q13'
-# directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch/qplans/q14'
-# directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch/qplans/q17'
-# directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/job/qplans'
-directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/job/qplans/12c'
+def save_categories_to_csv(categories: List[List[Union[int, Tuple[int, str]]]], directory: str, filename: str) -> None:
+    total_plans = sum(len(category) for category in categories)
+    csv_filename = os.path.join(directory, f'{filename}_plan_categories.csv')
 
-# Collect the node types and depth of the plans
-query_info = info_qplan(directory)
+    with open(csv_filename, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Category', 'Number of Plans', 'Percentage',
+                        'Last Node Type', 'Second Last Node Type'])
 
-# Sort the dictionary by depth
-sorted_query_info = dict(
-    sorted(query_info.items(), key=lambda item: item[1][1]))
+        for i, category in enumerate(categories, start=1):
+            num_plans = len(category)
+            percentage = (num_plans / total_plans) * 100
+            last_node_type = node_types[-1] if node_types else 'N/A'
+            second_last_node_type = node_types[-2] if len(
+                node_types) > 1 else 'N/A'
+            writer.writerow(
+                [f'Category {i}', num_plans, percentage, last_node_type, second_last_node_type])
 
-# Write the sorted dictionary to a CSV file in the specified directory
-csv_filename = 'query_plan_info.csv'
-query_plan_info_to_csv(sorted_query_info, directory, csv_filename)
 
-# Categorize the plans
-categories = categorize_plans(sorted_query_info)
+def process_directory(directory: str, output_directory: str) -> None:
+    query_info = info_qplan(directory)
+    sorted_query_info = dict(
+        sorted(query_info.items(), key=lambda item: item[1][1]))
+    categories = categorize_plans(sorted_query_info)
+    directory_name = os.path.basename(directory)
+    save_categories_to_csv(categories, output_directory, directory_name)
 
-# write categories to csv
 
-csv_filename = 'categories.csv'
+def process_benchmark(benchmark: str) -> None:
+    if benchmark == 'job':
+        job_directories = [
+            '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/job/qplans/12c',
+            '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/job/qplans/14b',
+            '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/job/qplans/15a'
+        ]
+        job_output_directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/job/plan_categories'
 
-# print(query_info)
-for i, category in enumerate(categories):
-    print(f"Category {i + 1}: {category}")
+        for directory in job_directories:
+            process_directory(directory, job_output_directory)
+    elif benchmark == 'tpch':
+        tpch_queries = [2, 3, 5, 7, 8, 12, 13, 14, 17]
+        tpch_output_directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch/plan_categories'
+
+        summary_needed = input(
+            "Do you want a summary CSV for tpch? (yes/no): ").strip().lower() == 'yes'
+        summary_data = set()
+
+        for query_id in tpch_queries:
+            directory = f'/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch/qplans/q{query_id}'
+            process_directory(directory, tpch_output_directory)
+            if summary_needed:
+                query_info = info_qplan(directory)
+                sorted_query_info = dict(
+                    sorted(query_info.items(), key=lambda item: item[1][1]))
+                categories = categorize_plans(sorted_query_info)
+                for i, category in enumerate(categories, start=1):
+                    num_plans = len(category)
+                    percentage = (num_plans / sum(len(cat)
+                                                  for cat in categories)) * 100
+                    last_node_type = node_types[-1] if node_types else 'N/A'
+                    second_last_node_type = node_types[-2] if len(
+                        node_types) > 1 else 'N/A'
+                    for query in category:
+                        summary_data.add(
+                            (query_id, f'Category {i}', num_plans, percentage, last_node_type, second_last_node_type))
+
+        if summary_needed:
+            summary_csv_filename = os.path.join(
+                tpch_output_directory, 'summary_plan_categories.csv')
+            summary_data = list(summary_data)
+            with open(summary_csv_filename, mode='w', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow(['Query ID', 'Category', 'Number of Plans',
+                                'Percentage', 'Last Node Type', 'Second Last Node Type'])
+                writer.writerows(summary_data)
+    else:
+        print("Error: Invalid benchmark type. Please enter 'tpch' or 'job'.")
+
+
+def main():
+    benchmark = input("Enter the benchmark type (tpch/job): ").strip().lower()
+    process_benchmark(benchmark)
+
+
+if __name__ == "__main__":
+    main()
