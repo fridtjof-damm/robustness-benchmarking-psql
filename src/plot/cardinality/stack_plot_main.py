@@ -129,15 +129,17 @@ def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='no
                     sampled_indices = np.random.choice(sampled_indices, min(
                         len(sampled_indices), target_sample_size - 2), replace=False).tolist()
 
-                label_indices.extend(sampled_indices)
-
         # Ensure unique indices
         label_indices = list(set(label_indices))
 
-        # set x-axis labels at the identified indices
-        plt.xticks(x[label_indices],
-                   [f'1 {param_combinations["param2"][i]} - 2 {param_combinations["param1"][i]}' for i in label_indices],
-                   rotation=45, ha='right', fontsize=14)
+        # set x-axis labels at the identified indices if the number of bars is over 30
+        if len(param_combinations) > 30:
+            plt.xticks(x[label_indices],
+                       [f'1 {param_combinations["param2"][i]} - 2 {param_combinations["param1"][i]}' for i in label_indices],
+                       rotation=45, ha='right', fontsize=14)
+        else:
+            plt.xticks(x, [f'1 {param_combinations_with_whitespace["param2"][i]} - 2 {param_combinations_with_whitespace["param1"][i]}' for i in range(len(param_combinations_with_whitespace))],
+                       rotation=45, ha='right', fontsize=14)
 
         # set the x-axis limit to zoom in on the left if stack bar count is over 30
         if len(param_combinations) > 30:
