@@ -30,20 +30,12 @@ def process_node_types(node_types_str):
 def sample_data(data, method='none', target_size=150):
     if method == 'none':
         return data
-    elif method == 'stratified':
-        param_groups = data.groupby(['param1', 'param2'])
-        sampling_rate = target_size / len(param_groups)
-        sampled_data = param_groups.apply(
-            lambda x: x.sample(max(1, int(len(x) * sampling_rate))),
-            include_groups=False
-        ).reset_index(drop=True)
-        return sampled_data
     elif method == 'systematic':
         n = max(1, len(data) // target_size)
         return data.iloc[::n].reset_index(drop=True)
     else:
         raise ValueError(
-            "Invalid sampling method. Use 'none', 'stratified', or 'systematic'")
+            "Invalid sampling method. Use 'none','systematic'")
 
 
 def extract_params(filter_str, param1_name, param2_name):
@@ -120,10 +112,10 @@ def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='no
         plt.ylabel('Cardinality', fontsize=20)
         plt.yticks(fontsize=16)
 
-        unique_param2 = param_combinations['param2'].unique()
+        unique_param1 = param_combinations['param1'].unique()
         label_indices = []
-        for param2 in unique_param2:
-            indices = param_combinations.index[param_combinations['param2'] == param2].tolist(
+        for param1 in unique_param1:
+            indices = param_combinations.index[param_combinations['param1'] == param1].tolist(
             )
             if indices:
                 label_indices.append(indices[0])  # First occurrence
@@ -131,8 +123,8 @@ def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='no
 
         # set x-axis labels at the identified indices
         plt.xticks(x[label_indices],
-                   [f'2 {param_combinations["param1"][i]}' for i in label_indices],
-                   rotation=45, ha='right', fontsize=16)
+                   [f'1 {param_combinations["param2"][i]} - 2 {param_combinations["param1"][i]}' for i in label_indices],
+                   rotation=45, ha='right', fontsize=14)
 
         # set the x-axis limit to zoom in on the left if stack bar count is over 30
         if len(param_combinations) > 30:
