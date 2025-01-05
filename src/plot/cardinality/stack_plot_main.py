@@ -118,8 +118,21 @@ def create_stacked_bar_chart(data, param1_name, param2_name, sampling_method='no
             indices = param_combinations.index[param_combinations['param1'] == param1].tolist(
             )
             if indices:
-                label_indices.append(indices[0])  # First occurrence
-                label_indices.append(indices[-1])  # Last occurrence
+                first_occurrence = indices[0]
+                last_occurrence = indices[-1]
+                label_indices.append(first_occurrence)  # First occurrence
+                label_indices.append(last_occurrence)  # Last occurrence
+
+                # Perform additional sampling if needed
+                sampled_indices = indices[1:-1]  # Exclude first and last
+                if len(sampled_indices) > 0:
+                    sampled_indices = np.random.choice(sampled_indices, min(
+                        len(sampled_indices), target_sample_size - 2), replace=False).tolist()
+
+                label_indices.extend(sampled_indices)
+
+        # Ensure unique indices
+        label_indices = list(set(label_indices))
 
         # set x-axis labels at the identified indices
         plt.xticks(x[label_indices],
