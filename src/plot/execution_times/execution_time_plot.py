@@ -30,19 +30,14 @@ def csv_to_data_list(file_path, param1_name, param2_name):
     return data_list, axis_len, param1_categories.cat.categories, param2_categories.cat.categories
 
 
-def create_execution_time_heatmap(data, axis_len, param1_labels, param2_labels, output_file):
-    values = [i[2] for i in data]
-    percentile_95_value = np.percentile(values, 95)
-    clipped_data = [(item[0], item[1], min(item[2], percentile_95_value))
-                    for item in data]
-
+def create_execution_time_heatmap(data, axis_len, param1_labels, param2_labels, param1_name, param2_name, output_file):
     norm = mpl.colors.Normalize(
-        min([i[2] for i in clipped_data]), max([i[2] for i in clipped_data]))
+        min([i[2] for i in data]), max([i[2] for i in data]))
     cmap = LinearSegmentedColormap.from_list(
         'My color Map', colors=['green', 'yellow', 'red'])
 
     fig, ax = plt.subplots(1, 1)
-    for item in clipped_data:
+    for item in data:
         y = item[0]
         x = item[1]
         color = cmap(norm(item[2]))
@@ -56,8 +51,8 @@ def create_execution_time_heatmap(data, axis_len, param1_labels, param2_labels, 
     ax.set_xticklabels(param1_labels, rotation=45, ha='right')
     ax.set_yticks(np.arange(len(param2_labels)) + 0.5)
     ax.set_yticklabels(param2_labels)
-    ax.set_xlabel('param1')
-    ax.set_ylabel('param2')
+    ax.set_xlabel(param1_name)
+    ax.set_ylabel(param2_name)
     plt.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)
     plt.savefig(output_file, format='pdf', bbox_inches='tight')
     plt.close()
@@ -105,7 +100,7 @@ def process_benchmark(benchmark):
                 csv_path, param1_name, param2_name)
             output_file = os.path.join(output_dir, f'{qid}.pdf')
             create_execution_time_heatmap(
-                data, axis_len, param1_labels, param2_labels, output_file)
+                data, axis_len, param1_labels, param2_labels, param1_name, param2_name, output_file)
 
 
 if __name__ == "__main__":
