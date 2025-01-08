@@ -80,7 +80,7 @@ def create_execution_time_heatmap(data, axis_len, param1_labels, param2_labels, 
     plt.xlim(0, len(param1_labels))
 
     if len(param1_labels) > 20:
-        step = (len(param1_labels)-2) // 18
+        step = (len(param1_labels)-12) // 8
         selected_indices = [
             0] + list(range(step, len(param1_labels)-1, step)) + [len(param1_labels)-1]
         selected_indices = sorted(list(set(selected_indices)))
@@ -91,7 +91,7 @@ def create_execution_time_heatmap(data, axis_len, param1_labels, param2_labels, 
         xticklabels = param1_labels
 
     if len(param2_labels) > 20:
-        step = (len(param2_labels)-2) // 18
+        step = (len(param2_labels)-12) // 8
         selected_indices = [
             0] + list(range(step, len(param2_labels)-1, step)) + [len(param2_labels)-1]
         selected_indices = sorted(list(set(selected_indices)))
@@ -107,7 +107,10 @@ def create_execution_time_heatmap(data, axis_len, param1_labels, param2_labels, 
     ax.set_yticklabels(yticklabels)
     ax.set_xlabel(param1_name)
     ax.set_ylabel(param2_name)
-    plt.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)
+    cbar = plt.colorbar(mpl.cm.ScalarMappable(
+        norm=norm, cmap=cmap), ax=ax, label='Execution Time (s)')
+    cbar.ax.yaxis.set_major_formatter(
+        mpl.ticker.FuncFormatter(lambda x, _: f'{x / 1000:.2f}'))
     plt.savefig(output_file, format='pdf', bbox_inches='tight')
     plt.close()
 
@@ -130,7 +133,7 @@ def plot_execution_times(data_list, axis_len, param1_categories, param2_categori
     ax.set_ylabel('Param2')
     ax.set_title('Execution Times')
     plt.colorbar(mpl.cm.ScalarMappable(
-        norm=norm, cmap=cmap), ax=ax, label='Param1')
+        norm=norm, cmap=cmap), ax=ax, label='Execution time (ms)')
     plt.tight_layout()
     plt.show()
 
