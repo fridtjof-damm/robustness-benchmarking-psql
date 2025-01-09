@@ -47,3 +47,5 @@ resources/query_examples/countries.ipynb
 
 # Except this path
 !/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/job/csvs/plottable
+!/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/resources/job_parameterized
+!/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/resources/queries_tpch
