@@ -1,4 +1,4 @@
-# Robustness Benchamrking Tool for PostgreSQL
+# Robustness Benchmarking Tool for PostgreSQL
 Dieses Repository dient der Ausarbeitung meiner Bachelorarbeit
 
 
