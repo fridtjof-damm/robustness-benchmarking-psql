@@ -44,7 +44,7 @@ resources/query_examples/countries.ipynb
 /src/src_archive/
 /results/archive
 /thesis
-
+.gitignore
 # Except this path
 !/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/job/csvs/plottable
 !/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/resources/job_parameterized
