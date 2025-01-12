@@ -106,6 +106,7 @@ def process_directory(directory: str, output_directory: str) -> None:
 
 def process_benchmark(benchmark: str) -> None:
     if benchmark == 'job':
+        print("Processing 'job' benchmark...")
         job_directories = [
             '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/job/qplans/12c',
             '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/job/qplans/14b',
@@ -115,7 +116,17 @@ def process_benchmark(benchmark: str) -> None:
 
         for directory in job_directories:
             process_directory(directory, job_output_directory)
+
+    elif benchmark == 'countries':
+        print("Processing 'countries' benchmark...")
+        countries_plans_directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/archive/fd/country_example_plans'
+        countries_output_directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/countries/plan_categories'
+
+        process_directory(countries_plans_directory,
+                          countries_output_directory)
+
     elif benchmark == 'tpch':
+        print("Processing 'tpch' benchmark...")
         tpch_queries = [2, 3, 5, 7, 8, 12, 13, 14, 17]
         tpch_output_directory = '/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/tpch/plan_categories'
 
@@ -134,7 +145,7 @@ def process_benchmark(benchmark: str) -> None:
                 for i, category in enumerate(categories, start=1):
                     num_plans = len(category)
                     percentage = (num_plans / sum(len(cat)
-                                                  for cat in categories)) * 100
+                                  for cat in categories)) * 100
                     last_node_type = node_types[-1] if node_types else 'N/A'
                     second_last_node_type = node_types[-2] if len(
                         node_types) > 1 else 'N/A'
@@ -152,11 +163,12 @@ def process_benchmark(benchmark: str) -> None:
                                 'Percentage', 'Last Node Type', 'Second Last Node Type'])
                 writer.writerows(summary_data)
     else:
-        print("Error: Invalid benchmark type. Please enter 'tpch' or 'job'.")
+        print("Error: Invalid benchmark type. Please enter 'tpch', 'job', or 'countries'.")
 
 
 def main():
-    benchmark = input("Enter the benchmark type (tpch/job): ").strip().lower()
+    benchmark = input(
+        "Enter the benchmark type (tpch/job/countries): ").strip().lower()
     process_benchmark(benchmark)
 
 
