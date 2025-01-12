@@ -48,28 +48,6 @@ def csv_to_values_list(file) -> tuple[list, list]:
 
     return values_x, values_y
 
-# from picasso templates retrieve all parameters to prepare PICASSO qgen section
-
-
-def get_picasso_gen_list():
-    query_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 16, 17]
-    query_templates = []
-    extract_vals = []
-    parameters = []
-    for query_id in query_ids:
-        with open(f"resources/queries_picasso/qt{query_id}.sql", encoding='UTF-8', mode='r') as f:
-            query_template = f.read()
-            query_templates.append(query_template)
-            f.close()
-
-    for query in query_templates:
-        matches = re.findall(r'\{(.*?)\}', query)
-        for param in matches:
-            if param not in parameters:
-                parameters.append(param)
-    print(parameters)
-
-# get_picasso_gen_list()
 
 # function to extract number and suffix (letters for variations) from query filenames
 # used in qanalyze.py for example in the function job_profiling()
@@ -143,51 +121,6 @@ def extract_params(filter_str):
 def extract_cardinalities(cardinality_str):
     matches = re.findall(r'\([\d,]+,\s*(\d+)\)', cardinality_str)
     return [int(x) for x in matches]
-
-
-def process_csv_and_discard_equals(input_file, output_file, query_parameters):
-    # Read the CSV file
-    df = pd.read_csv(input_file)
-
-    # Function to filter out parameters with '='
-    def filter_out_equals(filters):
-        return ', '.join([f for f in filters.split('), (') if '=' not in f])
-
-    # Discard filters that are not relevant to the plot
-    # extract query id
-    query_id = os.path.basename(input_file).split('.')[0]
-    param1_name, param2_name = query_parameters[query_id]
-    print(query_id, param1_name, param2_name)
-
-    # Ensure Filters column contains string values
-    df['Filters'] = df['Filters'].astype(str)
-
-    # Extract relevant filters
-    df['param1'], df['param2'] = zip(
-        *[extract_relevant_filters(x, param1_name, param2_name) for x in df['Filters']])
-
-    # Apply the filter function to the 'Filters' column
-    df['Filters'] = df['Filters'].apply(filter_out_equals)
-
-    # Debug print statements
-    print(f"Filtered DataFrame columns: {df.columns}")
-    print(f"Filtered DataFrame head:\n{df.head()}")
-
-    # Check if output file exists and prompt for overwrite
-    if os.path.exists(output_file) and input_file != output_file:
-        overwrite = input(
-            f"The file {output_file} already exists. Do you want to overwrite it? (y/n): ")
-        if overwrite.lower() != 'y':
-            print("Operation cancelled.")
-            return None
-
-    # Save the modified DataFrame to the output CSV file
-    df.to_csv(output_file, index=False)
-
-    print(f"Processed CSV saved to {output_file}")
-
-    # Return the processed DataFrame
-    return df
 
 
 def process_node_types(node_types_str):

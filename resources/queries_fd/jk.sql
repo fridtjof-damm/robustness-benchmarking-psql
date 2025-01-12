@@ -1,1 +1,0 @@
-select n.name as actor_name, count(distinct t.id) as movie_count from name n join cast_info ci on n.id = ci.person_id join title t on ci.movie_id = t.id join role_type rt on ci.role_id = rt.id where rt.role in ('actor', 'actress') and n.name = 'Kimmel, Jimmy' group by n.name;
