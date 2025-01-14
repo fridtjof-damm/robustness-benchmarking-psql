@@ -1,5 +1,6 @@
 
 *.tbl
+*.pdf
 .python-version
 .DS_Store
 /build
