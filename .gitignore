@@ -26,14 +26,7 @@ config.json
 /results/queryresults_sf100
 /results/job/qplans
 /results/job/
-*.bib
-*.tex
-*.png
-*.pdf
-*.csv
-*.txt
-*.json
-*.sql
+
 src/plot/3d_costdiagram_test.py
 /resources/queries_fd/skew_example/p.py
 results/job/qplans/
