@@ -23,9 +23,10 @@ resources/query_examples/countries.ipynb
 /thesis
 .gitignore
 /src/utils/evaluate_query_exec_times.py
+/results/plots
 # Except this path
 !/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/results/job/csvs/plottable
 !/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/resources/job_parameterized
 !/Users/fridtjofdamm/Documents/thesis-robustness-benchmarking/resources/queries_tpch
-!results/plots/execution_times
+
 
