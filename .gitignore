@@ -15,6 +15,7 @@ playground.py
 *.wal
 *.tmp
 config.json
+/resources/queries_picasso
 /results/tpch/analyse
 /results/dummyresults
 /results/parameters_sf10
