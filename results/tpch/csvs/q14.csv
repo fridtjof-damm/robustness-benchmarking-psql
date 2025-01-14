@@ -1,0 +1,6 @@
+Query ID,Node Types,Filters,Execution Time,Cardinality e/a
+1,"Aggregate, Aggregate, Hash, Hash Join, Seq Scan, Seq Scan","(l_shipdate,1993-02-01 00:00:00), (l_shipdate,= )",21003.008,"(1,1), (2,3), (1,1), (313164,257727), (313164,257727), (833398,666667), (833398,666667)"
+2,"Aggregate, Aggregate, Hash, Hash Join, Seq Scan, Seq Scan","(l_shipdate,1994-02-01 00:00:00), (l_shipdate,= )",17947.274,"(1,1), (2,3), (1,1), (332027,257016), (332027,257016), (833398,666667), (833398,666667)"
+3,"Aggregate, Aggregate, Hash, Hash Join, Seq Scan, Seq Scan","(l_shipdate,1995-02-01 00:00:00), (l_shipdate,= )",18145.21,"(1,1), (2,3), (1,1), (313572,258344), (313572,258344), (833398,666667), (833398,666667)"
+4,"Aggregate, Aggregate, Hash, Hash Join, Seq Scan, Seq Scan","(l_shipdate,1996-02-01 00:00:00), (l_shipdate,= )",18505.762,"(1,1), (2,3), (1,1), (315099,257292), (315099,257292), (833398,666667), (833398,666667)"
+5,"Aggregate, Aggregate, Hash, Hash Join, Seq Scan, Seq Scan","(l_shipdate,1997-02-01 00:00:00), (l_shipdate,= )",18457.288,"(1,1), (2,3), (1,1), (311120,257524), (311120,257524), (833398,666667), (833398,666667)"

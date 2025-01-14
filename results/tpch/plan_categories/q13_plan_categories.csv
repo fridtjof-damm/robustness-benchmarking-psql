@@ -1,0 +1,2 @@
+Category,Number of Plans,Percentage,Last Node Type,Second Last Node Type
+Category 1,16,100.0,Seq Scan,Hash

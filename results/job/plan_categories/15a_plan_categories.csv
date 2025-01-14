@@ -1,0 +1,16 @@
+Category,Number of Plans,Percentage,Last Node Type,Second Last Node Type
+Category 1,466,1.5481727574750832,Index Only Scan,Index Scan
+Category 2,1064,3.5348837209302326,Index Only Scan,Index Scan
+Category 3,16,0.053156146179401995,Index Only Scan,Index Scan
+Category 4,14,0.046511627906976744,Index Only Scan,Index Scan
+Category 5,17423,57.88372093023256,Index Only Scan,Index Scan
+Category 6,8032,26.6843853820598,Index Only Scan,Index Scan
+Category 7,129,0.4285714285714286,Index Only Scan,Index Scan
+Category 8,152,0.5049833887043189,Index Only Scan,Index Scan
+Category 9,9,0.02990033222591362,Index Only Scan,Index Scan
+Category 10,133,0.4418604651162791,Index Only Scan,Index Scan
+Category 11,22,0.07308970099667773,Index Only Scan,Index Scan
+Category 12,2493,8.282392026578073,Index Only Scan,Index Scan
+Category 13,109,0.36212624584717606,Index Only Scan,Index Scan
+Category 14,19,0.06312292358803986,Index Only Scan,Index Scan
+Category 15,19,0.06312292358803986,Index Only Scan,Index Scan

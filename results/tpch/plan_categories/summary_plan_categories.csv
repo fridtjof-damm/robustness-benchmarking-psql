@@ -1,0 +1,10 @@
+Query ID,Category,Number of Plans,Percentage,Last Node Type,Second Last Node Type
+12,Category 1,210,100.0,Seq Scan,Hash
+17,Category 1,120,100.0,Seq Scan,Aggregate
+14,Category 1,5,100.0,Seq Scan,Hash
+7,Category 1,600,100.0,Seq Scan,Hash
+3,Category 1,961,100.0,Seq Scan,Hash
+5,Category 1,25,100.0,Seq Scan,Hash
+8,Category 1,125,100.0,Seq Scan,Hash
+13,Category 1,16,100.0,Seq Scan,Hash
+2,Category 1,25,100.0,Index Scan,Index Scan

@@ -1,0 +1,4 @@
+Category,Number of Plans,Percentage,Last Node Type,Second Last Node Type
+Category 1,1560,5.1827242524916945,Index Only Scan,Index Scan
+Category 2,25900,86.04651162790698,Index Only Scan,Index Scan
+Category 3,2640,8.77076411960133,Index Only Scan,Index Scan

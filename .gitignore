@@ -15,7 +15,6 @@ playground.py
 *.wal
 *.tmp
 config.json
-/results/tpch
 /results/tpch/analyse
 /results/dummyresults
 /results/parameters_sf10
@@ -25,8 +24,7 @@ config.json
 /results/queryresults_sf10
 /results/queryresults_sf100
 /results/job/qplans
-/results/job/
-
+*.json
 src/plot/3d_costdiagram_test.py
 /resources/queries_fd/skew_example/p.py
 results/job/qplans/
